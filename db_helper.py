@@ -192,15 +192,15 @@ def create_tables():
 
 def user_exists(email):
     """
-    Check if a user exists by email
+    Check if user exists (case-insensitive)
     """
     conn = get_db_connection()
     if not conn:
-        return None
+        return False
 
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id FROM users WHERE email = %s;", (email,))
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(%s);", (email,))
         result = cursor.fetchone()
         return result is not None
     except Exception as e:
@@ -245,7 +245,7 @@ def create_user(email, password, full_name, user_type, education_level=None, cou
 
 def get_user_by_email(email):
     """
-    Get user by email
+    Get user by email (case-insensitive)
     """
     conn = get_db_connection()
     if not conn:
@@ -253,7 +253,7 @@ def get_user_by_email(email):
 
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        cursor.execute("SELECT * FROM users WHERE email = %s;", (email,))
+        cursor.execute("SELECT * FROM users WHERE LOWER(email) = LOWER(%s);", (email,))
         result = cursor.fetchone()
         return result
     except Exception as e:

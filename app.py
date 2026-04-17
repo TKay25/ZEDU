@@ -76,9 +76,9 @@ def signup():
     if data.get('user_type') not in ['student', 'tutor', 'parent']:
         return jsonify({"success": False, "message": "Invalid user type"}), 400
 
-    # Create user
+    # Create user (convert email to lowercase for consistency)
     result = create_user(
-        email=data.get('email'),
+        email=data.get('email', '').lower(),
         password=data.get('password'),
         full_name=data.get('full_name'),
         user_type=data.get('user_type'),
@@ -106,7 +106,7 @@ def login():
     if not data.get('email') or not data.get('password'):
         return jsonify({"success": False, "message": "Email and password required"}), 400
 
-    user = authenticate_user(data.get('email'), data.get('password'))
+    user = authenticate_user(data.get('email', '').lower(), data.get('password'))
     
     if user:
         session.permanent = True
