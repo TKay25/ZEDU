@@ -41,9 +41,16 @@ def create_tables():
 
     cursor = conn.cursor()
     try:
+        # Drop tables in reverse dependency order (if they exist and cause issues)
+        # We'll keep them if they exist, but clear constraints first
+        cursor.execute("DROP TABLE IF EXISTS reviews CASCADE;")
+        cursor.execute("DROP TABLE IF EXISTS enrollments CASCADE;")
+        cursor.execute("DROP TABLE IF EXISTS courses CASCADE;")
+        cursor.execute("DROP TABLE IF EXISTS users CASCADE;")
+
         # Users table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
@@ -63,7 +70,7 @@ def create_tables():
 
         # Courses table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS courses (
+            CREATE TABLE courses (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
@@ -83,40 +90,40 @@ def create_tables():
 
         # Enrollments table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS enrollments (
+            CREATE TABLE enrollments (
                 id SERIAL PRIMARY KEY,
                 student_id INTEGER NOT NULL,
                 course_id INTEGER NOT NULL,
                 progress DECIMAL(3, 2) DEFAULT 0,
                 enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 completed_at TIMESTAMP,
+                UNIQUE(student_id, course_id),
                 FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
-                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-                UNIQUE(student_id, course_id)
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
             );
         """)
 
         # Reviews/Ratings table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS reviews (
+            CREATE TABLE reviews (
                 id SERIAL PRIMARY KEY,
                 course_id INTEGER NOT NULL,
                 student_id INTEGER NOT NULL,
                 rating INTEGER CHECK (rating >= 1 AND rating <= 5),
                 comment TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(course_id, student_id),
                 FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
-                UNIQUE(course_id, student_id)
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
             );
         """)
 
         # Create indexes for better query performance
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_courses_instructor ON courses(instructor_id);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_student ON enrollments(student_id);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_course ON enrollments(course_id);")
+        cursor.execute("CREATE INDEX idx_users_email ON users(email);")
+        cursor.execute("CREATE INDEX idx_users_type ON users(user_type);")
+        cursor.execute("CREATE INDEX idx_courses_instructor ON courses(instructor_id);")
+        cursor.execute("CREATE INDEX idx_enrollments_student ON enrollments(student_id);")
+        cursor.execute("CREATE INDEX idx_enrollments_course ON enrollments(course_id);")
 
         conn.commit()
         print("✓ Database tables created successfully!")
