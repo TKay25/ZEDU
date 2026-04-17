@@ -3305,9 +3305,9 @@
                                 <option value="parent">Parent</option>
                             </select>
                         </div>
-                        <div class="mb-3" id="educationLevelGroup" style="display: none;">
+                        <div class="mb-3" id="educationLevelGroup">
                             <label for="signupEducationLevel" class="form-label" id="educationLevelLabel">Education Level</label>
-                            <select class="form-select" id="signupEducationLevel">
+                            <select class="form-select" id="signupEducationLevel" required>
                                 <option value="">Select level</option>
                                 <option value="primary">Primary School</option>
                                 <option value="high_school">High School</option>
@@ -3373,10 +3373,12 @@
                     role = 'student';
                 }
                 
-                // Clear and reset form first
-                document.getElementById('signupForm').reset();
+                // Only reset form if coming from a role button, not from education level button
+                if (role && !educationLevel) {
+                    document.getElementById('signupForm').reset();
+                }
                 
-                // Set values BEFORE showing modal (not in setTimeout)
+                // Set values BEFORE showing modal
                 if (role) {
                     document.getElementById('signupUserType').value = role;
                     console.log('Set role to:', role);
