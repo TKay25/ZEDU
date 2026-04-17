@@ -3326,56 +3326,72 @@
         // Sign Up Form Handler
         document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('Form submitted'); // Debug logging
             
-            const fullName = document.getElementById('signupFullName').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const countryCode = document.getElementById('signupCountryCode').value.trim();
-            const whatsappNumber = document.getElementById('signupWhatsapp').value.trim();
-            const userType = document.getElementById('signupUserType').value;
-            const educationLevel = document.getElementById('signupEducationLevel').value || null;
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('signupConfirmPassword').value;
-            const agreeTerms = document.getElementById('agreeTerms').checked;
-            const messageDiv = document.getElementById('signupMessage');
+            // Get button element
+            const submitBtn = document.querySelector('#signupForm button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            try {
+                const fullName = document.getElementById('signupFullName').value.trim();
+                const email = document.getElementById('signupEmail').value.trim();
+                const countryCode = document.getElementById('signupCountryCode').value.trim();
+                const whatsappNumber = document.getElementById('signupWhatsapp').value.trim();
+                const userType = document.getElementById('signupUserType').value;
+                const educationLevel = document.getElementById('signupEducationLevel').value || null;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('signupConfirmPassword').value;
+                const agreeTerms = document.getElementById('agreeTerms').checked;
+                const messageDiv = document.getElementById('signupMessage');
+                
+                console.log('Form data:', {fullName, email, countryCode, userType, educationLevel}); // Debug logging
 
-            // Validation
-            if (!fullName) {
-                showSignupMessage('Please enter your full name', 'error');
-                return;
-            }
-            if (!email) {
-                showSignupMessage('Please enter your email address', 'error');
-                return;
-            }
-            if (!countryCode) {
-                showSignupMessage('Please enter your country code', 'error');
-                return;
-            }
-            if (!whatsappNumber) {
-                showSignupMessage('Please enter your WhatsApp number', 'error');
-                return;
-            }
-            if (!userType) {
-                showSignupMessage('Please select your role', 'error');
-                return;
-            }
-            if (password.length < 6) {
-                showSignupMessage('Password must be at least 6 characters', 'error');
-                return;
-            }
-            if (password !== confirmPassword) {
-                showSignupMessage('Passwords do not match', 'error');
-                return;
-            }
-            if (userType === 'student' || userType === 'tutor') {
-                if (!educationLevel) {
-                    const levelLabel = userType === 'tutor' ? 'Teaching level' : 'Education level';
-                    showSignupMessage(`Please select your ${levelLabel}`, 'error');
+                // Validation
+                if (!fullName) {
+                    showSignupMessage('Please enter your full name', 'error');
                     return;
                 }
-            }
+                if (!email) {
+                    showSignupMessage('Please enter your email address', 'error');
+                    return;
+                }
+                if (!countryCode) {
+                    showSignupMessage('Please enter your country code', 'error');
+                    return;
+                }
+                if (!whatsappNumber) {
+                    showSignupMessage('Please enter your WhatsApp number', 'error');
+                    return;
+                }
+                if (!userType) {
+                    showSignupMessage('Please select your role', 'error');
+                    return;
+                }
+                if (password.length < 6) {
+                    showSignupMessage('Password must be at least 6 characters', 'error');
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    showSignupMessage('Passwords do not match', 'error');
+                    return;
+                }
+                if (userType === 'student' || userType === 'tutor') {
+                    if (!educationLevel) {
+                        const levelLabel = userType === 'tutor' ? 'Teaching level' : 'Education level';
+                        showSignupMessage(`Please select your ${levelLabel}`, 'error');
+                        return;
+                    }
+                }
+                if (!agreeTerms) {
+                    showSignupMessage('You must agree to the Terms and Conditions', 'error');
+                    return;
+                }
 
-            try {
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+                console.log('Sending signup request...'); // Debug logging
                 const response = await fetch('/api/signup', {
                     method: 'POST',
                     headers: {
@@ -3392,8 +3408,11 @@
                         whatsapp_number: whatsappNumber
                     })
                 });
+                
+                console.log('Response status:', response.status); // Debug logging
 
                 const data = await response.json();
+                console.log('Response data:', data); // Debug logging
 
                 if (data.success) {
                     showSignupMessage('Account created successfully! Redirecting to login...', 'success');
@@ -3407,13 +3426,19 @@
                                              userType === 'tutor' ? 'tutorModal' : 'parentModal';
                         const loginModal = new bootstrap.Modal(document.getElementById(loginModalId));
                         loginModal.show();
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
                     }, 2000);
                 } else {
                     showSignupMessage(data.message || 'Sign-up failed', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
                 }
             } catch (error) {
-                showSignupMessage('An error occurred. Please try again.', 'error');
+                showSignupMessage('An error occurred. Please try again. Error: ' + error.message, 'error');
                 console.error('Sign-up error:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         });
 
