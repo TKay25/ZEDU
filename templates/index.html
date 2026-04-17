@@ -3365,24 +3365,40 @@
         // Handle signup role and education level pre-selection
         document.addEventListener('click', function(e) {
             if (e.target.hasAttribute('data-signup-role') || e.target.hasAttribute('data-signup-education')) {
-                const role = e.target.getAttribute('data-signup-role');
+                let role = e.target.getAttribute('data-signup-role');
                 const educationLevel = e.target.getAttribute('data-signup-education');
-                const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
                 
-                // Use a small delay to ensure modal is shown before setting values
+                // If education level is selected but no role, default to student
+                if (educationLevel && !role) {
+                    role = 'student';
+                }
+                
+                // Clear and reset form first
+                document.getElementById('signupForm').reset();
+                
+                // Set values BEFORE showing modal (not in setTimeout)
+                if (role) {
+                    document.getElementById('signupUserType').value = role;
+                    console.log('Set role to:', role);
+                }
+                if (educationLevel) {
+                    document.getElementById('signupEducationLevel').value = educationLevel;
+                    console.log('Set education level to:', educationLevel);
+                }
+                
+                // Now show the modal
+                const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                signupModal.show();
+                
+                // Use a small delay to ensure modal is rendered, then trigger change event
                 setTimeout(function() {
                     if (role) {
-                        document.getElementById('signupUserType').value = role;
                         $('#signupUserType').trigger('change');
                     }
-                    if (educationLevel) {
-                        document.getElementById('signupEducationLevel').value = educationLevel;
-                        // Show education level field for students and tutors
-                        if (!role || role === 'student' || role === 'tutor') {
-                            document.getElementById('educationLevelGroup').style.display = 'block';
-                        }
-                    }
-                }, 300);
+                    // Verify values are still set
+                    console.log('After modal shown - educationLevel value:', document.getElementById('signupEducationLevel').value);
+                    console.log('After modal shown - userType value:', document.getElementById('signupUserType').value);
+                }, 100);
             }
         });
 
@@ -3401,13 +3417,14 @@
                 const countryCode = document.getElementById('signupCountryCode').value.trim();
                 const whatsappNumber = document.getElementById('signupWhatsapp').value.trim();
                 const userType = document.getElementById('signupUserType').value;
-                const educationLevel = document.getElementById('signupEducationLevel').value || null;
+                const educationLevel = document.getElementById('signupEducationLevel').value;
                 const password = document.getElementById('signupPassword').value;
                 const confirmPassword = document.getElementById('signupConfirmPassword').value;
                 const agreeTerms = document.getElementById('agreeTerms').checked;
                 const messageDiv = document.getElementById('signupMessage');
                 
                 console.log('Form data:', {fullName, email, countryCode, userType, educationLevel}); // Debug logging
+                console.log('educationLevel is:', educationLevel, 'type:', typeof educationLevel, 'falsy?:', !educationLevel);
 
                 // Validation
                 if (!fullName) {
