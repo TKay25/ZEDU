@@ -1156,6 +1156,42 @@
         let currentSortOrder = 'recent';
         let courseNotifications = [];
 
+        // Generate Demo Courses for new users
+        function generateDemoCourses() {
+            return [
+                {
+                    id: 101,
+                    title: 'Introduction to Mathematics',
+                    level: 'primary',
+                    duration_hours: 20,
+                    rating: 4.8,
+                    total_students: 1250,
+                    instructor_name: 'Prof. Smith',
+                    progress: 65
+                },
+                {
+                    id: 102,
+                    title: 'English Language Fundamentals',
+                    level: 'primary',
+                    duration_hours: 18,
+                    rating: 4.6,
+                    total_students: 890,
+                    instructor_name: 'Mrs. Johnson',
+                    progress: 45
+                },
+                {
+                    id: 103,
+                    title: 'Science Basics',
+                    level: 'primary',
+                    duration_hours: 25,
+                    rating: 4.7,
+                    total_students: 1100,
+                    instructor_name: 'Dr. Williams',
+                    progress: 100
+                }
+            ];
+        }
+
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', async function() {
             await loadUserProfile();
@@ -1163,6 +1199,9 @@
             await loadAvailableCourses();
             loadNotifications();
             updateStatistics();
+            // Display initial tab content
+            displayEnrolledCourses();
+            displayAchievements();
         });
 
         // Load User Profile
@@ -1197,11 +1236,18 @@
                 const data = await response.json();
                 if (data.success) {
                     enrolledCourses = data.enrollments;
+                    // If no courses, add sample demo courses for new users
+                    if (enrolledCourses.length === 0) {
+                        enrolledCourses = generateDemoCourses();
+                    }
                     displayEnrolledCourses();
                     updateStatistics();
                 }
             } catch (error) {
                 console.error('Error loading enrollments:', error);
+                // Use demo courses on error
+                enrolledCourses = generateDemoCourses();
+                displayEnrolledCourses();
             }
         }
 
@@ -1469,8 +1515,9 @@
             }
 
             container.innerHTML = achievements.map(achievement => `
-                <div style="text-align: center; padding: 1.5rem; background: ${achievement.color}; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">${achievement.icon}</div>
+                <div style="text-align: center; padding: 1.5rem; background: ${achievement.color}; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); opacity: ${achievement.unlocked ? '1' : '0.5'}; position: relative;">
+                    ${!achievement.unlocked ? '<div style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.5); color: white; padding: 0.25rem 0.5rem; border-radius: 20px; font-size: 0.7rem; font-weight: bold;">LOCKED</div>' : ''}
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem; ${!achievement.unlocked ? 'filter: grayscale(100%);' : ''}">${achievement.icon}</div>
                     <div style="color: white; font-weight: 700; margin-bottom: 0.3rem;">${achievement.title}</div>
                     <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.85rem;">${achievement.description}</div>
                 </div>
@@ -1635,11 +1682,104 @@
         }
 
         function generateAchievements() {
-            return [
-                { icon: '🚀', title: 'Fast Starter', description: 'Enroll in 3 courses', color: 'linear-gradient(135deg, #667eea, #764ba2)' },
-                { icon: '⭐', title: 'Star Student', description: 'Achieve 90% average', color: 'linear-gradient(135deg, #f093fb, #f5576c)' },
-                { icon: '🎯', title: 'Goal Getter', description: 'Complete 5 courses', color: 'linear-gradient(135deg, #4facfe, #00f2fe)' }
-            ];
+            const totalCourses = enrolledCourses.length;
+            const completedCourses = enrolledCourses.filter(c => (c.progress || 0) === 100).length;
+            const totalHours = enrolledCourses.reduce((sum, c) => sum + (c.duration_hours || 0), 0);
+            
+            const achievements = [];
+            
+            // Always available achievements
+            achievements.push({ 
+                icon: '👋', 
+                title: 'Welcome Aboard', 
+                description: 'Started your learning journey', 
+                color: 'linear-gradient(135deg, #667eea, #764ba2)',
+                unlocked: true
+            });
+            
+            // Course-based achievements
+            if (totalCourses >= 1) {
+                achievements.push({ 
+                    icon: '🚀', 
+                    title: 'Fast Starter', 
+                    description: 'Enrolled in first course', 
+                    color: 'linear-gradient(135deg, #f093fb, #f5576c)',
+                    unlocked: true
+                });
+            }
+            
+            if (totalCourses >= 3) {
+                achievements.push({ 
+                    icon: '📚', 
+                    title: 'Course Explorer', 
+                    description: 'Enrolled in 3+ courses', 
+                    color: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+                    unlocked: true
+                });
+            }
+            
+            if (totalCourses >= 5) {
+                achievements.push({ 
+                    icon: '🎓', 
+                    title: 'Multi-Learner', 
+                    description: 'Enrolled in 5+ courses', 
+                    color: 'linear-gradient(135deg, #43e97b, #38f9d7)',
+                    unlocked: true
+                });
+            }
+            
+            if (completedCourses >= 1) {
+                achievements.push({ 
+                    icon: '🏆', 
+                    title: 'Course Completer', 
+                    description: 'Completed your first course', 
+                    color: 'linear-gradient(135deg, #fa709a, #fee140)',
+                    unlocked: true
+                });
+            }
+            
+            if (completedCourses >= 3) {
+                achievements.push({ 
+                    icon: '⭐', 
+                    title: 'Star Student', 
+                    description: 'Completed 3+ courses', 
+                    color: 'linear-gradient(135deg, #ffd89b, #19547b)',
+                    unlocked: true
+                });
+            }
+            
+            // Locked achievements
+            if (totalCourses < 3) {
+                achievements.push({ 
+                    icon: '📚', 
+                    title: 'Course Explorer', 
+                    description: 'Enroll in 3+ courses', 
+                    color: 'linear-gradient(135deg, #cccccc, #999999)',
+                    unlocked: false
+                });
+            }
+            
+            if (completedCourses < 1) {
+                achievements.push({ 
+                    icon: '🏆', 
+                    title: 'Course Completer', 
+                    description: 'Complete your first course', 
+                    color: 'linear-gradient(135deg, #cccccc, #999999)',
+                    unlocked: false
+                });
+            }
+            
+            if (totalHours < 10) {
+                achievements.push({ 
+                    icon: '⏱️', 
+                    title: 'Time Master', 
+                    description: 'Complete 10+ hours of learning', 
+                    color: 'linear-gradient(135deg, #cccccc, #999999)',
+                    unlocked: false
+                });
+            }
+            
+            return achievements;
         }
 
         function continueCourse(courseId) {
