@@ -3362,11 +3362,20 @@
             });
         });
 
+        // Global variable to store selected education level
+        let storedEducationLevel = null;
+
         // Handle signup role and education level pre-selection
         document.addEventListener('click', function(e) {
             if (e.target.hasAttribute('data-signup-role') || e.target.hasAttribute('data-signup-education')) {
                 let role = e.target.getAttribute('data-signup-role');
                 const educationLevel = e.target.getAttribute('data-signup-education');
+                
+                // Store education level globally for later use
+                if (educationLevel) {
+                    storedEducationLevel = educationLevel;
+                    console.log('Stored education level:', storedEducationLevel);
+                }
                 
                 // If education level is selected but no role, default to student
                 if (educationLevel && !role) {
@@ -3383,9 +3392,12 @@
                     document.getElementById('signupUserType').value = role;
                     console.log('Set role to:', role);
                 }
-                if (educationLevel) {
-                    document.getElementById('signupEducationLevel').value = educationLevel;
-                    console.log('Set education level to:', educationLevel);
+                
+                // Use stored education level if not explicitly set
+                let finalEducationLevel = educationLevel || storedEducationLevel;
+                if (finalEducationLevel) {
+                    document.getElementById('signupEducationLevel').value = finalEducationLevel;
+                    console.log('Set education level to:', finalEducationLevel);
                 }
                 
                 // Now show the modal
@@ -3728,6 +3740,25 @@
         // Add animation delay to cards
         document.querySelectorAll('.feature-card, .course-card, .testimonial-card, .stat-item').forEach((el, index) => {
             el.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Fix modal backdrop blur issue - properly remove backdrop when modal closes
+        ['studentModal', 'tutorModal', 'parentModal', 'signupModal'].forEach(function(modalId) {
+            const modalElement = document.getElementById(modalId);
+            if (modalElement) {
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    // Remove all remaining backdrop elements
+                    document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+                        backdrop.remove();
+                    });
+                    // Remove modal-open class from body if no modals are open
+                    if (document.querySelectorAll('.modal.show').length === 0) {
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }
+                });
+            }
         });
     </script>
 </body>
