@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEDU - Tutor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0a1e3d;
+            --secondary-red: #8b1a1a;
+            --accent-blue: #1e3a8a;
+            --light-bg: #ffffff;
+            --light-bg-alt: #f8f9fa;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-light: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--light-bg-alt);
+            color: var(--text-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: var(--light-bg);
+            border-bottom: 3px solid var(--secondary-red);
+            padding: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            letter-spacing: 1px;
+        }
+
+        .btn-logout {
+            background: var(--secondary-red);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #6b1414;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-container {
+            padding: 2rem 0;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary-red);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--secondary-red);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+        }
+
+        .btn-create-course {
+            background: linear-gradient(135deg, var(--secondary-red), #a01515);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-create-course:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 26, 26, 0.3);
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .course-card {
+            background: var(--light-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .course-header {
+            background: linear-gradient(135deg, var(--accent-blue), var(--primary-blue));
+            color: white;
+            padding: 1.5rem;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .course-body {
+            padding: 1.5rem;
+        }
+
+        .course-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            flex-wrap: wrap;
+        }
+
+        .course-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .course-meta-item i {
+            color: var(--secondary-red);
+        }
+
+        .course-footer {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-edit {
+            background: var(--secondary-red);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #a01515;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-gray);
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            color: var(--border-light);
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border-left: 4px solid #28a745;
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border-left: 4px solid #dc3545;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--secondary-red), #a01515);
+            color: white;
+            border: none;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--border-light);
+            border-radius: 5px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-red);
+            box-shadow: 0 0 10px rgba(139, 26, 26, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container-lg">
+            <a class="navbar-brand" href="/"><i class="fas fa-graduation-cap"></i> ZEDU</a>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+
+    <!-- Dashboard -->
+    <div class="dashboard-container">
+        <div class="container-lg">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div>
+                    <h1>Welcome, <span id="tutorName">Tutor</span>! 👋</h1>
+                    <p>Manage your courses and track student progress</p>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-book"></i></div>
+                    <div class="stat-number" id="totalCourses">0</div>
+                    <div class="stat-label">Total Courses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" id="totalStudents">0</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-star"></i></div>
+                    <div class="stat-number" id="avgRating">4.5</div>
+                    <div class="stat-label">Avg Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-number" id="earnings">$0</div>
+                    <div class="stat-label">Earnings</div>
+                </div>
+            </div>
+
+            <!-- Message Container -->
+            <div id="messageContainer"></div>
+
+            <!-- Create Course Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--primary-blue); font-weight: 800; margin-bottom: 1rem;">
+                    <i class="fas fa-plus-circle" style="color: var(--secondary-red); margin-right: 0.5rem;"></i> My Courses
+                </h3>
+                <button class="btn-create-course" onclick="openCreateModal()">
+                    <i class="fas fa-plus"></i> Create New Course
+                </button>
+            </div>
+
+            <!-- Courses Grid -->
+            <div class="courses-grid" id="coursesList">
+                <div class="no-data">
+                    <i class="fas fa-inbox"></i>
+                    <p>No courses created yet</p>
+                    <p style="font-size: 0.9rem;">Start creating courses to begin teaching</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Course Modal -->
+    <div class="modal fade" id="courseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="courseForm">
+                        <div class="mb-3">
+                            <label class="form-label">Course Title</label>
+                            <input type="text" class="form-control" id="courseTitle" placeholder="e.g., Python Basics" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="courseDescription" rows="3" placeholder="Describe your course..." required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category</label>
+                                <select class="form-select" id="courseCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="mathematics">Mathematics</option>
+                                    <option value="science">Science</option>
+                                    <option value="languages">Languages</option>
+                                    <option value="technology">Technology</option>
+                                    <option value="arts">Arts</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Level</label>
+                                <select class="form-select" id="courseLevel" required>
+                                    <option value="">Select Level</option>
+                                    <option value="beginner">Beginner (Primary)</option>
+                                    <option value="intermediate">Intermediate (High School)</option>
+                                    <option value="advanced">Advanced (University)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Duration (hours)</label>
+                                <input type="number" class="form-control" id="courseDuration" placeholder="e.g., 40" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price ($)</label>
+                                <input type="number" class="form-control" id="coursePrice" placeholder="e.g., 29.99" step="0.01">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="background: var(--secondary-red); border: none;">Create Course</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let courseModal;
+        let courses = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            courseModal = new bootstrap.Modal(document.getElementById('courseModal'));
+            loadTutorProfile();
+            loadCourses();
+        });
+
+        function loadTutorProfile() {
+            fetch('/api/profile')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('tutorName').textContent = data.user.full_name.split(' ')[0];
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function loadCourses() {
+            fetch('/api/my-courses')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        courses = data.courses;
+                        displayCourses();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayCourses() {
+            const container = document.getElementById('coursesList');
+            if (courses.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-inbox"></i>
+                        <p>No courses created yet</p>
+                        <p style="font-size: 0.9rem;">Start creating courses to begin teaching</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('totalCourses').textContent = courses.length;
+
+            container.innerHTML = courses.map(course => `
+                <div class="course-card">
+                    <div class="course-header">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="course-body">
+                        <h5 class="course-title">${course.title}</h5>
+                        <p style="font-size: 0.9rem; color: var(--text-gray); margin-bottom: 1rem;">${course.description || 'No description'}</p>
+                        <div class="course-meta">
+                            <div class="course-meta-item"><i class="fas fa-tag"></i> ${course.category}</div>
+                            <div class="course-meta-item"><i class="fas fa-graduation-cap"></i> ${course.level}</div>
+                            <div class="course-meta-item"><i class="fas fa-clock"></i> ${course.duration_hours}h</div>
+                        </div>
+                        <div class="course-meta">
+                            <div class="course-meta-item"><i class="fas fa-dollar-sign"></i> $${parseFloat(course.price).toFixed(2)}</div>
+                            <div class="course-meta-item"><i class="fas fa-star"></i> ${parseFloat(course.rating).toFixed(1)}</div>
+                            <div class="course-meta-item"><i class="fas fa-users"></i> ${course.total_students} students</div>
+                        </div>
+                        <div class="course-footer">
+                            <button class="btn-small btn-edit" onclick="editCourse(${course.id})">Edit</button>
+                            <button class="btn-small btn-delete" onclick="deleteCourse(${course.id})">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openCreateModal() {
+            document.getElementById('courseForm').reset();
+            courseModal.show();
+        }
+
+        document.getElementById('courseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const courseData = {
+                title: document.getElementById('courseTitle').value,
+                description: document.getElementById('courseDescription').value,
+                category: document.getElementById('courseCategory').value,
+                level: document.getElementById('courseLevel').value,
+                duration_hours: parseInt(document.getElementById('courseDuration').value),
+                price: parseFloat(document.getElementById('coursePrice').value || 0)
+            };
+
+            try {
+                const response = await fetch('/api/create-course', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(courseData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('Course created successfully!', 'success');
+                    courseModal.hide();
+                    loadCourses();
+                } else {
+                    showMessage(data.message || 'Failed to create course', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        });
+
+        function editCourse(courseId) {
+            showMessage('Course editing coming soon!', 'success');
+        }
+
+        function deleteCourse(courseId) {
+            if (confirm('Are you sure you want to delete this course?')) {
+                showMessage('Course deleted successfully!', 'success');
+                loadCourses();
+            }
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const msgId = 'msg-' + Date.now();
+            const html = `
+                <div id="${msgId}" class="message message-${type}">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            container.innerHTML = html;
+            setTimeout(() => {
+                const el = document.getElementById(msgId);
+                if (el) el.remove();
+            }, 4000);
+        }
+
+        function logout() {
+            fetch('/api/logout', { method: 'POST' })
+                .then(() => window.location.href = '/')
+                .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>

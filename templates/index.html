@@ -6,13 +6,18 @@
     <title>ZEDU - Online Education Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-dark: #0a1e3d;
-            --secondary-dark: #8b1a1a;
-            --accent-light: #1e3a8a;
-            --text-light: #e0e7ff;
-            --border-color: #1e3a8a;
+            --primary-blue: #0a1e3d;
+            --secondary-red: #8b1a1a;
+            --accent-blue: #1e3a8a;
+            --light-bg: #ffffff;
+            --light-bg-alt: #f8f9fa;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-light: #e0e0e0;
         }
 
         * {
@@ -22,45 +27,60 @@
         }
 
         body {
-            background-color: var(--primary-dark);
-            color: var(--text-light);
+            background-color: var(--light-bg);
+            color: var(--text-dark);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         /* Navbar Styling */
         .navbar {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 100%);
-            border-bottom: 2px solid var(--secondary-dark);
-            padding: 1rem 0;
-            box-shadow: 0 4px 15px rgba(139, 26, 26, 0.3);
+            background: var(--light-bg);
+            border-bottom: 2px solid var(--secondary-red);
+            padding: 0.8rem 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
         .navbar-brand {
-            font-size: 1.8rem;
+            font-size: 1.15rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 2px;
+            color: var(--primary-blue);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand:hover {
+            color: var(--secondary-red);
         }
 
         .nav-link {
-            color: var(--text-light) !important;
-            margin: 0 0.5rem;
+            color: var(--text-dark) !important;
+            margin: 0 0.8rem;
             transition: all 0.3s ease;
             position: relative;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.76rem;
         }
 
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -5px;
             left: 0;
             width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #ff6b6b, var(--secondary-dark));
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary-red), var(--primary-blue));
             transition: width 0.3s ease;
+            border-radius: 2px;
         }
 
         .nav-link:hover::after {
@@ -68,159 +88,717 @@
         }
 
         .btn-login {
-            margin: 0 0.3rem;
+            margin: 0 0.4rem;
             border-radius: 25px;
-            padding: 0.5rem 1.5rem;
+            padding: 0.6rem 1.3rem;
             font-weight: 600;
             transition: all 0.3s ease;
-            border: 2px solid var(--secondary-dark);
+            border: 2px solid transparent;
+            font-size: 0.61rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .btn-student {
-            background-color: #1e3a8a;
+            background-color: var(--accent-blue);
             color: white;
         }
 
         .btn-student:hover {
-            background-color: #2d5aa3;
+            background-color: var(--primary-blue);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
+            box-shadow: 0 8px 20px rgba(10, 30, 61, 0.4);
         }
 
         .btn-tutor {
-            background-color: var(--secondary-dark);
+            background-color: var(--secondary-red);
             color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .btn-tutor:hover {
-            background-color: #a83030;
+            background-color: #6b1414;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 26, 26, 0.4);
+            box-shadow: 0 8px 20px rgba(139, 26, 26, 0.4);
         }
 
         .btn-parent {
-            background-color: #1f2937;
+            background-color: #6C757D;
             color: white;
-            border-color: #4b5563;
+            border-color: #6C757D;
         }
 
         .btn-parent:hover {
-            background-color: #2d3748;
+            background-color: #5a6268;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(31, 41, 55, 0.4);
+            box-shadow: 0 8px 20px rgba(102, 102, 102, 0.4);
+        }
+
+        /* Education Level Dropdown */
+        .nav-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .nav-dropdown-toggle {
+            color: var(--text-dark) !important;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .nav-dropdown-toggle::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary-red);
+            transition: width 0.3s ease;
+        }
+
+        .nav-dropdown-toggle:hover::after {
+            width: 100%;
+        }
+
+        .dropdown-arrow {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-dropdown:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu-custom {
+            display: none;
+            position: absolute;
+            background: var(--light-bg);
+            border: 2px solid var(--secondary-red);
+            border-radius: 10px;
+            min-width: 250px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            top: 100%;
+            left: 0;
+            margin-top: 0.5rem;
+        }
+
+        .nav-dropdown:hover .dropdown-menu-custom {
+            display: block;
+        }
+
+        .dropdown-item-custom {
+            padding: 1rem 1.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-item-custom:hover {
+            background-color: var(--light-bg-alt);
+            border-left-color: var(--secondary-red);
+            padding-left: 2rem;
+        }
+
+        .dropdown-item-icon {
+            margin-right: 0.8rem;
+            color: var(--secondary-red);
+            font-weight: 600;
+        }
+
+        /* Button Dropdowns */
+        .btn-dropdown-group {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem !important;
+        }
+
+        .btn-dropdown-toggle i:last-child {
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-dropdown-group:hover .btn-dropdown-toggle i:last-child {
+            transform: rotate(180deg);
+        }
+
+        .btn-dropdown-menu {
+            display: none;
+            position: absolute;
+            background: var(--light-bg);
+            border: 2px solid var(--secondary-red);
+            border-radius: 10px;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            top: 100%;
+            right: 0;
+            margin-top: 0.8rem;
+            overflow: hidden;
+        }
+
+        .btn-dropdown-group:hover .btn-dropdown-menu {
+            display: block;
+        }
+
+        .btn-dropdown-item {
+            padding: 0.8rem 1.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 0.70rem;
+        }
+
+        .btn-dropdown-item:hover {
+            background-color: var(--light-bg-alt);
+            border-left-color: var(--secondary-red);
+            padding-left: 2rem;
+            color: var(--primary-blue);
+        }
+
+        .btn-dropdown-item i {
+            color: var(--secondary-red);
+            font-weight: 600;
+        }
+
+        /* Education Level Section */
+        .education-levels {
+            padding: 80px 0;
+            background: var(--light-bg);
+        }
+
+        .level-card {
+            background: linear-gradient(135deg, var(--light-bg-alt), var(--light-bg));
+            border: 3px solid var(--border-light);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .level-card:hover {
+            border-color: var(--secondary-red);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(139, 26, 26, 0.2);
+        }
+
+        .level-icon {
+            font-size: 2.24rem;
+            color: var(--secondary-red);
+            margin-bottom: 1.5rem;
+        }
+
+        .level-card h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .level-card p {
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .level-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .level-stat {
+            text-align: center;
+        }
+
+        .level-stat-value {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--secondary-red);
+        }
+
+        .level-stat-label {
+            font-size: 0.54rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .level-btn {
+            background: var(--secondary-red);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-btn:hover {
+            background: #6b1414;
+            transform: scale(1.05);
+        }
+
+        /* Education Level Badge */
+        .education-level-badge {
+            display: inline-block;
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.25rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.48rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .primary-badge {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .highschool-badge {
+            background: linear-gradient(135deg, #2196F3, #0b7dda);
+        }
+
+        .university-badge {
+            background: linear-gradient(135deg, #FF9800, #e68900);
         }
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 50%, var(--secondary-dark) 100%);
-            padding: 120px 0;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4f8 50%, #e8f0f7 100%);
+            padding: 100px 0 120px;
             position: relative;
             overflow: hidden;
+            color: var(--text-dark);
+            border-bottom: 3px solid var(--secondary-red);
+            display: flex;
+            align-items: center;
+            min-height: 600px;
+        }
+
+        .hero > .container {
+            position: relative;
+            z-index: 2;
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(139, 26, 26, 0.2) 0%, transparent 70%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(139, 26, 26, 0.12) 0%, transparent 70%);
             border-radius: 50%;
-            top: -100px;
-            right: -100px;
+            top: -300px;
+            right: -250px;
+            animation: float 8s ease-in-out infinite;
+            z-index: 0;
         }
 
         .hero::after {
             content: '';
             position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(30, 58, 138, 0.2) 0%, transparent 70%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(30, 58, 138, 0.12) 0%, transparent 70%);
             border-radius: 50%;
-            bottom: -50px;
-            left: -50px;
+            bottom: -200px;
+            left: -200px;
+            animation: float 10s ease-in-out infinite reverse;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(40px) rotate(3deg); }
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
+            padding-right: 2rem;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             font-weight: 900;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d, #a3e3ff);
+            margin-bottom: 1.2rem;
+            color: var(--primary-blue);
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+            animation: slideInDown 0.8s ease-out;
+            word-spacing: 0.1rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: 1px;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .hero p {
-            font-size: 1.3rem;
-            color: #b4c7ff;
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            font-size: 0.90rem;
+            color: var(--text-gray);
+            margin-bottom: 2.2rem;
+            line-height: 1.8;
+            max-width: 550px;
+            animation: slideInUp 0.8s ease-out 0.2s both;
+            font-weight: 500;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-search {
+            background: white;
+            padding: 1.1rem 1.8rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 12px 40px rgba(10, 30, 61, 0.12);
+            max-width: 600px;
+            border: 2.5px solid var(--secondary-red);
+            transition: all 0.3s ease;
+            animation: slideInUp 0.8s ease-out 0.4s both;
+        }
+
+        .hero-search:hover,
+        .hero-search:focus-within {
+            border-color: var(--secondary-red);
+            box-shadow: 0 18px 50px rgba(139, 26, 26, 0.18);
+            transform: translateY(-3px);
+        }
+
+        .hero-search i {
+            color: var(--secondary-red);
+            font-weight: 700;
+            font-size: 0.90rem;
+        }
+
+        .hero-search input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            font-size: 0.78rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .hero-search input::placeholder {
+            color: var(--text-gray);
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .hero-search button {
+            background: linear-gradient(135deg, var(--secondary-red) 0%, #c93a3a 100%);
+            border: none;
+            color: white;
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.80rem;
+        }
+
+        .hero-search button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(139, 26, 26, 0.3);
+        }
+
+        .hero-search input::placeholder {
+            color: #999;
+        }
+
+        .hero-search input:focus {
+            outline: none;
         }
 
         .cta-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 1.2rem;
             flex-wrap: wrap;
+            margin-top: 2rem;
+            animation: slideInUp 0.8s ease-out 0.6s both;
         }
 
-        .btn-primary-custom {
-            background: linear-gradient(135deg, #ff6b6b, #ff8787);
-            border: none;
-            padding: 0.8rem 2.5rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px;
+        .cta-buttons .btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .cta-buttons .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        /* Hero Visual Elements */
+        .hero-visual {
+            position: relative;
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            margin-top: 2rem;
+        }
+
+        .hero-icon-main {
+            font-size: 4rem;
+            color: var(--secondary-red);
+            text-align: center;
+            animation: slideInRight 0.8s ease-out;
+            position: relative;
+            z-index: 3;
+        }
+
+        /* Hero Secondary Icons */
+        .hero-icon-secondary {
+            position: absolute;
+            font-size: 2.2rem;
+            opacity: 0.6;
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .hero-icon-top-left {
+            top: 40px;
+            left: 20px;
+            animation-delay: 0.2s;
+            color: #f59e0b;
+        }
+
+        .hero-icon-top-right {
+            top: 50px;
+            right: 30px;
+            animation-delay: 0.3s;
+            color: #10b981;
+        }
+
+        .hero-icon-bottom-left {
+            bottom: 60px;
+            left: 30px;
+            animation-delay: 0.4s;
+            color: #3b82f6;
+        }
+
+        .hero-icon-bottom-right {
+            bottom: 70px;
+            right: 20px;
+            animation-delay: 0.5s;
+            color: var(--secondary-red);
+        }
+
+        .hero-icon-main::before {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(139, 26, 26, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero-stat-badge {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid var(--secondary-red);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
             transition: all 0.3s ease;
         }
 
+        .hero-stat-badge:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.6) rotate(-15deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .badge-students {
+            top: 25px;
+            left: -35px;
+            animation-delay: 0.4s;
+            border-left-color: #10b981;
+        }
+
+        .badge-courses {
+            top: 50%;
+            right: -40px;
+            transform: translateY(-50%);
+            animation-delay: 0.6s;
+            border-left-color: #3b82f6;
+        }
+
+        .badge-instructors {
+            bottom: 30px;
+            left: -20px;
+            animation-delay: 0.8s;
+            border-left-color: #f59e0b;
+        }
+
+        .badge-number {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--secondary-red);
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .badge-label {
+            font-size: 0.50rem;
+            color: var(--text-gray);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            line-height: 1.1;
+            margin-top: 0.2rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--secondary-red);
+            border: none;
+            padding: 0.8rem 2.2rem;
+            font-size: 0.70rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
         .btn-primary-custom:hover {
+            background: #6b1414;
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 10px 30px rgba(139, 26, 26, 0.4);
+            color: white;
         }
 
         .btn-secondary-custom {
             background: transparent;
-            border: 2px solid var(--secondary-dark);
-            color: var(--text-light);
-            padding: 0.8rem 2.5rem;
-            font-size: 1.1rem;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+            padding: 0.8rem 2.2rem;
+            font-size: 0.70rem;
             font-weight: 600;
             border-radius: 50px;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .btn-secondary-custom:hover {
-            background-color: var(--secondary-dark);
+            background-color: var(--primary-blue);
+            color: white;
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(139, 26, 26, 0.4);
+            box-shadow: 0 10px 30px rgba(10, 30, 61, 0.3);
         }
 
         /* Features Section */
         .features {
             padding: 80px 0;
-            background-color: var(--primary-dark);
+            background-color: var(--light-bg-alt);
         }
 
         .section-title {
-            font-size: 2.5rem;
+            font-size: 1.6rem;
             font-weight: 800;
             margin-bottom: 3rem;
             text-align: center;
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary-blue);
         }
 
         .feature-card {
-            background: linear-gradient(135deg, var(--accent-light) 0%, var(--primary-dark) 100%);
-            border: 1px solid var(--border-color);
+            background: var(--light-bg);
+            border: 2px solid var(--border-light);
             border-radius: 15px;
             padding: 2.5rem;
             margin-bottom: 2rem;
@@ -230,37 +808,38 @@
 
         .feature-card:hover {
             transform: translateY(-10px);
-            border-color: var(--secondary-dark);
-            box-shadow: 0 15px 40px rgba(139, 26, 26, 0.2);
+            border-color: var(--secondary-red);
+            box-shadow: 0 15px 40px rgba(139, 26, 26, 0.15);
         }
 
         .feature-icon {
-            font-size: 3rem;
-            color: #ff6b6b;
+            font-size: 1.92rem;
+            color: var(--secondary-red);
             margin-bottom: 1.5rem;
         }
 
         .feature-card h3 {
-            font-size: 1.5rem;
+            font-size: 0.96rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: #ffd93d;
+            color: var(--accent-blue);
         }
 
         .feature-card p {
-            color: #b4c7ff;
+            color: var(--text-gray);
             line-height: 1.6;
+            font-size: 0.70rem;
         }
 
         /* Courses Section */
         .courses-section {
             padding: 80px 0;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 100%);
+            background: var(--light-bg);
         }
 
         .course-card {
-            background: var(--primary-dark);
-            border: 2px solid var(--border-color);
+            background: var(--light-bg);
+            border: 2px solid var(--border-light);
             border-radius: 15px;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -269,18 +848,18 @@
 
         .course-card:hover {
             transform: translateY(-8px);
-            border-color: var(--secondary-dark);
-            box-shadow: 0 20px 40px rgba(139, 26, 26, 0.3);
+            border-color: var(--secondary-red);
+            box-shadow: 0 20px 40px rgba(139, 26, 26, 0.2);
         }
 
         .course-image {
             height: 200px;
-            background: linear-gradient(135deg, #1e3a8a, #8b1a1a);
+            background: var(--primary-blue);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            color: #ffd93d;
+            font-size: 2.4rem;
+            color: white;
         }
 
         .course-content {
@@ -289,25 +868,77 @@
 
         .course-badge {
             display: inline-block;
-            background-color: var(--secondary-dark);
+            background-color: var(--secondary-red);
             color: white;
             padding: 0.4rem 1rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.51rem;
             font-weight: 600;
             margin-bottom: 1rem;
         }
 
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 2px solid var(--border-light);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .course-rating {
+            color: var(--secondary-red);
+            font-weight: 600;
+        }
+
+        .course-students {
+            color: var(--text-gray);
+        }
+
+        .course-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .course-instructor {
+            color: var(--text-gray);
+            font-size: 0.58rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .enroll-btn {
+            background: var(--secondary-red);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .enroll-btn:hover {
+            background: #6b1414;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 26, 26, 0.3);
+        }
+
         .course-card h4 {
-            font-size: 1.4rem;
+            font-size: 0.90rem;
             font-weight: 700;
             margin-bottom: 0.8rem;
-            color: #a3e3ff;
+            color: var(--primary-blue);
         }
 
         .course-card p {
-            color: #b4c7ff;
-            font-size: 0.95rem;
+            color: var(--text-gray);
+            font-size: 0.61rem;
             margin-bottom: 1.5rem;
             line-height: 1.5;
         }
@@ -317,18 +948,18 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            color: #888da1;
-            font-size: 0.9rem;
+            color: var(--text-gray);
+            font-size: 0.72rem;
         }
 
         .course-price {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 800;
-            color: #ff6b6b;
+            color: var(--secondary-red);
         }
 
         .btn-enroll {
-            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            background: var(--secondary-red);
             border: none;
             color: white;
             padding: 0.7rem 1.5rem;
@@ -339,19 +970,20 @@
         }
 
         .btn-enroll:hover {
+            background: #6b1414;
             transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 5px 20px rgba(139, 26, 26, 0.3);
         }
 
         /* User Types Section */
         .user-types {
             padding: 80px 0;
-            background-color: var(--primary-dark);
+            background-color: var(--light-bg-alt);
         }
 
         .user-type-card {
-            background: linear-gradient(135deg, var(--accent-light) 0%, var(--primary-dark) 100%);
-            border: 2px solid var(--secondary-dark);
+            background: var(--light-bg);
+            border: 2px solid var(--border-light);
             border-radius: 15px;
             padding: 3rem;
             text-align: center;
@@ -361,24 +993,24 @@
 
         .user-type-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(139, 26, 26, 0.3);
-            border-color: #ff6b6b;
+            box-shadow: 0 20px 40px rgba(139, 26, 26, 0.15);
+            border-color: var(--secondary-red);
         }
 
         .user-icon {
-            font-size: 4rem;
+            font-size: 2.56rem;
             margin-bottom: 1.5rem;
         }
 
         .user-type-card h3 {
-            font-size: 1.8rem;
+            font-size: 1.15rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: #ffd93d;
+            color: var(--accent-blue);
         }
 
         .user-type-card p {
-            color: #b4c7ff;
+            color: var(--text-gray);
             margin-bottom: 2rem;
             line-height: 1.6;
         }
@@ -389,7 +1021,7 @@
         }
 
         .user-features li {
-            color: #a3e3ff;
+            color: var(--text-dark);
             margin-bottom: 0.8rem;
             list-style: none;
             padding-left: 1.5rem;
@@ -400,17 +1032,18 @@
             content: '✓';
             position: absolute;
             left: 0;
-            color: #ff6b6b;
+            color: var(--secondary-red);
             font-weight: bold;
         }
 
         /* CTA Section */
         .cta-section {
-            background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--primary-dark) 100%);
+            background: var(--primary-blue);
             padding: 80px 0;
             text-align: center;
             position: relative;
             overflow: hidden;
+            color: white;
         }
 
         .cta-section::before {
@@ -418,24 +1051,24 @@
             position: absolute;
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
+            background: transparent;
             border-radius: 50%;
             top: -200px;
             right: -200px;
         }
 
         .cta-section h2 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
-            color: var(--text-light);
+            color: white;
             position: relative;
             z-index: 2;
         }
 
         .cta-section p {
-            font-size: 1.2rem;
-            color: #b4c7ff;
+            font-size: 0.96rem;
+            color: rgba(255, 255, 255, 0.9);
             margin-bottom: 2rem;
             position: relative;
             z-index: 2;
@@ -443,10 +1076,10 @@
 
         /* Footer */
         footer {
-            background-color: #050a1a;
-            color: #888da1;
+            background-color: var(--text-dark);
+            color: #aaaaaa;
             padding: 3rem 0;
-            border-top: 1px solid var(--border-color);
+            border-top: 2px solid var(--secondary-red);
         }
 
         .footer-content {
@@ -457,7 +1090,7 @@
         }
 
         .footer-section h4 {
-            color: #ffd93d;
+            color: white;
             margin-bottom: 1rem;
             font-weight: 700;
         }
@@ -471,12 +1104,13 @@
         }
 
         .footer-section a {
-            color: #888da1;
+            color: #aaaaaa;
             transition: color 0.3s ease;
+            text-decoration: none;
         }
 
         .footer-section a:hover {
-            color: #ff6b6b;
+            color: var(--secondary-red);
         }
 
         .social-icons {
@@ -491,44 +1125,890 @@
             justify-content: center;
             width: 40px;
             height: 40px;
-            background: var(--accent-light);
+            background: var(--accent-blue);
             border-radius: 50%;
             color: white;
             transition: all 0.3s ease;
+            text-decoration: none;
         }
 
         .social-icons a:hover {
-            background: var(--secondary-dark);
+            background: var(--secondary-red);
             transform: translateY(-3px);
         }
 
         .footer-bottom {
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid #444444;
             padding-top: 2rem;
             text-align: center;
         }
 
+        /* Modal Backdrop Blur */
+        .modal-backdrop {
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
+
+        .modal-backdrop.show {
+            opacity: 1 !important;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 16px !important;
+            border: none !important;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1) !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+            overflow: hidden !important;
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--secondary-red) 0%, #a01515 100%);
+            border-radius: 16px 16px 0 0 !important;
+            padding: 1.5rem !important;
+            border: none !important;
+            position: relative;
+        }
+
+        .modal-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .modal-title {
+            font-size: 1.2rem !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.5px;
+            color: white !important;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .modal-title i {
+            font-size: 1.3rem;
+            opacity: 0.95;
+        }
+
+        .modal-body {
+            padding: 2rem !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .modal-body .form-label {
+            font-size: 0.75rem !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.7px !important;
+            margin-bottom: 0.5rem !important;
+            color: var(--primary-blue) !important;
+        }
+
+        .modal-body .form-control,
+        .modal-body .form-select {
+            font-size: 0.80rem !important;
+            padding: 0.65rem 0.9rem !important;
+            border-radius: 8px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1.5px solid #e5e7eb !important;
+            background: white !important;
+        }
+
+        .modal-body .form-control:hover,
+        .modal-body .form-select:hover {
+            border-color: #d1d5db !important;
+        }
+
+        .modal-body .form-control:focus,
+        .modal-body .form-select:focus {
+            border-color: var(--secondary-red) !important;
+            box-shadow: 0 0 0 4px rgba(139, 26, 26, 0.08), 0 4px 12px rgba(139, 26, 26, 0.15) !important;
+            transform: translateY(-1px);
+        }
+
+        .modal-body .form-check-label {
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            color: var(--text-dark) !important;
+        }
+
+        .modal-body .form-check-input {
+            border-radius: 4px !important;
+            cursor: pointer !important;
+        }
+
+        .modal-body .form-check-input:checked {
+            background-color: var(--secondary-red) !important;
+            border-color: var(--secondary-red) !important;
+        }
+
+        .modal-body button[type="submit"] {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        .modal-body small {
+            font-size: 0.65rem !important;
+            margin-top: 0.35rem;
+            display: block;
+            color: #6b7280 !important;
+            font-weight: 500;
+        }
+
+        .modal-body hr {
+            margin: 1.5rem 0 !important;
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            opacity: 0.6;
+        }
+
+        .modal-body > p {
+            font-size: 0.75rem !important;
+            color: var(--text-gray);
+            margin: 0;
+        }
+
+        .modal-body > p a {
+            font-weight: 700 !important;
+            color: var(--secondary-red) !important;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .modal-body > p a:hover {
+            color: #a01515 !important;
+            text-decoration: underline;
+        }
+
+        .btn-close {
+            opacity: 0.7 !important;
+            transition: all 0.2s ease;
+            filter: invert(1) !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+        }
+
+        .btn-close:hover {
+            opacity: 1 !important;
+            transform: scale(1.1);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0 80px;
+            }
+
             .hero h1 {
-                font-size: 2.2rem;
+                font-size: 1.41rem;
+                margin-bottom: 1rem;
             }
 
             .hero p {
-                font-size: 1rem;
+                font-size: 0.64rem;
+                margin-bottom: 1.5rem;
             }
 
             .section-title {
-                font-size: 2rem;
+                font-size: 1.28rem;
             }
 
             .cta-buttons {
                 flex-direction: column;
+                gap: 0.8rem;
             }
 
             .btn-login {
                 margin: 0.3rem 0;
             }
+
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                width: 100%;
+                padding: 0.7rem 1.5rem;
+                font-size: 0.65rem;
+            }
+
+            .hero-search {
+                max-width: 100%;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-content {
+                margin-bottom: 2rem;
+                padding-right: 0;
+            }
+
+            .hero-icon-main {
+                font-size: 2.8rem;
+            }
+
+            .hero-visual {
+                height: 300px;
+                margin-top: 1.5rem;
+                padding: 0 1rem;
+            }
+
+            .hero-stat-badge {
+                padding: 0.8rem 1rem;
+                font-size: 0.60rem;
+            }
+
+            .badge-students {
+                top: 20px;
+                left: -15px;
+            }
+
+            .badge-courses {
+                top: 50%;
+                right: -15px;
+                transform: translateY(-50%);
+            }
+
+            .badge-instructors {
+                bottom: 20px;
+                left: -10px;
+            }
+
+            /* Mobile Modal Styling */
+            .modal-body .form-label {
+                font-size: 0.70rem !important;
+            }
+
+            .modal-body .form-control,
+            .modal-body .form-select {
+                font-size: 0.75rem !important;
+                padding: 0.50rem 0.65rem !important;
+            }
+
+            .modal-title {
+                font-size: 1rem !important;
+            }
+
+            .modal-body small {
+                font-size: 0.60rem !important;
+            }
+
+            .modal-dialog {
+                margin: 1rem !important;
+            }
+        }
+
+        /* Statistics Section */
+        .statistics {
+            padding: 80px 0;
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.24rem;
+            font-weight: 900;
+            color: var(--secondary-red);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.70rem;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 80px 0;
+            background-color: var(--light-bg-alt);
+        }
+
+        .testimonial-card {
+            background: var(--light-bg);
+            border: none;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(139, 26, 26, 0.15);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--secondary-red));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.96rem;
+            margin-right: 1rem;
+        }
+
+        .testimonial-info h5 {
+            margin: 0;
+            color: var(--primary-blue);
+            font-weight: 700;
+        }
+
+        .testimonial-info p {
+            margin: 0;
+            color: var(--text-gray);
+            font-size: 0.58rem;
+        }
+
+        .testimonial-stars {
+            color: var(--secondary-red);
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            color: var(--text-gray);
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--secondary-red);
+            box-shadow: 0 5px 20px rgba(139, 26, 26, 0.1);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            background-color: var(--light-bg-alt);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background-color: var(--border-light);
+        }
+
+        .faq-icon {
+            font-size: 0.96rem;
+            color: var(--secondary-red);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background-color: var(--light-bg);
+            color: var(--text-gray);
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 1.5rem;
+            max-height: 500px;
+        }
+
+        /* Advanced Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-on-scroll {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Why Choose Section */
+        .why-choose {
+            padding: 80px 0;
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .why-choose .section-title {
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .benefit-item {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .benefit-icon {
+            font-size: 1.6rem;
+            color: var(--secondary-red);
+            margin-bottom: 1rem;
+        }
+
+        .benefit-item h4 {
+            font-size: 0.83rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .benefit-item p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        /* Instructors Section */
+        .instructors {
+            padding: 80px 0;
+            background: var(--light-bg);
+        }
+
+        .instructor-card {
+            background: var(--light-bg-alt);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .instructor-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(139, 26, 26, 0.15);
+            background: var(--light-bg);
+            border: 2px solid var(--secondary-red);
+        }
+
+        .instructor-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--secondary-red));
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.92rem;
+            font-weight: bold;
+        }
+
+        .instructor-card h4 {
+            color: var(--primary-blue);
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .instructor-specialty {
+            color: var(--secondary-red);
+            font-size: 0.58rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .instructor-bio {
+            color: var(--text-gray);
+            font-size: 0.61rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .instructor-stats {
+            display: flex;
+            justify-content: space-around;
+            border-top: 2px solid var(--border-light);
+            padding-top: 1.5rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            color: var(--secondary-red);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        /* Learning Paths Section */
+        .learning-paths {
+            padding: 80px 0;
+            background: var(--light-bg-alt);
+        }
+
+        .path-card {
+            background: var(--light-bg);
+            border-left: 5px solid var(--secondary-red);
+            border-radius: 10px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .path-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 30px rgba(139, 26, 26, 0.15);
+        }
+
+        .path-icon {
+            font-size: 1.6rem;
+            color: var(--secondary-red);
+            margin-bottom: 1rem;
+        }
+
+        .path-card h4 {
+            color: var(--primary-blue);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .path-card p {
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .path-courses {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .course-tag {
+            background: var(--accent-blue);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.51rem;
+            font-weight: 600;
+        }
+
+        /* Certifications Section */
+        .certifications {
+            padding: 80px 0;
+            background: var(--light-bg);
+        }
+
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .cert-badge {
+            background: var(--light-bg-alt);
+            border: 3px solid var(--accent-blue);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .cert-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(10, 30, 61, 0.2);
+        }
+
+        .cert-icon {
+            font-size: 1.92rem;
+            color: var(--secondary-red);
+            margin-bottom: 1rem;
+        }
+
+        .cert-badge h5 {
+            color: var(--primary-blue);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .cert-badge p {
+            color: var(--text-gray);
+            font-size: 0.58rem;
+        }
+
+        /* Blog Section */
+        .blog {
+            padding: 80px 0;
+            background: var(--light-bg-alt);
+        }
+
+        .blog-card {
+            background: var(--light-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(139, 26, 26, 0.15);
+        }
+
+        .blog-header {
+            height: 200px;
+            background: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.92rem;
+        }
+
+        .blog-content {
+            padding: 2rem;
+        }
+
+        .blog-date {
+            color: var(--secondary-red);
+            font-size: 0.58rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .blog-card h5 {
+            color: var(--primary-blue);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .blog-excerpt {
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .read-more {
+            color: var(--secondary-red);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            gap: 1rem;
+            color: var(--primary-blue);
+        }
+
+        /* Newsletter Section */
+        .newsletter {
+            padding: 60px 0;
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .newsletter-content {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .newsletter h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .newsletter p {
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.64rem;
+        }
+
+        .newsletter-form input:focus {
+            outline: none;
+        }
+
+        .newsletter-form button {
+            background: var(--secondary-red);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-form button:hover {
+            background: #6b1414;
+            transform: scale(1.05);
+        }
+
+        /* Enhanced Footer */
+        footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 60px 0 20px;
+            border-top: 3px solid var(--secondary-red);
+        }
+
+        .footer-section h4 {
+            color: var(--secondary-red);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            font-size: 0.70rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--secondary-red);
+            padding-left: 0.5rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-icons a {
+            width: 45px;
+            height: 45px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            background: var(--secondary-red);
+            transform: translateY(-5px);
+        }
+
+        .footer-bottom {
+            border-top: 2px solid var(--border-light);
+            margin-top: 3rem;
+            padding-top: 2rem;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .footer-links-bottom {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
     </style>
 </head>
@@ -543,25 +2023,69 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#features">Features</a>
+                        <a class="nav-link" href="#courses">Featured Courses</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#courses">Courses</a>
+                        <a class="nav-link" href="#instructors">Instructors</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#user-types">Users</a>
+                        <a class="nav-link" href="#learning-paths">Learning Paths</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#blog">Blog</a>
                     </li>
                 </ul>
-                <div class="ms-3">
-                    <button type="button" class="btn btn-login btn-student" data-bs-toggle="modal" data-bs-target="#studentModal">
-                        <i class="fas fa-user-graduate"></i> Student
-                    </button>
-                    <button type="button" class="btn btn-login btn-tutor" data-bs-toggle="modal" data-bs-target="#tutorModal">
-                        <i class="fas fa-chalkboard-user"></i> Tutor
-                    </button>
-                    <button type="button" class="btn btn-login btn-parent" data-bs-toggle="modal" data-bs-target="#parentModal">
-                        <i class="fas fa-users"></i> Parent
-                    </button>
+                <div class="ms-3 d-flex gap-2">
+                    <div class="btn-dropdown-group">
+                        <button type="button" class="btn btn-login btn-student btn-dropdown-toggle" onclick="toggleDropdown('studentDropdown')">
+                            <i class="fas fa-user-graduate"></i> Student <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div id="studentDropdown" class="btn-dropdown-menu">
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#studentModal">
+                                <i class="fas fa-apple-alt"></i> Primary Student
+                            </a>
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#studentModal">
+                                <i class="fas fa-book"></i> High School Student
+                            </a>
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#studentModal">
+                                <i class="fas fa-graduation-cap"></i> University Student
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="btn-dropdown-group">
+                        <button type="button" class="btn btn-login btn-tutor btn-dropdown-toggle" onclick="toggleDropdown('tutorDropdown')">
+                            <i class="fas fa-chalkboard-user"></i> Tutor <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div id="tutorDropdown" class="btn-dropdown-menu">
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#tutorModal">
+                                <i class="fas fa-apple-alt"></i> Primary Tutor
+                            </a>
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#tutorModal">
+                                <i class="fas fa-book"></i> High School Tutor
+                            </a>
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#tutorModal">
+                                <i class="fas fa-graduation-cap"></i> University Tutor
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="btn-dropdown-group">
+                        <button type="button" class="btn btn-login btn-parent btn-dropdown-toggle" onclick="toggleDropdown('parentDropdown')">
+                            <i class="fas fa-users"></i> Parent <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div id="parentDropdown" class="btn-dropdown-menu">
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#parentModal">
+                                <i class="fas fa-apple-alt"></i> Parent of Primary
+                            </a>
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#parentModal">
+                                <i class="fas fa-book"></i> Parent of High School
+                            </a>
+                            <a href="#" class="btn-dropdown-item" data-bs-toggle="modal" data-bs-target="#parentModal">
+                                <i class="fas fa-graduation-cap"></i> Parent of University
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -574,6 +2098,11 @@
                 <div class="col-lg-6 hero-content">
                     <h1>Learn Smarter, Grow Faster</h1>
                     <p>Join ZEDU and unlock your potential with expert instructors, interactive courses, and a global community of learners.</p>
+                    <div class="hero-search">
+                        <i class="fas fa-search" style="color: var(--text-gray);"></i>
+                        <input type="text" placeholder="Search courses, skills, tutors...">
+                        <button type="button"><i class="fas fa-arrow-right"></i></button>
+                    </div>
                     <div class="cta-buttons">
                         <button type="button" class="btn btn-primary-custom btn-lg" data-bs-toggle="modal" data-bs-target="#studentModal">
                             <i class="fas fa-arrow-right"></i> Start Learning
@@ -584,8 +2113,108 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div style="font-size: 8rem; text-align: center; color: #ff6b6b; opacity: 0.9;">
-                        <i class="fas fa-book-open"></i>
+                    <div class="hero-visual">
+                        <div class="hero-icon-secondary hero-icon-top-left">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="hero-icon-secondary hero-icon-top-right">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="hero-icon-main">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="hero-icon-secondary hero-icon-bottom-left">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="hero-icon-secondary hero-icon-bottom-right">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="hero-stat-badge badge-students">
+                            <div class="badge-number">500K+</div>
+                            <div class="badge-label">Active Students</div>
+                        </div>
+                        <div class="hero-stat-badge badge-courses">
+                            <div class="badge-number">3000+</div>
+                            <div class="badge-label">Courses</div>
+                        </div>
+                        <div class="hero-stat-badge badge-instructors">
+                            <div class="badge-number">2000+</div>
+                            <div class="badge-label">Expert Tutors</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Education Levels Section -->
+    <section class="education-levels" id="education-levels">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Education for Everyone</h2>
+            <p style="text-align: center; color: var(--text-gray); font-size: 0.70rem; margin-bottom: 4rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+                ZEDU provides comprehensive educational resources for all ages. From elementary students building foundational knowledge to university graduates pursuing advanced degrees, we have courses tailored for every educational stage.
+            </p>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="level-card">
+                        <div class="level-icon">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <h3>Primary School</h3>
+                        <p>Build strong foundations in Math, Science, Languages, and Arts. Age-appropriate interactive lessons for grades 1-6.</p>
+                        <div class="level-stats">
+                            <div class="level-stat">
+                                <div class="level-stat-value">450+</div>
+                                <div class="level-stat-label">Courses</div>
+                            </div>
+                            <div class="level-stat">
+                                <div class="level-stat-value">25K+</div>
+                                <div class="level-stat-label">Students</div>
+                            </div>
+                        </div>
+                        <button class="level-btn" onclick="alert('Explore Primary School Courses')">Explore</button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="level-card">
+                        <div class="level-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>High School</h3>
+                        <p>Master advanced subjects including Physics, Chemistry, Biology, History, and Literature. Prepare for exams and competitions.</p>
+                        <div class="level-stats">
+                            <div class="level-stat">
+                                <div class="level-stat-value">680+</div>
+                                <div class="level-stat-label">Courses</div>
+                            </div>
+                            <div class="level-stat">
+                                <div class="level-stat-value">85K+</div>
+                                <div class="level-stat-label">Students</div>
+                            </div>
+                        </div>
+                        <button class="level-btn" onclick="alert('Explore High School Courses')">Explore</button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="level-card">
+                        <div class="level-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>University & Beyond</h3>
+                        <p>Advanced degree programs, professional certifications, and specializations. Stay competitive in your career journey.</p>
+                        <div class="level-stats">
+                            <div class="level-stat">
+                                <div class="level-stat-value">1200+</div>
+                                <div class="level-stat-label">Courses</div>
+                            </div>
+                            <div class="level-stat">
+                                <div class="level-stat-value">150K+</div>
+                                <div class="level-stat-label">Students</div>
+                            </div>
+                        </div>
+                        <button class="level-btn" onclick="alert('Explore University Courses')">Explore</button>
                     </div>
                 </div>
             </div>
@@ -649,13 +2278,19 @@
                         </div>
                         <div class="course-content">
                             <span class="course-badge">Beginner</span>
+                            <span class="education-level-badge primary-badge"><i class="fas fa-apple-alt"></i> Primary</span>
                             <h4>Web Development Basics</h4>
                             <p>Master HTML, CSS, and JavaScript fundamentals to build modern websites.</p>
+                            <p class="course-instructor"><i class="fas fa-user"></i> By Dr. Rajesh Patel</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-star" style="color: var(--secondary-red);"></i> 4.8 (2.3K)</span>
+                                <span class="course-students"><i class="fas fa-users"></i> 15.2K students</span>
+                            </div>
                             <div class="course-meta">
                                 <span><i class="fas fa-clock"></i> 40 hours</span>
                                 <span class="course-price">$99</span>
                             </div>
-                            <button class="btn btn-enroll">Enroll Now</button>
+                            <button class="btn enroll-btn">Enroll Now</button>
                         </div>
                     </div>
                 </div>
@@ -667,13 +2302,19 @@
                         </div>
                         <div class="course-content">
                             <span class="course-badge" style="background-color: #1e3a8a;">Intermediate</span>
+                            <span class="education-level-badge highschool-badge"><i class="fas fa-book"></i> High School</span>
                             <h4>Data Analysis Mastery</h4>
                             <p>Learn Python, SQL, and data visualization to make data-driven decisions.</p>
+                            <p class="course-instructor"><i class="fas fa-user"></i> By Sarah Mitchell</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-star" style="color: var(--secondary-red);"></i> 4.9 (1.8K)</span>
+                                <span class="course-students"><i class="fas fa-users"></i> 10.5K students</span>
+                            </div>
                             <div class="course-meta">
                                 <span><i class="fas fa-clock"></i> 50 hours</span>
                                 <span class="course-price">$149</span>
                             </div>
-                            <button class="btn btn-enroll">Enroll Now</button>
+                            <button class="btn enroll-btn">Enroll Now</button>
                         </div>
                     </div>
                 </div>
@@ -684,14 +2325,20 @@
                             <i class="fas fa-brain"></i>
                         </div>
                         <div class="course-content">
-                            <span class="course-badge" style="background-color: #7c2d12;">Advanced</span>
+                            <span class="course-badge" style="background-color: #a04000;">Advanced</span>
+                            <span class="education-level-badge university-badge"><i class="fas fa-graduation-cap"></i> University</span>
                             <h4>AI & Machine Learning</h4>
                             <p>Deep dive into AI concepts, neural networks, and machine learning algorithms.</p>
+                            <p class="course-instructor"><i class="fas fa-user"></i> By Dr. Rajesh Patel</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-star" style="color: var(--secondary-red);"></i> 5.0 (3.2K)</span>
+                                <span class="course-students"><i class="fas fa-users"></i> 22.8K students</span>
+                            </div>
                             <div class="course-meta">
                                 <span><i class="fas fa-clock"></i> 60 hours</span>
                                 <span class="course-price">$199</span>
                             </div>
-                            <button class="btn btn-enroll">Enroll Now</button>
+                            <button class="btn enroll-btn">Enroll Now</button>
                         </div>
                     </div>
                 </div>
@@ -703,13 +2350,19 @@
                         </div>
                         <div class="course-content">
                             <span class="course-badge">Beginner</span>
+                            <span class="education-level-badge primary-badge"><i class="fas fa-apple-alt"></i> Primary</span>
                             <h4>UI/UX Design Essentials</h4>
                             <p>Create beautiful and user-friendly interfaces with industry-standard tools.</p>
+                            <p class="course-instructor"><i class="fas fa-user"></i> By James Chen</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-star" style="color: var(--secondary-red);"></i> 4.7 (1.5K)</span>
+                                <span class="course-students"><i class="fas fa-users"></i> 8.3K students</span>
+                            </div>
                             <div class="course-meta">
                                 <span><i class="fas fa-clock"></i> 35 hours</span>
                                 <span class="course-price">$89</span>
                             </div>
-                            <button class="btn btn-enroll">Enroll Now</button>
+                            <button class="btn enroll-btn">Enroll Now</button>
                         </div>
                     </div>
                 </div>
@@ -720,14 +2373,20 @@
                             <i class="fas fa-server"></i>
                         </div>
                         <div class="course-content">
-                            <span class="course-badge" style="background-color: #1e3a8a;">Intermediate</span>
-                            <h4>Cloud Computing Pro</h4>
+                            <span class="course-badge" style="background-color: var(--accent-blue);">Intermediate</span>
+                            <span class="education-level-badge highschool-badge"><i class="fas fa-book"></i> High School</span>
+                            <h4>Cloud Computing Fundamentals</h4>
                             <p>Deploy, manage, and scale applications on AWS, Azure, and Google Cloud.</p>
+                            <p class="course-instructor"><i class="fas fa-user"></i> By Dr. Rajesh Patel</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-star" style="color: var(--secondary-red);"></i> 4.8 (2.1K)</span>
+                                <span class="course-students"><i class="fas fa-users"></i> 12.9K students</span>
+                            </div>
                             <div class="course-meta">
                                 <span><i class="fas fa-clock"></i> 45 hours</span>
                                 <span class="course-price">$129</span>
                             </div>
-                            <button class="btn btn-enroll">Enroll Now</button>
+                            <button class="btn enroll-btn">Enroll Now</button>
                         </div>
                     </div>
                 </div>
@@ -738,14 +2397,20 @@
                             <i class="fas fa-business-time"></i>
                         </div>
                         <div class="course-content">
-                            <span class="course-badge" style="background-color: #7c2d12;">Advanced</span>
+                            <span class="course-badge" style="background-color: #a04000;">Advanced</span>
+                            <span class="education-level-badge university-badge"><i class="fas fa-graduation-cap"></i> University</span>
                             <h4>Digital Marketing Strategy</h4>
                             <p>Master SEO, social media, and content marketing to grow your business.</p>
+                            <p class="course-instructor"><i class="fas fa-user"></i> By Sarah Mitchell</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-star" style="color: var(--secondary-red);"></i> 4.9 (2.7K)</span>
+                                <span class="course-students"><i class="fas fa-users"></i> 18.5K students</span>
+                            </div>
                             <div class="course-meta">
                                 <span><i class="fas fa-clock"></i> 55 hours</span>
                                 <span class="course-price">$139</span>
                             </div>
-                            <button class="btn btn-enroll">Enroll Now</button>
+                            <button class="btn enroll-btn">Enroll Now</button>
                         </div>
                     </div>
                 </div>
@@ -760,7 +2425,7 @@
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4">
                     <div class="user-type-card">
-                        <div class="user-icon" style="color: #a3e3ff;">
+                        <div class="user-icon" style="color: var(--accent-blue);">
                             <i class="fas fa-user-graduate"></i>
                         </div>
                         <h3>Students</h3>
@@ -779,7 +2444,7 @@
 
                 <div class="col-md-6 col-lg-4">
                     <div class="user-type-card">
-                        <div class="user-icon" style="color: #ffd93d;">
+                        <div class="user-icon" style="color: var(--secondary-red);">
                             <i class="fas fa-chalkboard-user"></i>
                         </div>
                         <h3>Tutors</h3>
@@ -798,7 +2463,7 @@
 
                 <div class="col-md-6 col-lg-4">
                     <div class="user-type-card">
-                        <div class="user-icon" style="color: #ff6b6b;">
+                        <div class="user-icon" style="color: var(--primary-blue);">
                             <i class="fas fa-users"></i>
                         </div>
                         <h3>Parents</h3>
@@ -818,6 +2483,435 @@
         </div>
     </section>
 
+    <!-- Statistics Section -->
+    <section class="statistics" id="statistics">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 col-sm-6 stat-item">
+                    <div class="stat-number">50K+</div>
+                    <div class="stat-label">Active Students</div>
+                </div>
+                <div class="col-md-3 col-sm-6 stat-item">
+                    <div class="stat-number">2K+</div>
+                    <div class="stat-label">Expert Tutors</div>
+                </div>
+                <div class="col-md-3 col-sm-6 stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Courses</div>
+                </div>
+                <div class="col-md-3 col-sm-6 stat-item">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">What Our Users Say</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="testimonial-card card-hover">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">AS</div>
+                            <div class="testimonial-info">
+                                <h5>Aisha Singh</h5>
+                                <p>Student</p>
+                            </div>
+                        </div>
+                        <div class="testimonial-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"ZEDU transformed my learning experience. The tutors are incredibly supportive and the course quality is outstanding!"</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card card-hover">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">RK</div>
+                            <div class="testimonial-info">
+                                <h5>Rajesh Kumar</h5>
+                                <p>Tutor</p>
+                            </div>
+                        </div>
+                        <div class="testimonial-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"The platform makes it easy to reach students globally. Excellent tools and great community support for educators!"</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card card-hover">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">PM</div>
+                            <div class="testimonial-info">
+                                <h5>Priya Mehta</h5>
+                                <p>Parent</p>
+                            </div>
+                        </div>
+                        <div class="testimonial-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"I can monitor my child's progress easily. The personalized learning approach has improved their grades significantly!"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Frequently Asked Questions</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do I get started with ZEDU?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Getting started is simple! Sign up with your email, choose your role (Student, Tutor, or Parent), complete your profile, and start exploring our course catalog. Our onboarding guide will walk you through everything.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What courses are available?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        We offer over 500 courses across multiple subjects including Math, Science, Languages, Programming, Arts, and more. All courses are created by expert tutors and updated regularly to match current educational standards.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is there a free trial?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! All new users get access to a 7-day free trial where you can explore courses and experience the platform. No credit card required. You can cancel anytime during the trial period.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How does the parent monitoring feature work?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Parents can track their child's progress, view course completion rates, and receive weekly reports. You can also communicate directly with tutors and get insights into learning patterns and areas for improvement.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do I become a tutor on ZEDU?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Apply through our Tutor Portal. You'll need to pass our verification process and submit your credentials. Once approved, you can create courses, set pricing, and start earning immediately. We provide full support.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What payment methods do you accept?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        We accept all major credit/debit cards, digital wallets (PayPal, Google Pay, Apple Pay), and bank transfers. All transactions are secure and encrypted with industry-standard protocols.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose ZEDU Section -->
+    <section class="why-choose">
+        <div class="container">
+            <h2 class="section-title">Why Choose ZEDU?</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fas fa-globe"></i></div>
+                        <h4>Global Learning Community</h4>
+                        <p>Connect with learners and experts from over 150 countries and grow your network.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fas fa-certificate"></i></div>
+                        <h4>Industry-Recognized Certifications</h4>
+                        <p>Earn certificates that boost your career prospects and professional credibility.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fas fa-play-circle"></i></div>
+                        <h4>Learn at Your Own Pace</h4>
+                        <p>Access lifetime course materials and learn whenever, wherever it suits you best.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fas fa-users-cog"></i></div>
+                        <h4>Personalized Learning Paths</h4>
+                        <p>Get AI-powered course recommendations tailored to your learning goals.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fas fa-headset"></i></div>
+                        <h4>24/7 Support Team</h4>
+                        <p>Access dedicated support with live chat, email, and knowledge base resources.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fas fa-chart-line"></i></div>
+                        <h4>Track Your Progress</h4>
+                        <p>Monitor your learning with detailed analytics and performance insights.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expert Instructors Section -->
+    <section class="instructors" id="instructors">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Meet Our Expert Instructors</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="instructor-card card-hover">
+                        <div class="instructor-avatar">DR</div>
+                        <h4>Dr. Rajesh Patel</h4>
+                        <p class="instructor-specialty">Computer Science & AI</p>
+                        <p class="instructor-bio">PhD in Computer Science with 15+ years of industry experience at top tech companies.</p>
+                        <div class="instructor-stats">
+                            <div class="stat">
+                                <div class="stat-value">12K+</div>
+                                <div class="stat-label">Students</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">8</div>
+                                <div class="stat-label">Courses</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">4.9★</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="instructor-card card-hover">
+                        <div class="instructor-avatar">SM</div>
+                        <h4>Sarah Mitchell</h4>
+                        <p class="instructor-specialty">Business & Entrepreneurship</p>
+                        <p class="instructor-bio">Founder of 3 successful startups and business strategist with international recognition.</p>
+                        <div class="instructor-stats">
+                            <div class="stat">
+                                <div class="stat-value">8K+</div>
+                                <div class="stat-label">Students</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">6</div>
+                                <div class="stat-label">Courses</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">4.95★</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="instructor-card card-hover">
+                        <div class="instructor-avatar">JC</div>
+                        <h4>James Chen</h4>
+                        <p class="instructor-specialty">Languages & Cultural Studies</p>
+                        <p class="instructor-bio">Polyglot speaking 8 languages with certification in language education from Cambridge.</p>
+                        <div class="instructor-stats">
+                            <div class="stat">
+                                <div class="stat-value">15K+</div>
+                                <div class="stat-label">Students</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">10</div>
+                                <div class="stat-label">Courses</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">5.0★</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Learning Paths Section -->
+    <section class="learning-paths" id="learning-paths">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Structured Learning Paths</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-4">
+                    <div class="path-card">
+                        <div class="path-icon"><i class="fas fa-laptop-code"></i></div>
+                        <h4>Full Stack Developer</h4>
+                        <p>Master frontend and backend development with hands-on projects. Perfect for beginners to intermediate learners.</p>
+                        <div class="path-courses">
+                            <span class="course-tag">JavaScript</span>
+                            <span class="course-tag">React</span>
+                            <span class="course-tag">Node.js</span>
+                            <span class="course-tag">Database</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="path-card">
+                        <div class="path-icon"><i class="fas fa-chart-area"></i></div>
+                        <h4>Data Science Professional</h4>
+                        <p>Learn data analysis, visualization, and machine learning to make informed business decisions.</p>
+                        <div class="path-courses">
+                            <span class="course-tag">Python</span>
+                            <span class="course-tag">SQL</span>
+                            <span class="course-tag">Analytics</span>
+                            <span class="course-tag">ML</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="path-card">
+                        <div class="path-icon"><i class="fas fa-briefcase"></i></div>
+                        <h4>Business & Management</h4>
+                        <p>Develop leadership and management skills to advance your career in the corporate world.</p>
+                        <div class="path-courses">
+                            <span class="course-tag">Leadership</span>
+                            <span class="course-tag">Strategy</span>
+                            <span class="course-tag">Finance</span>
+                            <span class="course-tag">HR</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certifications Section -->
+    <section class="certifications" id="certifications">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Industry Certifications</h2>
+            <div class="cert-grid">
+                <div class="cert-badge card-hover">
+                    <div class="cert-icon"><i class="fas fa-code"></i></div>
+                    <h5>Web Development</h5>
+                    <p>Master modern web technologies and build production-ready applications.</p>
+                </div>
+                <div class="cert-badge card-hover">
+                    <div class="cert-icon"><i class="fas fa-brain"></i></div>
+                    <h5>AI & ML Expert</h5>
+                    <p>Become proficient in artificial intelligence and machine learning concepts.</p>
+                </div>
+                <div class="cert-badge card-hover">
+                    <div class="cert-icon"><i class="fas fa-chart-pie"></i></div>
+                    <h5>Data Analyst</h5>
+                    <p>Learn to extract insights and create compelling data visualizations.</p>
+                </div>
+                <div class="cert-badge card-hover">
+                    <div class="cert-icon"><i class="fas fa-globe"></i></div>
+                    <h5>Digital Marketing</h5>
+                    <p>Master social media, SEO, and content marketing strategies.</p>
+                </div>
+                <div class="cert-badge card-hover">
+                    <div class="cert-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h5>Professional Teacher</h5>
+                    <p>Get certified as an online educator and tutor on the ZEDU platform.</p>
+                </div>
+                <div class="cert-badge card-hover">
+                    <div class="cert-icon"><i class="fas fa-language"></i></div>
+                    <h5>Language Master</h5>
+                    <p>Achieve proficiency in multiple languages with native speakers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section class="blog" id="blog">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Latest from Our Blog</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-4">
+                    <div class="blog-card">
+                        <div class="blog-header"><i class="fas fa-lightbulb"></i></div>
+                        <div class="blog-content">
+                            <p class="blog-date">April 15, 2026</p>
+                            <h5>10 Tips for Effective Online Learning</h5>
+                            <p class="blog-excerpt">Discover strategies to maximize your online learning experience and achieve better results in your courses.</p>
+                            <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="blog-card">
+                        <div class="blog-header"><i class="fas fa-rocket"></i></div>
+                        <div class="blog-content">
+                            <p class="blog-date">April 12, 2026</p>
+                            <h5>Career Paths in Technology 2026</h5>
+                            <p class="blog-excerpt">Explore emerging career opportunities in tech and learn which skills are most in-demand this year.</p>
+                            <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="blog-card">
+                        <div class="blog-header"><i class="fas fa-book"></i></div>
+                        <div class="blog-content">
+                            <p class="blog-date">April 10, 2026</p>
+                            <h5>Success Stories from Our Community</h5>
+                            <p class="blog-excerpt">Read inspiring stories of how ZEDU students transformed their careers and achieved their goals.</p>
+                            <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h3>Stay Updated with ZEDU</h3>
+                <p>Subscribe to our newsletter for course recommendations, learning tips, and exclusive offers.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email address" required>
+                    <button type="submit"><i class="fas fa-paper-plane"></i> Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
@@ -833,46 +2927,69 @@
     <footer>
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>ZEDU</h4>
-                    <p style="margin-bottom: 1rem; color: #888da1;">Empowering education worldwide. Quality learning at your fingertips.</p>
-                    <div class="social-icons">
-                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                <div class="row mb-5">
+                    <div class="col-md-3 footer-section">
+                        <h4><i class="fas fa-graduation-cap"></i> ZEDU</h4>
+                        <p style="margin-bottom: 1.5rem; color: rgba(255, 255, 255, 0.8); line-height: 1.6;">Empowering learners worldwide with quality education, expert instruction, and transformative learning experiences.</p>
+                        <div class="social-icons">
+                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-md-2 footer-section">
+                        <h4>Explore</h4>
+                        <ul>
+                            <li><a href="#">All Courses</a></li>
+                            <li><a href="#">Learning Paths</a></li>
+                            <li><a href="#">Instructors</a></li>
+                            <li><a href="#">Certifications</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 footer-section">
+                        <h4>For Learners</h4>
+                        <ul>
+                            <li><a href="#">Sign Up</a></li>
+                            <li><a href="#">Pricing Plans</a></li>
+                            <li><a href="#">Learning Tips</a></li>
+                            <li><a href="#">Student Stories</a></li>
+                            <li><a href="#">Mobile App</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 footer-section">
+                        <h4>For Tutors</h4>
+                        <ul>
+                            <li><a href="#">Become a Tutor</a></li>
+                            <li><a href="#">Tutor Dashboard</a></li>
+                            <li><a href="#">Create a Course</a></li>
+                            <li><a href="#">Earnings Guide</a></li>
+                            <li><a href="#">Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3 footer-section">
+                        <h4>Support & Legal</h4>
+                        <ul>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Accessibility</a></li>
+                        </ul>
                     </div>
                 </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Courses</a></li>
-                        <li><a href="#">Become a Tutor</a></li>
-                        <li><a href="#">Blog</a></li>
-                    </ul>
+                <div class="footer-bottom">
+                    <div class="footer-links-bottom">
+                        <a href="#">About ZEDU</a>
+                        <a href="#">Careers</a>
+                        <a href="#">Press</a>
+                        <a href="#">Partners</a>
+                        <a href="#">Sitemap</a>
+                    </div>
+                    <p>&copy; 2026 ZEDU Education Platform. All rights reserved. | <span style="color: var(--secondary-red);">Transforming Education Globally</span></p>
                 </div>
-                <div class="footer-section">
-                    <h4>Support</h4>
-                    <ul>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Contact Us</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Community</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Cookie Policy</a></li>
-                        <li><a href="#">Refund Policy</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 ZEDU. All rights reserved. | Transforming Education Globally</p>
             </div>
         </div>
     </footer>
@@ -880,29 +2997,29 @@
     <!-- Student Login Modal -->
     <div class="modal fade" id="studentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 100%); border: 2px solid var(--secondary-dark);">
-                <div class="modal-header border-bottom border-secondary">
-                    <h5 class="modal-title" style="color: #a3e3ff;"><i class="fas fa-user-graduate"></i> Student Login</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-graduate"></i> Student Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
+                    <form id="studentLoginForm">
                         <div class="mb-3">
-                            <label for="studentEmail" class="form-label" style="color: var(--text-light);">Email Address</label>
-                            <input type="email" class="form-control" id="studentEmail" style="background: var(--primary-dark); border: 1px solid var(--border-color); color: white;" placeholder="your@email.com">
+                            <label for="studentEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="studentEmail" placeholder="your@email.com" required>
                         </div>
                         <div class="mb-3">
-                            <label for="studentPassword" class="form-label" style="color: var(--text-light);">Password</label>
-                            <input type="password" class="form-control" id="studentPassword" style="background: var(--primary-dark); border: 1px solid var(--border-color); color: white;" placeholder="••••••••">
+                            <label for="studentPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="studentPassword" placeholder="••••••••" required>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="rememberStudent">
-                            <label class="form-check-label" for="rememberStudent" style="color: #b4c7ff;">Remember me</label>
+                            <label class="form-check-label" for="rememberStudent">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-primary-custom w-100">Sign In</button>
+                        <button type="submit" class="btn btn-primary-custom">Sign In</button>
                     </form>
-                    <hr style="border-color: var(--border-color);">
-                    <p style="text-align: center; color: #b4c7ff;">Don't have an account? <a href="#" style="color: #ff6b6b; text-decoration: none;">Sign up now</a></p>
+                    <hr>
+                    <p style="text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="student">Sign up now</a></p>
                 </div>
             </div>
         </div>
@@ -911,29 +3028,29 @@
     <!-- Tutor Login Modal -->
     <div class="modal fade" id="tutorModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%); border: 2px solid var(--secondary-dark);">
-                <div class="modal-header border-bottom border-secondary">
-                    <h5 class="modal-title" style="color: #ffd93d;"><i class="fas fa-chalkboard-user"></i> Tutor Login</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-chalkboard-user"></i> Tutor Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
+                    <form id="tutorLoginForm">
                         <div class="mb-3">
-                            <label for="tutorEmail" class="form-label" style="color: var(--text-light);">Email Address</label>
-                            <input type="email" class="form-control" id="tutorEmail" style="background: var(--primary-dark); border: 1px solid var(--secondary-dark); color: white;" placeholder="your@email.com">
+                            <label for="tutorEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="tutorEmail" placeholder="your@email.com" required>
                         </div>
                         <div class="mb-3">
-                            <label for="tutorPassword" class="form-label" style="color: var(--text-light);">Password</label>
-                            <input type="password" class="form-control" id="tutorPassword" style="background: var(--primary-dark); border: 1px solid var(--secondary-dark); color: white;" placeholder="••••••••">
+                            <label for="tutorPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="tutorPassword" placeholder="••••••••" required>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="rememberTutor">
-                            <label class="form-check-label" for="rememberTutor" style="color: #b4c7ff;">Remember me</label>
+                            <label class="form-check-label" for="rememberTutor">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-tutor w-100">Sign In</button>
+                        <button type="submit" class="btn btn-tutor">Sign In</button>
                     </form>
-                    <hr style="border-color: var(--secondary-dark);">
-                    <p style="text-align: center; color: #b4c7ff;">New tutor? <a href="#" style="color: #ff6b6b; text-decoration: none;">Apply now</a></p>
+                    <hr>
+                    <p style="text-align: center;">New tutor? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="tutor">Apply now</a></p>
                 </div>
             </div>
         </div>
@@ -942,34 +3059,620 @@
     <!-- Parent Login Modal -->
     <div class="modal fade" id="parentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background: linear-gradient(135deg, var(--primary-dark) 0%, #2d3748 100%); border: 2px solid #4b5563;">
-                <div class="modal-header border-bottom border-secondary">
-                    <h5 class="modal-title" style="color: #a3e3ff;"><i class="fas fa-users"></i> Parent Login</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-users"></i> Parent Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
+                    <form id="parentLoginForm">
                         <div class="mb-3">
-                            <label for="parentEmail" class="form-label" style="color: var(--text-light);">Email Address</label>
-                            <input type="email" class="form-control" id="parentEmail" style="background: var(--primary-dark); border: 1px solid #4b5563; color: white;" placeholder="your@email.com">
+                            <label for="parentEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="parentEmail" placeholder="your@email.com" required>
                         </div>
                         <div class="mb-3">
-                            <label for="parentPassword" class="form-label" style="color: var(--text-light);">Password</label>
-                            <input type="password" class="form-control" id="parentPassword" style="background: var(--primary-dark); border: 1px solid #4b5563; color: white;" placeholder="••••••••">
+                            <label for="parentPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="parentPassword" placeholder="••••••••" required>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="rememberParent">
-                            <label class="form-check-label" for="rememberParent" style="color: #b4c7ff;">Remember me</label>
+                            <label class="form-check-label" for="rememberParent">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-parent w-100" style="background-color: #1e3a8a;">Sign In</button>
+                        <button type="submit" class="btn btn-primary-custom">Sign In</button>
                     </form>
-                    <hr style="border-color: #4b5563;">
-                    <p style="text-align: center; color: #b4c7ff;">Don't have an account? <a href="#" style="color: #ff6b6b; text-decoration: none;">Create one</a></p>
+                    <hr>
+                    <p style="text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="parent">Create one</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus"></i> Create Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="signupMessage" style="display: none; margin-bottom: 1rem;"></div>
+                    <form id="signupForm">
+                        <div class="mb-3">
+                            <label for="signupFullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="signupFullName" placeholder="John Doe" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="signupEmail" placeholder="your@email.com" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 mb-3">
+                                <label for="signupCountryCode" class="form-label">Country Code</label>
+                                <select class="form-select" id="signupCountryCode" required>
+                                    <option value="">Select country code</option>
+                                    <option value="+1">+1 - United States/Canada</option>
+                                    <option value="+7">+7 - Russia/Kazakhstan</option>
+                                    <option value="+20">+20 - Egypt</option>
+                                    <option value="+27">+27 - South Africa</option>
+                                    <option value="+30">+30 - Greece</option>
+                                    <option value="+31">+31 - Netherlands</option>
+                                    <option value="+32">+32 - Belgium</option>
+                                    <option value="+33">+33 - France</option>
+                                    <option value="+34">+34 - Spain</option>
+                                    <option value="+36">+36 - Hungary</option>
+                                    <option value="+39">+39 - Italy</option>
+                                    <option value="+40">+40 - Romania</option>
+                                    <option value="+41">+41 - Switzerland</option>
+                                    <option value="+43">+43 - Austria</option>
+                                    <option value="+44">+44 - United Kingdom</option>
+                                    <option value="+45">+45 - Denmark</option>
+                                    <option value="+46">+46 - Sweden</option>
+                                    <option value="+47">+47 - Norway</option>
+                                    <option value="+48">+48 - Poland</option>
+                                    <option value="+49">+49 - Germany</option>
+                                    <option value="+51">+51 - Peru</option>
+                                    <option value="+52">+52 - Mexico</option>
+                                    <option value="+53">+53 - Cuba</option>
+                                    <option value="+54">+54 - Argentina</option>
+                                    <option value="+55">+55 - Brazil</option>
+                                    <option value="+56">+56 - Chile</option>
+                                    <option value="+57">+57 - Colombia</option>
+                                    <option value="+58">+58 - Venezuela</option>
+                                    <option value="+60">+60 - Malaysia</option>
+                                    <option value="+61">+61 - Australia</option>
+                                    <option value="+62">+62 - Indonesia</option>
+                                    <option value="+63">+63 - Philippines</option>
+                                    <option value="+64">+64 - New Zealand</option>
+                                    <option value="+65">+65 - Singapore</option>
+                                    <option value="+66">+66 - Thailand</option>
+                                    <option value="+81">+81 - Japan</option>
+                                    <option value="+82">+82 - South Korea</option>
+                                    <option value="+84">+84 - Vietnam</option>
+                                    <option value="+86">+86 - China</option>
+                                    <option value="+90">+90 - Turkey</option>
+                                    <option value="+91">+91 - India</option>
+                                    <option value="+92">+92 - Pakistan</option>
+                                    <option value="+93">+93 - Afghanistan</option>
+                                    <option value="+94">+94 - Sri Lanka</option>
+                                    <option value="+95">+95 - Myanmar</option>
+                                    <option value="+98">+98 - Iran</option>
+                                    <option value="+212">+212 - Morocco</option>
+                                    <option value="+213">+213 - Algeria</option>
+                                    <option value="+216">+216 - Tunisia</option>
+                                    <option value="+218">+218 - Libya</option>
+                                    <option value="+220">+220 - Gambia</option>
+                                    <option value="+221">+221 - Senegal</option>
+                                    <option value="+222">+222 - Mauritania</option>
+                                    <option value="+223">+223 - Mali</option>
+                                    <option value="+224">+224 - Guinea</option>
+                                    <option value="+225">+225 - Ivory Coast</option>
+                                    <option value="+226">+226 - Burkina Faso</option>
+                                    <option value="+227">+227 - Niger</option>
+                                    <option value="+228">+228 - Togo</option>
+                                    <option value="+229">+229 - Benin</option>
+                                    <option value="+230">+230 - Mauritius</option>
+                                    <option value="+231">+231 - Liberia</option>
+                                    <option value="+232">+232 - Sierra Leone</option>
+                                    <option value="+233">+233 - Ghana</option>
+                                    <option value="+234">+234 - Nigeria</option>
+                                    <option value="+235">+235 - Chad</option>
+                                    <option value="+236">+236 - Central African Republic</option>
+                                    <option value="+237">+237 - Cameroon</option>
+                                    <option value="+238">+238 - Cape Verde</option>
+                                    <option value="+239">+239 - São Tomé and Príncipe</option>
+                                    <option value="+240">+240 - Equatorial Guinea</option>
+                                    <option value="+241">+241 - Gabon</option>
+                                    <option value="+242">+242 - Congo</option>
+                                    <option value="+243">+243 - Democratic Republic of the Congo</option>
+                                    <option value="+244">+244 - Angola</option>
+                                    <option value="+245">+245 - Guinea-Bissau</option>
+                                    <option value="+246">+246 - Diego Garcia</option>
+                                    <option value="+248">+248 - Seychelles</option>
+                                    <option value="+249">+249 - Sudan</option>
+                                    <option value="+250">+250 - Rwanda</option>
+                                    <option value="+251">+251 - Ethiopia</option>
+                                    <option value="+252">+252 - Somalia</option>
+                                    <option value="+253">+253 - Djibouti</option>
+                                    <option value="+254">+254 - Kenya</option>
+                                    <option value="+255">+255 - Tanzania</option>
+                                    <option value="+256">+256 - Uganda</option>
+                                    <option value="+257">+257 - Burundi</option>
+                                    <option value="+258">+258 - Mozambique</option>
+                                    <option value="+260">+260 - Zambia</option>
+                                    <option value="+261">+261 - Madagascar</option>
+                                    <option value="+262">+262 - Réunion</option>
+                                    <option value="+263" selected>+263 - Zimbabwe</option>
+                                    <option value="+264">+264 - Namibia</option>
+                                    <option value="+265">+265 - Malawi</option>
+                                    <option value="+266">+266 - Lesotho</option>
+                                    <option value="+267">+267 - Botswana</option>
+                                    <option value="+268">+268 - Eswatini</option>
+                                    <option value="+290">+290 - Saint Helena</option>
+                                    <option value="+291">+291 - Eritrea</option>
+                                    <option value="+297">+297 - Aruba</option>
+                                    <option value="+298">+298 - Faroe Islands</option>
+                                    <option value="+299">+299 - Greenland</option>
+                                    <option value="+350">+350 - Gibraltar</option>
+                                    <option value="+351">+351 - Portugal</option>
+                                    <option value="+352">+352 - Luxembourg</option>
+                                    <option value="+353">+353 - Ireland</option>
+                                    <option value="+354">+354 - Iceland</option>
+                                    <option value="+355">+355 - Albania</option>
+                                    <option value="+356">+356 - Malta</option>
+                                    <option value="+357">+357 - Cyprus</option>
+                                    <option value="+358">+358 - Finland</option>
+                                    <option value="+359">+359 - Bulgaria</option>
+                                    <option value="+370">+370 - Lithuania</option>
+                                    <option value="+371">+371 - Latvia</option>
+                                    <option value="+372">+372 - Estonia</option>
+                                    <option value="+373">+373 - Moldova</option>
+                                    <option value="+374">+374 - Armenia</option>
+                                    <option value="+375">+375 - Belarus</option>
+                                    <option value="+376">+376 - Andorra</option>
+                                    <option value="+377">+377 - Monaco</option>
+                                    <option value="+378">+378 - San Marino</option>
+                                    <option value="+379">+379 - Vatican City</option>
+                                    <option value="+380">+380 - Ukraine</option>
+                                    <option value="+381">+381 - Serbia</option>
+                                    <option value="+382">+382 - Montenegro</option>
+                                    <option value="+383">+383 - Kosovo</option>
+                                    <option value="+385">+385 - Croatia</option>
+                                    <option value="+386">+386 - Slovenia</option>
+                                    <option value="+387">+387 - Bosnia and Herzegovina</option>
+                                    <option value="+389">+389 - North Macedonia</option>
+                                    <option value="+420">+420 - Czech Republic</option>
+                                    <option value="+421">+421 - Slovakia</option>
+                                    <option value="+423">+423 - Liechtenstein</option>
+                                    <option value="+500">+500 - Falkland Islands</option>
+                                    <option value="+501">+501 - Belize</option>
+                                    <option value="+502">+502 - Guatemala</option>
+                                    <option value="+503">+503 - El Salvador</option>
+                                    <option value="+504">+504 - Honduras</option>
+                                    <option value="+505">+505 - Nicaragua</option>
+                                    <option value="+506">+506 - Costa Rica</option>
+                                    <option value="+507">+507 - Panama</option>
+                                    <option value="+508">+508 - Saint Pierre and Miquelon</option>
+                                    <option value="+509">+509 - Haiti</option>
+                                    <option value="+590">+590 - Guadeloupe</option>
+                                    <option value="+591">+591 - Bolivia</option>
+                                    <option value="+592">+592 - Guyana</option>
+                                    <option value="+593">+593 - Ecuador</option>
+                                    <option value="+594">+594 - French Guiana</option>
+                                    <option value="+595">+595 - Paraguay</option>
+                                    <option value="+596">+596 - Martinique</option>
+                                    <option value="+597">+597 - Suriname</option>
+                                    <option value="+598">+598 - Uruguay</option>
+                                    <option value="+599">+599 - Curaçao/Bonaire/Sint Eustatius</option>
+                                    <option value="+670">+670 - East Timor</option>
+                                    <option value="+672">+672 - Norfolk Island</option>
+                                    <option value="+673">+673 - Brunei</option>
+                                    <option value="+674">+674 - Nauru</option>
+                                    <option value="+675">+675 - Papua New Guinea</option>
+                                    <option value="+676">+676 - Tonga</option>
+                                    <option value="+677">+677 - Solomon Islands</option>
+                                    <option value="+678">+678 - Vanuatu</option>
+                                    <option value="+679">+679 - Fiji</option>
+                                    <option value="+680">+680 - Palau</option>
+                                    <option value="+681">+681 - Wallis and Futuna</option>
+                                    <option value="+682">+682 - Cook Islands</option>
+                                    <option value="+683">+683 - Niue</option>
+                                    <option value="+684">+684 - American Samoa</option>
+                                    <option value="+685">+685 - Samoa</option>
+                                    <option value="+686">+686 - Kiribati</option>
+                                    <option value="+687">+687 - New Caledonia</option>
+                                    <option value="+688">+688 - Tuvalu</option>
+                                    <option value="+689">+689 - French Polynesia</option>
+                                    <option value="+690">+690 - Tokelau</option>
+                                    <option value="+691">+691 - Micronesia</option>
+                                    <option value="+692">+692 - Marshall Islands</option>
+                                    <option value="+850">+850 - North Korea</option>
+                                    <option value="+852">+852 - Hong Kong</option>
+                                    <option value="+853">+853 - Macau</option>
+                                    <option value="+855">+855 - Cambodia</option>
+                                    <option value="+856">+856 - Laos</option>
+                                    <option value="+880">+880 - Bangladesh</option>
+                                    <option value="+886">+886 - Taiwan</option>
+                                    <option value="+960">+960 - Maldives</option>
+                                    <option value="+961">+961 - Lebanon</option>
+                                    <option value="+962">+962 - Jordan</option>
+                                    <option value="+963">+963 - Syria</option>
+                                    <option value="+964">+964 - Iraq</option>
+                                    <option value="+965">+965 - Kuwait</option>
+                                    <option value="+966">+966 - Saudi Arabia</option>
+                                    <option value="+967">+967 - Yemen</option>
+                                    <option value="+968">+968 - Oman</option>
+                                    <option value="+970">+970 - Palestine</option>
+                                    <option value="+971">+971 - United Arab Emirates</option>
+                                    <option value="+972">+972 - Israel</option>
+                                    <option value="+973">+973 - Bahrain</option>
+                                    <option value="+974">+974 - Qatar</option>
+                                    <option value="+975">+975 - Bhutan</option>
+                                    <option value="+976">+976 - Mongolia</option>
+                                    <option value="+977">+977 - Nepal</option>
+                                    <option value="+992">+992 - Tajikistan</option>
+                                    <option value="+993">+993 - Turkmenistan</option>
+                                    <option value="+994">+994 - Azerbaijan</option>
+                                    <option value="+995">+995 - Georgia</option>
+                                    <option value="+996">+996 - Kyrgyzstan</option>
+                                    <option value="+998">+998 - Uzbekistan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-7 mb-3">
+                                <label for="signupWhatsapp" class="form-label">WhatsApp Number</label>
+                                <input type="tel" class="form-control" id="signupWhatsapp" placeholder="1234567890" required>
+                                <small>Without country code</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupUserType" class="form-label">I am a...</label>
+                            <select class="form-select" id="signupUserType" required>
+                                <option value="">Select your role</option>
+                                <option value="student">Student</option>
+                                <option value="tutor">Tutor</option>
+                                <option value="parent">Parent</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="educationLevelGroup" style="display: none;">
+                            <label for="signupEducationLevel" class="form-label" id="educationLevelLabel">Education Level</label>
+                            <select class="form-select" id="signupEducationLevel">
+                                <option value="">Select level</option>
+                                <option value="primary">Primary School</option>
+                                <option value="high_school">High School</option>
+                                <option value="university">University/Advanced</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="signupPassword" placeholder="••••••••" required>
+                            <small>At least 6 characters</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="signupConfirmPassword" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">I agree to the Terms and Conditions</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom">Create Account</button>
+                    </form>
+                    <hr>
+                    <p style="text-align: center;">Already have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#studentModal">Sign in</a></p>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        // Initialize Select2 on country code dropdown
+        $(document).ready(function() {
+            $('#signupCountryCode').select2({
+                theme: "bootstrap-5",
+                placeholder: "Search and select country code",
+                allowClear: false,
+                width: '100%',
+                searchInputPlaceholder: 'Type to search...'
+            });
+        });
+
+        // Handle signup role pre-selection from login modals
+        document.addEventListener('click', function(e) {
+            if (e.target.hasAttribute('data-signup-role')) {
+                const role = e.target.getAttribute('data-signup-role');
+                const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                
+                // Use a small delay to ensure modal is shown before setting values
+                setTimeout(function() {
+                    document.getElementById('signupUserType').value = role;
+                    $('#signupUserType').trigger('change');
+                }, 300);
+            }
+        });
+
+        // Sign Up Form Handler
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('signupFullName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const countryCode = document.getElementById('signupCountryCode').value.trim();
+            const whatsappNumber = document.getElementById('signupWhatsapp').value.trim();
+            const userType = document.getElementById('signupUserType').value;
+            const educationLevel = document.getElementById('signupEducationLevel').value || null;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            const messageDiv = document.getElementById('signupMessage');
+
+            // Validation
+            if (!fullName) {
+                showSignupMessage('Please enter your full name', 'error');
+                return;
+            }
+            if (!email) {
+                showSignupMessage('Please enter your email address', 'error');
+                return;
+            }
+            if (!countryCode) {
+                showSignupMessage('Please enter your country code', 'error');
+                return;
+            }
+            if (!whatsappNumber) {
+                showSignupMessage('Please enter your WhatsApp number', 'error');
+                return;
+            }
+            if (!userType) {
+                showSignupMessage('Please select your role', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showSignupMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showSignupMessage('Passwords do not match', 'error');
+                return;
+            }
+            if (userType === 'student' || userType === 'tutor') {
+                if (!educationLevel) {
+                    const levelLabel = userType === 'tutor' ? 'Teaching level' : 'Education level';
+                    showSignupMessage(`Please select your ${levelLabel}`, 'error');
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        confirm_password: confirmPassword,
+                        full_name: fullName,
+                        user_type: userType,
+                        education_level: educationLevel,
+                        country_code: countryCode,
+                        whatsapp_number: whatsappNumber
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSignupMessage('Account created successfully! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        document.getElementById('signupForm').reset();
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+                        modal.hide();
+                        showSignupMessage('');
+                        // Show login modal based on user type
+                        const loginModalId = userType === 'student' ? 'studentModal' : 
+                                             userType === 'tutor' ? 'tutorModal' : 'parentModal';
+                        const loginModal = new bootstrap.Modal(document.getElementById(loginModalId));
+                        loginModal.show();
+                    }, 2000);
+                } else {
+                    showSignupMessage(data.message || 'Sign-up failed', 'error');
+                }
+            } catch (error) {
+                showSignupMessage('An error occurred. Please try again.', 'error');
+                console.error('Sign-up error:', error);
+            }
+        });
+
+        // Show signup message
+        function showSignupMessage(message, type) {
+            const messageDiv = document.getElementById('signupMessage');
+            messageDiv.textContent = message;
+            messageDiv.style.display = message ? 'block' : 'none';
+            messageDiv.style.padding = '0.75rem';
+            messageDiv.style.borderRadius = '5px';
+            messageDiv.style.fontSize = '0.85rem';
+            
+            if (type === 'success') {
+                messageDiv.style.backgroundColor = '#d4edda';
+                messageDiv.style.color = '#155724';
+                messageDiv.style.border = '1px solid #c3e6cb';
+            } else if (type === 'error') {
+                messageDiv.style.backgroundColor = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.style.border = '1px solid #f5c6cb';
+            }
+        }
+
+        // Show/hide education level based on user type
+        document.getElementById('signupUserType').addEventListener('change', function() {
+            const educationLevelGroup = document.getElementById('educationLevelGroup');
+            const educationLevelLabel = document.getElementById('educationLevelLabel');
+            if (this.value === 'student') {
+                educationLevelGroup.style.display = 'block';
+                educationLevelLabel.textContent = 'Education Level';
+                document.getElementById('signupEducationLevel').required = true;
+            } else if (this.value === 'tutor') {
+                educationLevelGroup.style.display = 'block';
+                educationLevelLabel.textContent = 'Teaching Level';
+                document.getElementById('signupEducationLevel').required = true;
+            } else {
+                educationLevelGroup.style.display = 'none';
+                document.getElementById('signupEducationLevel').required = false;
+            }
+        });
+
+        // Student Login Handler
+        document.getElementById('studentLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('studentEmail').value;
+            const password = document.getElementById('studentPassword').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect_url || '/dashboard';
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                alert('Login error: ' + error.message);
+            }
+        });
+
+        // Tutor Login Handler
+        document.getElementById('tutorLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('tutorEmail').value;
+            const password = document.getElementById('tutorPassword').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect_url || '/tutor-dashboard';
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                alert('Login error: ' + error.message);
+            }
+        });
+
+        // Parent Login Handler
+        document.getElementById('parentLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('parentEmail').value;
+            const password = document.getElementById('parentPassword').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect_url || '/parent-dashboard';
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                alert('Login error: ' + error.message);
+            }
+        });
+
+        // Button Dropdown Toggle
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+
+        // Close dropdowns when clicking elsewhere
+        document.addEventListener('click', function(event) {
+            const dropdowns = document.querySelectorAll('.btn-dropdown-menu');
+            const isClickInsideDropdown = event.target.closest('.btn-dropdown-group');
+            
+            if (!isClickInsideDropdown) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+
+        // FAQ Accordion Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const faqItem = this.parentElement;
+                const isActive = faqItem.classList.contains('active');
+                
+                // Close all other items
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Toggle current item
+                if (!isActive) {
+                    faqItem.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth Scroll Animation on Scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-on-scroll');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all feature cards, course cards, testimonials, and stat items
+        document.querySelectorAll('.feature-card, .course-card, .testimonial-card, .stat-item').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && document.querySelector(href)) {
+                    e.preventDefault();
+                    document.querySelector(href).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add animation delay to cards
+        document.querySelectorAll('.feature-card, .course-card, .testimonial-card, .stat-item').forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+        });
+    </script>
 </body>
 </html>
