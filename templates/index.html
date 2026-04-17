@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEDU - Online Education Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #0a1e3d;
+            --secondary-dark: #8b1a1a;
+            --accent-light: #1e3a8a;
+            --text-light: #e0e7ff;
+            --border-color: #1e3a8a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--primary-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 100%);
+            border-bottom: 2px solid var(--secondary-dark);
+            padding: 1rem 0;
+            box-shadow: 0 4px 15px rgba(139, 26, 26, 0.3);
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .nav-link {
+            color: var(--text-light) !important;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b6b, var(--secondary-dark));
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-login {
+            margin: 0 0.3rem;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid var(--secondary-dark);
+        }
+
+        .btn-student {
+            background-color: #1e3a8a;
+            color: white;
+        }
+
+        .btn-student:hover {
+            background-color: #2d5aa3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-tutor {
+            background-color: var(--secondary-dark);
+            color: white;
+        }
+
+        .btn-tutor:hover {
+            background-color: #a83030;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 26, 26, 0.4);
+        }
+
+        .btn-parent {
+            background-color: #1f2937;
+            color: white;
+            border-color: #4b5563;
+        }
+
+        .btn-parent:hover {
+            background-color: #2d3748;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(31, 41, 55, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 50%, var(--secondary-dark) 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 26, 26, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(30, 58, 138, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -50px;
+            left: -50px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d, #a3e3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: #b4c7ff;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary-custom {
+            background: transparent;
+            border: 2px solid var(--secondary-dark);
+            color: var(--text-light);
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: var(--secondary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(139, 26, 26, 0.4);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background-color: var(--primary-dark);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--accent-light) 0%, var(--primary-dark) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--secondary-dark);
+            box-shadow: 0 15px 40px rgba(139, 26, 26, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #ff6b6b;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #ffd93d;
+        }
+
+        .feature-card p {
+            color: #b4c7ff;
+            line-height: 1.6;
+        }
+
+        /* Courses Section */
+        .courses-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 100%);
+        }
+
+        .course-card {
+            background: var(--primary-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--secondary-dark);
+            box-shadow: 0 20px 40px rgba(139, 26, 26, 0.3);
+        }
+
+        .course-image {
+            height: 200px;
+            background: linear-gradient(135deg, #1e3a8a, #8b1a1a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #ffd93d;
+        }
+
+        .course-content {
+            padding: 2rem;
+        }
+
+        .course-badge {
+            display: inline-block;
+            background-color: var(--secondary-dark);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .course-card h4 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #a3e3ff;
+        }
+
+        .course-card p {
+            color: #b4c7ff;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: #888da1;
+            font-size: 0.9rem;
+        }
+
+        .course-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #ff6b6b;
+        }
+
+        .btn-enroll {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            border: none;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-enroll:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* User Types Section */
+        .user-types {
+            padding: 80px 0;
+            background-color: var(--primary-dark);
+        }
+
+        .user-type-card {
+            background: linear-gradient(135deg, var(--accent-light) 0%, var(--primary-dark) 100%);
+            border: 2px solid var(--secondary-dark);
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .user-type-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(139, 26, 26, 0.3);
+            border-color: #ff6b6b;
+        }
+
+        .user-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-type-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #ffd93d;
+        }
+
+        .user-type-card p {
+            color: #b4c7ff;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .user-features {
+            text-align: left;
+            margin: 2rem 0;
+        }
+
+        .user-features li {
+            color: #a3e3ff;
+            margin-bottom: 0.8rem;
+            list-style: none;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .user-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--primary-dark) 100%);
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            right: -200px;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            color: #b4c7ff;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #050a1a;
+            color: #888da1;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: #ffd93d;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #888da1;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #ff6b6b;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-light);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-color);
+            padding-top: 2rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn-login {
+                margin: 0.3rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-graduation-cap"></i> ZEDU</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#courses">Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#user-types">Users</a>
+                    </li>
+                </ul>
+                <div class="ms-3">
+                    <button type="button" class="btn btn-login btn-student" data-bs-toggle="modal" data-bs-target="#studentModal">
+                        <i class="fas fa-user-graduate"></i> Student
+                    </button>
+                    <button type="button" class="btn btn-login btn-tutor" data-bs-toggle="modal" data-bs-target="#tutorModal">
+                        <i class="fas fa-chalkboard-user"></i> Tutor
+                    </button>
+                    <button type="button" class="btn btn-login btn-parent" data-bs-toggle="modal" data-bs-target="#parentModal">
+                        <i class="fas fa-users"></i> Parent
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1>Learn Smarter, Grow Faster</h1>
+                    <p>Join ZEDU and unlock your potential with expert instructors, interactive courses, and a global community of learners.</p>
+                    <div class="cta-buttons">
+                        <button type="button" class="btn btn-primary-custom btn-lg" data-bs-toggle="modal" data-bs-target="#studentModal">
+                            <i class="fas fa-arrow-right"></i> Start Learning
+                        </button>
+                        <button type="button" class="btn btn-secondary-custom btn-lg" data-bs-toggle="modal" data-bs-target="#tutorModal">
+                            <i class="fas fa-chalkboard"></i> Become a Tutor
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div style="font-size: 8rem; text-align: center; color: #ff6b6b; opacity: 0.9;">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose ZEDU?</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h3>Expert Instructors</h3>
+                        <p>Learn from industry experts and certified professionals with years of experience.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-laptop"></i>
+                        </div>
+                        <h3>Learn Anywhere</h3>
+                        <p>Access courses anytime, anywhere on any device. Education at your convenience.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <h3>Certifications</h3>
+                        <p>Earn recognized certificates upon course completion to boost your career.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Community</h3>
+                        <p>Connect with learners worldwide and grow together in our vibrant community.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section class="courses-section" id="courses">
+        <div class="container">
+            <h2 class="section-title">Featured Courses</h2>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="course-content">
+                            <span class="course-badge">Beginner</span>
+                            <h4>Web Development Basics</h4>
+                            <p>Master HTML, CSS, and JavaScript fundamentals to build modern websites.</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 40 hours</span>
+                                <span class="course-price">$99</span>
+                            </div>
+                            <button class="btn btn-enroll">Enroll Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="course-content">
+                            <span class="course-badge" style="background-color: #1e3a8a;">Intermediate</span>
+                            <h4>Data Analysis Mastery</h4>
+                            <p>Learn Python, SQL, and data visualization to make data-driven decisions.</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 50 hours</span>
+                                <span class="course-price">$149</span>
+                            </div>
+                            <button class="btn btn-enroll">Enroll Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="course-content">
+                            <span class="course-badge" style="background-color: #7c2d12;">Advanced</span>
+                            <h4>AI & Machine Learning</h4>
+                            <p>Deep dive into AI concepts, neural networks, and machine learning algorithms.</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 60 hours</span>
+                                <span class="course-price">$199</span>
+                            </div>
+                            <button class="btn btn-enroll">Enroll Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <div class="course-content">
+                            <span class="course-badge">Beginner</span>
+                            <h4>UI/UX Design Essentials</h4>
+                            <p>Create beautiful and user-friendly interfaces with industry-standard tools.</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 35 hours</span>
+                                <span class="course-price">$89</span>
+                            </div>
+                            <button class="btn btn-enroll">Enroll Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="course-content">
+                            <span class="course-badge" style="background-color: #1e3a8a;">Intermediate</span>
+                            <h4>Cloud Computing Pro</h4>
+                            <p>Deploy, manage, and scale applications on AWS, Azure, and Google Cloud.</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 45 hours</span>
+                                <span class="course-price">$129</span>
+                            </div>
+                            <button class="btn btn-enroll">Enroll Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-business-time"></i>
+                        </div>
+                        <div class="course-content">
+                            <span class="course-badge" style="background-color: #7c2d12;">Advanced</span>
+                            <h4>Digital Marketing Strategy</h4>
+                            <p>Master SEO, social media, and content marketing to grow your business.</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 55 hours</span>
+                                <span class="course-price">$139</span>
+                            </div>
+                            <button class="btn btn-enroll">Enroll Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Types Section -->
+    <section class="user-types" id="user-types">
+        <div class="container">
+            <h2 class="section-title">For Everyone</h2>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="user-type-card">
+                        <div class="user-icon" style="color: #a3e3ff;">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3>Students</h3>
+                        <p>Advance your skills and achieve your learning goals with our comprehensive courses.</p>
+                        <ul class="user-features">
+                            <li>Access 1000+ courses</li>
+                            <li>Learn at your own pace</li>
+                            <li>Get certified</li>
+                            <li>Join study groups</li>
+                        </ul>
+                        <button type="button" class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#studentModal">
+                            Student Login
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="user-type-card">
+                        <div class="user-icon" style="color: #ffd93d;">
+                            <i class="fas fa-chalkboard-user"></i>
+                        </div>
+                        <h3>Tutors</h3>
+                        <p>Share your expertise and earn money by teaching students worldwide.</p>
+                        <ul class="user-features">
+                            <li>Create your courses</li>
+                            <li>Earn revenue</li>
+                            <li>Reach global students</li>
+                            <li>Analytics dashboard</li>
+                        </ul>
+                        <button type="button" class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#tutorModal">
+                            Tutor Login
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="user-type-card">
+                        <div class="user-icon" style="color: #ff6b6b;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Parents</h3>
+                        <p>Monitor your child's learning progress and support their educational journey.</p>
+                        <ul class="user-features">
+                            <li>Track progress</li>
+                            <li>View reports</li>
+                            <li>Set learning goals</li>
+                            <li>Parent support</li>
+                        </ul>
+                        <button type="button" class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#parentModal">
+                            Parent Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Start Your Learning Journey?</h2>
+            <p>Join thousands of students, tutors, and parents transforming education.</p>
+            <button type="button" class="btn btn-primary-custom btn-lg" data-bs-toggle="modal" data-bs-target="#studentModal">
+                Get Started Today
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ZEDU</h4>
+                    <p style="margin-bottom: 1rem; color: #888da1;">Empowering education worldwide. Quality learning at your fingertips.</p>
+                    <div class="social-icons">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Courses</a></li>
+                        <li><a href="#">Become a Tutor</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">Refund Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ZEDU. All rights reserved. | Transforming Education Globally</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Student Login Modal -->
+    <div class="modal fade" id="studentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-light) 100%); border: 2px solid var(--secondary-dark);">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" style="color: #a3e3ff;"><i class="fas fa-user-graduate"></i> Student Login</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="studentEmail" class="form-label" style="color: var(--text-light);">Email Address</label>
+                            <input type="email" class="form-control" id="studentEmail" style="background: var(--primary-dark); border: 1px solid var(--border-color); color: white;" placeholder="your@email.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentPassword" class="form-label" style="color: var(--text-light);">Password</label>
+                            <input type="password" class="form-control" id="studentPassword" style="background: var(--primary-dark); border: 1px solid var(--border-color); color: white;" placeholder="••••••••">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="rememberStudent">
+                            <label class="form-check-label" for="rememberStudent" style="color: #b4c7ff;">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100">Sign In</button>
+                    </form>
+                    <hr style="border-color: var(--border-color);">
+                    <p style="text-align: center; color: #b4c7ff;">Don't have an account? <a href="#" style="color: #ff6b6b; text-decoration: none;">Sign up now</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutor Login Modal -->
+    <div class="modal fade" id="tutorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%); border: 2px solid var(--secondary-dark);">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" style="color: #ffd93d;"><i class="fas fa-chalkboard-user"></i> Tutor Login</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="tutorEmail" class="form-label" style="color: var(--text-light);">Email Address</label>
+                            <input type="email" class="form-control" id="tutorEmail" style="background: var(--primary-dark); border: 1px solid var(--secondary-dark); color: white;" placeholder="your@email.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="tutorPassword" class="form-label" style="color: var(--text-light);">Password</label>
+                            <input type="password" class="form-control" id="tutorPassword" style="background: var(--primary-dark); border: 1px solid var(--secondary-dark); color: white;" placeholder="••••••••">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="rememberTutor">
+                            <label class="form-check-label" for="rememberTutor" style="color: #b4c7ff;">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-tutor w-100">Sign In</button>
+                    </form>
+                    <hr style="border-color: var(--secondary-dark);">
+                    <p style="text-align: center; color: #b4c7ff;">New tutor? <a href="#" style="color: #ff6b6b; text-decoration: none;">Apply now</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parent Login Modal -->
+    <div class="modal fade" id="parentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: linear-gradient(135deg, var(--primary-dark) 0%, #2d3748 100%); border: 2px solid #4b5563;">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" style="color: #a3e3ff;"><i class="fas fa-users"></i> Parent Login</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="parentEmail" class="form-label" style="color: var(--text-light);">Email Address</label>
+                            <input type="email" class="form-control" id="parentEmail" style="background: var(--primary-dark); border: 1px solid #4b5563; color: white;" placeholder="your@email.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="parentPassword" class="form-label" style="color: var(--text-light);">Password</label>
+                            <input type="password" class="form-control" id="parentPassword" style="background: var(--primary-dark); border: 1px solid #4b5563; color: white;" placeholder="••••••••">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="rememberParent">
+                            <label class="form-check-label" for="rememberParent" style="color: #b4c7ff;">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-parent w-100" style="background-color: #1e3a8a;">Sign In</button>
+                    </form>
+                    <hr style="border-color: #4b5563;">
+                    <p style="text-align: center; color: #b4c7ff;">Don't have an account? <a href="#" style="color: #ff6b6b; text-decoration: none;">Create one</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
