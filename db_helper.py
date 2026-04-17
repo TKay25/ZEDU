@@ -42,7 +42,9 @@ def create_tables():
     cursor = conn.cursor()
     try:
         # Drop tables in reverse dependency order (if they exist and cause issues)
-        # We'll keep them if they exist, but clear constraints first
+        cursor.execute("DROP TABLE IF EXISTS forum_posts CASCADE;")
+        cursor.execute("DROP TABLE IF EXISTS forum_threads CASCADE;")
+        cursor.execute("DROP TABLE IF EXISTS forums CASCADE;")
         cursor.execute("DROP TABLE IF EXISTS reviews CASCADE;")
         cursor.execute("DROP TABLE IF EXISTS enrollments CASCADE;")
         cursor.execute("DROP TABLE IF EXISTS courses CASCADE;")
@@ -118,12 +120,63 @@ def create_tables():
             );
         """)
 
+        # Forums table (global and per-course forums)
+        cursor.execute("""
+            CREATE TABLE forums (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                course_id INTEGER,
+                is_global BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Forum Threads table
+        cursor.execute("""
+            CREATE TABLE forum_threads (
+                id SERIAL PRIMARY KEY,
+                forum_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                user_id INTEGER NOT NULL,
+                views INTEGER DEFAULT 0,
+                last_post_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (forum_id) REFERENCES forums(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Forum Posts table
+        cursor.execute("""
+            CREATE TABLE forum_posts (
+                id SERIAL PRIMARY KEY,
+                thread_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                content TEXT NOT NULL,
+                is_solution BOOLEAN DEFAULT FALSE,
+                likes INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (thread_id) REFERENCES forum_threads(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX idx_users_type ON users(user_type);")
         cursor.execute("CREATE INDEX idx_courses_instructor ON courses(instructor_id);")
         cursor.execute("CREATE INDEX idx_enrollments_student ON enrollments(student_id);")
         cursor.execute("CREATE INDEX idx_enrollments_course ON enrollments(course_id);")
+        cursor.execute("CREATE INDEX idx_forums_course ON forums(course_id);")
+        cursor.execute("CREATE INDEX idx_forums_global ON forums(is_global);")
+        cursor.execute("CREATE INDEX idx_threads_forum ON forum_threads(forum_id);")
+        cursor.execute("CREATE INDEX idx_threads_user ON forum_threads(user_id);")
+        cursor.execute("CREATE INDEX idx_posts_thread ON forum_posts(thread_id);")
+        cursor.execute("CREATE INDEX idx_posts_user ON forum_posts(user_id);")
 
         conn.commit()
         print("✓ Database tables created successfully!")
@@ -449,6 +502,206 @@ def get_students_for_parent(parent_id):
     except Exception as e:
         print(f"Error getting students: {e}")
         return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def init_global_forum():
+    """
+    Initialize the global forum on first run
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO forums (name, description, is_global)
+            SELECT 'Global Forum', 'Share questions, tips, and discussions with all ZEDU members', TRUE
+            WHERE NOT EXISTS (SELECT 1 FROM forums WHERE is_global = TRUE);
+        """)
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error initializing global forum: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_global_forum():
+    """
+    Get the global forum
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, name, description FROM forums WHERE is_global = TRUE LIMIT 1;
+        """)
+        result = cursor.fetchone()
+        return result
+    except Exception as e:
+        print(f"Error getting global forum: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_course_forum(course_id):
+    """
+    Get or create forum for a specific course
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, name, description FROM forums WHERE course_id = %s LIMIT 1;
+        """, (course_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            cursor.execute("""
+                INSERT INTO forums (name, description, course_id)
+                SELECT c.title || ' Forum', 'Discussion forum for ' || c.title, %s
+                FROM courses c WHERE c.id = %s
+                RETURNING id, name, description;
+            """, (course_id, course_id))
+            conn.commit()
+            result = cursor.fetchone()
+        
+        return result
+    except Exception as e:
+        print(f"Error getting course forum: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_forum_threads(forum_id, limit=20):
+    """
+    Get recent threads in a forum with post counts
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT ft.id, ft.title, ft.user_id, u.full_name, u.avatar_url,
+                   ft.views, COUNT(fp.id) as reply_count,
+                   ft.created_at, ft.last_post_at
+            FROM forum_threads ft
+            JOIN users u ON ft.user_id = u.id
+            LEFT JOIN forum_posts fp ON ft.id = fp.thread_id
+            WHERE ft.forum_id = %s
+            GROUP BY ft.id, u.id
+            ORDER BY ft.last_post_at DESC
+            LIMIT %s;
+        """, (forum_id, limit))
+        results = cursor.fetchall()
+        return results
+    except Exception as e:
+        print(f"Error getting forum threads: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def create_thread(forum_id, user_id, title):
+    """
+    Create a new forum thread
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO forum_threads (forum_id, user_id, title)
+            VALUES (%s, %s, %s)
+            RETURNING id;
+        """, (forum_id, user_id, title))
+        
+        thread_id = cursor.fetchone()[0]
+        conn.commit()
+        return {"success": True, "message": "Thread created", "thread_id": thread_id}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating thread: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_thread_posts(thread_id, limit=50):
+    """
+    Get all posts in a thread with user details
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT fp.id, fp.content, fp.is_solution, fp.likes,
+                   u.id as user_id, u.full_name, u.user_type, u.avatar_url,
+                   fp.created_at, fp.updated_at
+            FROM forum_posts fp
+            JOIN users u ON fp.user_id = u.id
+            WHERE fp.thread_id = %s
+            ORDER BY fp.is_solution DESC, fp.likes DESC, fp.created_at ASC
+            LIMIT %s;
+        """, (thread_id, limit))
+        results = cursor.fetchall()
+        return results
+    except Exception as e:
+        print(f"Error getting thread posts: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def create_post(thread_id, user_id, content):
+    """
+    Create a new post in a thread
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO forum_posts (thread_id, user_id, content)
+            VALUES (%s, %s, %s)
+            RETURNING id;
+        """, (thread_id, user_id, content))
+        
+        post_id = cursor.fetchone()[0]
+        
+        # Update thread's last_post_at
+        cursor.execute("""
+            UPDATE forum_threads SET last_post_at = CURRENT_TIMESTAMP WHERE id = %s;
+        """, (thread_id,))
+        
+        conn.commit()
+        return {"success": True, "message": "Post created", "post_id": post_id}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating post: {e}")
+        return {"success": False, "message": str(e)}
     finally:
         cursor.close()
         conn.close()

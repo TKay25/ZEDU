@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
-from db_helper import create_tables, create_user, authenticate_user, get_user_by_id, get_tutors, get_all_users
+from db_helper import (create_tables, create_user, authenticate_user, get_user_by_id, get_tutors, get_all_users,
+                       init_global_forum, get_global_forum, get_course_forum, get_forum_threads, create_thread,
+                       get_thread_posts, create_post)
 import os
 from datetime import timedelta
 
@@ -18,6 +20,7 @@ app.config['JSON_SORT_KEYS'] = False
 # Initialize database tables on startup
 try:
     create_tables()
+    init_global_forum()
 except Exception as e:
     print(f"⚠️  Warning: Could not initialize database tables: {e}")
 
@@ -298,6 +301,84 @@ def get_students():
         from db_helper import get_students_for_parent
         students = get_students_for_parent(user_id)
         return jsonify({"success": True, "students": [dict(s) for s in students]}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# Forum Routes
+@app.route('/forums')
+def forums():
+    """Forums page"""
+    user_id = session.get('user_id')
+    return render_template('forums.html', user_id=user_id)
+
+@app.route('/forum/thread/<int:thread_id>')
+def view_thread(thread_id):
+    """View individual thread"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect('/')
+    return render_template('thread.html', thread_id=thread_id)
+
+@app.route('/api/forum/global', methods=['GET'])
+def get_global_forum_api():
+    """Get global forum"""
+    try:
+        forum = get_global_forum()
+        if forum:
+            return jsonify({"success": True, "forum": dict(forum)}), 200
+        return jsonify({"success": False, "message": "Forum not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/forum/<int:forum_id>/threads', methods=['GET'])
+def get_forum_threads_api(forum_id):
+    """Get threads in a forum"""
+    try:
+        threads = get_forum_threads(forum_id)
+        return jsonify({"success": True, "threads": [dict(t) for t in threads]}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/forum/<int:forum_id>/thread', methods=['POST'])
+def create_thread_api(forum_id):
+    """Create new thread in forum"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    data = request.get_json()
+    if not data.get('title'):
+        return jsonify({"success": False, "message": "Title is required"}), 400
+    
+    try:
+        result = create_thread(forum_id, user_id, data.get('title'))
+        return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/thread/<int:thread_id>/posts', methods=['GET'])
+def get_thread_posts_api(thread_id):
+    """Get posts in a thread"""
+    try:
+        posts = get_thread_posts(thread_id)
+        return jsonify({"success": True, "posts": [dict(p) for p in posts]}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/thread/<int:thread_id>/post', methods=['POST'])
+def create_post_api(thread_id):
+    """Create new post in thread"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    data = request.get_json()
+    if not data.get('content'):
+        return jsonify({"success": False, "message": "Content is required"}), 400
+    
+    try:
+        result = create_post(thread_id, user_id, data.get('content'))
+        return jsonify(result), 201 if result['success'] else 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
