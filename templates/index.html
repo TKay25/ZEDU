@@ -1169,6 +1169,34 @@
             border-color: var(--secondary-red) !important;
         }
 
+        /* Password Toggle Styling */
+        .password-toggle-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            padding: 0.5rem;
+            transition: color 0.2s ease;
+            z-index: 10;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--secondary-red);
+        }
+
+        .password-toggle-wrapper .form-control {
+            padding-right: 2.5rem;
+        }
+
         .modal-body button[type="submit"] {
             margin-left: auto;
             margin-right: auto;
@@ -2078,7 +2106,7 @@
                                 <div class="level-stat-label">Students</div>
                             </div>
                         </div>
-                        <button class="level-btn" onclick="alert('Explore Primary School Courses')">Explore</button>
+                        <button class="level-btn" data-signup-education="primary" data-bs-toggle="modal" data-bs-target="#signupModal">Explore</button>
                     </div>
                 </div>
 
@@ -2099,7 +2127,7 @@
                                 <div class="level-stat-label">Students</div>
                             </div>
                         </div>
-                        <button class="level-btn" onclick="alert('Explore High School Courses')">Explore</button>
+                        <button class="level-btn" data-signup-education="high_school" data-bs-toggle="modal" data-bs-target="#signupModal">Explore</button>
                     </div>
                 </div>
 
@@ -2120,7 +2148,7 @@
                                 <div class="level-stat-label">Students</div>
                             </div>
                         </div>
-                        <button class="level-btn" onclick="alert('Explore University Courses')">Explore</button>
+                        <button class="level-btn" data-signup-education="university" data-bs-toggle="modal" data-bs-target="#signupModal">Explore</button>
                     </div>
                 </div>
             </div>
@@ -2939,7 +2967,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="studentPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="studentPassword" placeholder="••••••••" required>
+                            <div class="password-toggle-wrapper">
+                                <input type="password" class="form-control password-field" id="studentPassword" placeholder="••••••••" required>
+                                <button type="button" class="password-toggle-btn" data-target="studentPassword" title="Toggle password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="rememberStudent">
@@ -2970,7 +3003,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="tutorPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="tutorPassword" placeholder="••••••••" required>
+                            <div class="password-toggle-wrapper">
+                                <input type="password" class="form-control password-field" id="tutorPassword" placeholder="••••••••" required>
+                                <button type="button" class="password-toggle-btn" data-target="tutorPassword" title="Toggle password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="rememberTutor">
@@ -3001,7 +3039,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="parentPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="parentPassword" placeholder="••••••••" required>
+                            <div class="password-toggle-wrapper">
+                                <input type="password" class="form-control password-field" id="parentPassword" placeholder="••••••••" required>
+                                <button type="button" class="password-toggle-btn" data-target="parentPassword" title="Toggle password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="rememberParent">
@@ -3273,12 +3316,22 @@
                         </div>
                         <div class="mb-3">
                             <label for="signupPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="signupPassword" placeholder="••••••••" required>
+                            <div class="password-toggle-wrapper">
+                                <input type="password" class="form-control password-field" id="signupPassword" placeholder="••••••••" required>
+                                <button type="button" class="password-toggle-btn" data-target="signupPassword" title="Toggle password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             <small>At least 6 characters</small>
                         </div>
                         <div class="mb-3">
                             <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="signupConfirmPassword" placeholder="••••••••" required>
+                            <div class="password-toggle-wrapper">
+                                <input type="password" class="form-control password-field" id="signupConfirmPassword" placeholder="••••••••" required>
+                                <button type="button" class="password-toggle-btn" data-target="signupConfirmPassword" title="Toggle password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="agreeTerms" required>
@@ -3309,16 +3362,26 @@
             });
         });
 
-        // Handle signup role pre-selection from login modals
+        // Handle signup role and education level pre-selection
         document.addEventListener('click', function(e) {
-            if (e.target.hasAttribute('data-signup-role')) {
+            if (e.target.hasAttribute('data-signup-role') || e.target.hasAttribute('data-signup-education')) {
                 const role = e.target.getAttribute('data-signup-role');
+                const educationLevel = e.target.getAttribute('data-signup-education');
                 const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
                 
                 // Use a small delay to ensure modal is shown before setting values
                 setTimeout(function() {
-                    document.getElementById('signupUserType').value = role;
-                    $('#signupUserType').trigger('change');
+                    if (role) {
+                        document.getElementById('signupUserType').value = role;
+                        $('#signupUserType').trigger('change');
+                    }
+                    if (educationLevel) {
+                        document.getElementById('signupEducationLevel').value = educationLevel;
+                        // Show education level field for students and tutors
+                        if (!role || role === 'student' || role === 'tutor') {
+                            document.getElementById('educationLevelGroup').style.display = 'block';
+                        }
+                    }
                 }, 300);
             }
         });
@@ -3477,6 +3540,26 @@
             } else {
                 educationLevelGroup.style.display = 'none';
                 document.getElementById('signupEducationLevel').required = false;
+            }
+        });
+
+        // Password visibility toggle functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.password-toggle-btn')) {
+                const btn = e.target.closest('.password-toggle-btn');
+                const targetId = btn.getAttribute('data-target');
+                const passwordField = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordField.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
             }
         });
 
