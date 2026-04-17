@@ -3597,10 +3597,23 @@
         // Student Login Handler
         document.getElementById('studentLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('studentEmail').value;
+            const email = document.getElementById('studentEmail').value.trim();
             const password = document.getElementById('studentPassword').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            // Validate fields
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                console.warn('Login attempt with missing fields - Email:', email, 'Password length:', password.length);
+                return;
+            }
 
             try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+                
+                console.log('Attempting login for:', email);
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -3608,23 +3621,44 @@
                 });
 
                 const data = await response.json();
+                console.log('Login response:', data);
+                
                 if (data.success) {
+                    console.log('Login successful, redirecting to:', data.redirect_url);
                     window.location.href = data.redirect_url || '/dashboard';
                 } else {
+                    console.warn('Login failed:', data.message);
                     alert(data.message || 'Login failed');
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 alert('Login error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
 
         // Tutor Login Handler
         document.getElementById('tutorLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('tutorEmail').value;
+            const email = document.getElementById('tutorEmail').value.trim();
             const password = document.getElementById('tutorPassword').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            // Validate fields
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                console.warn('Login attempt with missing fields - Email:', email, 'Password length:', password.length);
+                return;
+            }
 
             try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+                
+                console.log('Attempting tutor login for:', email);
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -3632,23 +3666,44 @@
                 });
 
                 const data = await response.json();
+                console.log('Login response:', data);
+                
                 if (data.success) {
+                    console.log('Login successful, redirecting to:', data.redirect_url);
                     window.location.href = data.redirect_url || '/tutor-dashboard';
                 } else {
+                    console.warn('Login failed:', data.message);
                     alert(data.message || 'Login failed');
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 alert('Login error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
 
         // Parent Login Handler
         document.getElementById('parentLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('parentEmail').value;
+            const email = document.getElementById('parentEmail').value.trim();
             const password = document.getElementById('parentPassword').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            // Validate fields
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                console.warn('Login attempt with missing fields - Email:', email, 'Password length:', password.length);
+                return;
+            }
 
             try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+                
+                console.log('Attempting parent login for:', email);
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -3656,13 +3711,21 @@
                 });
 
                 const data = await response.json();
+                console.log('Login response:', data);
+                
                 if (data.success) {
+                    console.log('Login successful, redirecting to:', data.redirect_url);
                     window.location.href = data.redirect_url || '/parent-dashboard';
                 } else {
+                    console.warn('Login failed:', data.message);
                     alert(data.message || 'Login failed');
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 alert('Login error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
 
@@ -3746,6 +3809,21 @@
         ['studentModal', 'tutorModal', 'parentModal', 'signupModal'].forEach(function(modalId) {
             const modalElement = document.getElementById(modalId);
             if (modalElement) {
+                // Clear form fields when modal opens
+                modalElement.addEventListener('show.bs.modal', function() {
+                    if (modalId === 'studentModal') {
+                        document.getElementById('studentLoginForm').reset();
+                        document.getElementById('studentPassword').type = 'password';
+                    } else if (modalId === 'tutorModal') {
+                        document.getElementById('tutorLoginForm').reset();
+                        document.getElementById('tutorPassword').type = 'password';
+                    } else if (modalId === 'parentModal') {
+                        document.getElementById('parentLoginForm').reset();
+                        document.getElementById('parentPassword').type = 'password';
+                    }
+                });
+                
+                // Remove backdrop when modal closes
                 modalElement.addEventListener('hidden.bs.modal', function() {
                     // Remove all remaining backdrop elements
                     document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
