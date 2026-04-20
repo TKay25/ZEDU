@@ -270,6 +270,7 @@
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
+            margin-left: auto;
         }
 
         .btn-admin:hover {
@@ -598,6 +599,11 @@
             padding: 2rem;
         }
 
+        .modal-backdrop {
+            background-color: transparent;
+            backdrop-filter: blur(4px);
+        }
+
         .form-label {
             font-weight: 600;
             color: var(--gray-800);
@@ -653,6 +659,8 @@
             align-items: center;
             justify-content: center;
             transition: color 0.2s ease;
+            z-index: 10;
+            pointer-events: auto;
         }
 
         .password-toggle-btn:hover {
@@ -1518,6 +1526,8 @@
         // Password visibility toggle functionality
         document.addEventListener('click', function(e) {
             if (e.target.closest('.password-toggle-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
                 const btn = e.target.closest('.password-toggle-btn');
                 const targetId = btn.getAttribute('data-target');
                 const passwordInput = document.getElementById(targetId);
@@ -1624,13 +1634,6 @@
                 }
             } catch (error) {
                 alert('Error creating account: ' + error.message);
-            }
-        });
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                alert('Error creating account');
             }
         });
 

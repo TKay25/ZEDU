@@ -1187,6 +1187,7 @@
             padding: 0.5rem;
             transition: color 0.2s ease;
             z-index: 10;
+            pointer-events: auto;
         }
 
         .password-toggle-btn:hover {
@@ -3847,6 +3848,8 @@
         // Password visibility toggle functionality
         document.addEventListener('click', function(e) {
             if (e.target.closest('.password-toggle-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
                 const btn = e.target.closest('.password-toggle-btn');
                 const targetId = btn.getAttribute('data-target');
                 const passwordField = document.getElementById(targetId);
