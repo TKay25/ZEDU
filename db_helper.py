@@ -390,6 +390,24 @@ def create_tables():
             );
         """)
 
+        # Notifications table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS notifications (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                notification_type VARCHAR(50) NOT NULL CHECK (notification_type IN ('assignment', 'forum', 'message', 'achievement', 'system', 'noticeboard', 'grade', 'announcement')),
+                title VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                related_entity_type VARCHAR(50),
+                related_entity_id INTEGER,
+                read BOOLEAN DEFAULT FALSE,
+                read_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
@@ -423,6 +441,10 @@ def create_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_achievements_student ON achievements(student_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_certificates_student ON certificates(student_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_recommended_student ON recommended_courses(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(notification_type);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at);")
 
         conn.commit()
         print("✓ Database tables created successfully!")
@@ -2354,6 +2376,172 @@ def get_student_noticeboards(student_id):
     except Exception as e:
         print(f"Error getting student noticeboards: {e}")
         return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ========== NOTIFICATION FUNCTIONS ==========
+
+def create_notification(user_id, notification_type, title, message, related_entity_type=None, related_entity_id=None):
+    """
+    Create a notification for a user
+    notification_type: assignment, forum, message, achievement, system, noticeboard, grade, announcement
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO notifications 
+            (user_id, notification_type, title, message, related_entity_type, related_entity_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (user_id, notification_type, title, message, related_entity_type, related_entity_id))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating notification: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_user_notifications(user_id, limit=20, unread_only=False):
+    """
+    Get notifications for a user
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        query = """
+            SELECT id, user_id, notification_type, title, message, 
+                   related_entity_type, related_entity_id, read, read_at, created_at, expires_at
+            FROM notifications
+            WHERE user_id = %s
+        """
+        params = [user_id]
+        
+        if unread_only:
+            query += " AND read = FALSE"
+        
+        query += " ORDER BY created_at DESC LIMIT %s"
+        params.append(limit)
+        
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting notifications: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_unread_notification_count(user_id):
+    """
+    Get count of unread notifications for a user
+    """
+    conn = get_db_connection()
+    if not conn:
+        return 0
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT COUNT(*) FROM notifications
+            WHERE user_id = %s AND read = FALSE
+        """, (user_id,))
+        
+        count = cursor.fetchone()[0]
+        return count
+    except Exception as e:
+        print(f"Error getting unread notification count: {e}")
+        return 0
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def mark_notification_as_read(notification_id):
+    """
+    Mark a notification as read
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE notifications
+            SET read = TRUE, read_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (notification_id,))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error marking notification as read: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def mark_all_notifications_as_read(user_id):
+    """
+    Mark all unread notifications as read for a user
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE notifications
+            SET read = TRUE, read_at = CURRENT_TIMESTAMP
+            WHERE user_id = %s AND read = FALSE
+        """, (user_id,))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error marking all notifications as read: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def delete_notification(notification_id):
+    """
+    Delete a notification
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM notifications WHERE id = %s", (notification_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting notification: {e}")
+        return False
     finally:
         cursor.close()
         conn.close()

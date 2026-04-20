@@ -11,7 +11,9 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        create_noticeboard, get_tutor_noticeboards, get_admin_noticeboards, get_noticeboard_details,
                        create_noticeboard_post, get_noticeboard_posts, update_post_views, pin_noticeboard_post,
                        unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards, update_last_login,
-                       get_all_forums_with_stats)
+                       get_all_forums_with_stats, create_notification, get_user_notifications, 
+                       get_unread_notification_count, mark_notification_as_read, mark_all_notifications_as_read, 
+                       delete_notification)
 import os
 from datetime import timedelta
 import base64
@@ -1230,6 +1232,103 @@ def api_delete_post(noticeboard_id, post_id):
     try:
         result = delete_noticeboard_post(post_id, noticeboard_id)
         return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ========== NOTIFICATION API ENDPOINTS ==========
+
+@app.route('/api/notifications', methods=['GET'])
+def get_notifications():
+    """Get user's notifications"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user_id = session['user_id']
+    
+    # Optional query parameters
+    limit = request.args.get('limit', default=20, type=int)
+    unread_only = request.args.get('unread_only', default=False, type=lambda x: x.lower() == 'true')
+    
+    # Validate limit
+    if limit < 1 or limit > 100:
+        limit = 20
+    
+    try:
+        notifications = get_user_notifications(user_id, limit=limit, unread_only=unread_only)
+        return jsonify({
+            "success": True,
+            "notifications": notifications,
+            "count": len(notifications)
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/notifications/unread-count', methods=['GET'])
+def get_unread_count():
+    """Get count of unread notifications for current user"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user_id = session['user_id']
+    
+    try:
+        count = get_unread_notification_count(user_id)
+        return jsonify({
+            "success": True,
+            "unread_count": count
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/notifications/<int:notification_id>/read', methods=['POST'])
+def mark_notification_read(notification_id):
+    """Mark a single notification as read"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        result = mark_notification_as_read(notification_id)
+        if result:
+            return jsonify({"success": True, "message": "Notification marked as read"}), 200
+        else:
+            return jsonify({"success": False, "message": "Failed to mark notification as read"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/notifications/read-all', methods=['POST'])
+def mark_all_read():
+    """Mark all notifications as read for current user"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user_id = session['user_id']
+    
+    try:
+        result = mark_all_notifications_as_read(user_id)
+        if result:
+            return jsonify({"success": True, "message": "All notifications marked as read"}), 200
+        else:
+            return jsonify({"success": False, "message": "Failed to mark all notifications as read"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/notifications/<int:notification_id>', methods=['DELETE'])
+def delete_notification_endpoint(notification_id):
+    """Delete a notification"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        result = delete_notification(notification_id)
+        if result:
+            return jsonify({"success": True, "message": "Notification deleted"}), 200
+        else:
+            return jsonify({"success": False, "message": "Failed to delete notification"}), 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
