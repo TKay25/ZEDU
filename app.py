@@ -103,10 +103,13 @@ def login():
     """
     data = request.get_json()
 
+    print(data)
+
     if not data.get('email') or not data.get('password'):
         return jsonify({"success": False, "message": "Email and password required"}), 400
 
     user = authenticate_user(data.get('email', '').lower(), data.get('password'))
+    print(user)
     
     if user:
         session.permanent = True
