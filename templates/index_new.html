@@ -547,14 +547,25 @@
         }
 
         .modal-header {
-            border-bottom: 1px solid var(--gray-200);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-bottom: none;
             padding: 2rem;
+            color: white;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .modal-header .btn-close:hover {
+            opacity: 1;
         }
 
         .modal-title {
             font-size: 1.2rem;
             font-weight: 800;
-            color: var(--dark);
+            color: white;
         }
 
         .btn-close:focus {
@@ -594,6 +605,40 @@
         .form-select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 0.25rem rgba(94, 59, 238, 0.1);
+        }
+
+        /* Password Toggle Styles */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper .form-control {
+            padding-right: 2.5rem;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-600);
+            font-size: 1rem;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--primary);
+        }
+
+        .password-toggle-btn:focus {
+            outline: none;
         }
 
         .badge-primary {
@@ -976,7 +1021,10 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Welcome Back</h5>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-sign-in-alt" style="font-size: 1.28rem; color: var(--primary);"></i>
+                        <h5 class="modal-title" style="margin: 0;">Welcome Back</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -987,7 +1035,12 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control" id="loginPassword" required>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" id="loginPassword" required>
+                                <button type="button" class="password-toggle-btn" data-target="loginPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary-custom w-100">Sign In</button>
                     </form>
@@ -1001,7 +1054,10 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Create Your Account</h5>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-user-plus" style="font-size: 1.28rem; color: var(--success);"></i>
+                        <h5 class="modal-title" style="margin: 0;">Create Your Account</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -1019,11 +1075,21 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" required>
+                                <div class="password-wrapper">
+                                    <input type="password" class="form-control" id="password" required>
+                                    <button type="button" class="password-toggle-btn" data-target="password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" id="confirmPassword" required>
+                                <div class="password-wrapper">
+                                    <input type="password" class="form-control" id="confirmPassword" required>
+                                    <button type="button" class="password-toggle-btn" data-target="confirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -1037,7 +1103,7 @@
                                     <option value="administrator">School/Organization Administrator</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6" id="educationLevelContainer">
                                 <label class="form-label">Education Level</label>
                                 <select class="form-select" id="educationLevel" required>
                                     <option value="">Select level...</option>
@@ -1376,7 +1442,10 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Administrator Login</h5>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-lock" style="font-size: 1.28rem; color: var(--secondary);"></i>
+                        <h5 class="modal-title" style="margin: 0;">Administrator Login</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -1387,7 +1456,12 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control" id="adminLoginPassword" required>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" id="adminLoginPassword" required>
+                                <button type="button" class="password-toggle-btn" data-target="adminLoginPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary-custom w-100">Sign In</button>
                     </form>
@@ -1419,25 +1493,65 @@
             loadThemePreference();
         }
 
-        // Show/hide education level and admin fields based on user type
-        document.getElementById('userType').addEventListener('change', function() {
-            const educationLevelGroup = document.getElementById('educationLevel').parentElement.parentElement;
-            const adminFormFields = document.getElementById('adminFormFields');
-            
-            if (this.value === 'student' || this.value === 'tutor') {
-                educationLevelGroup.style.display = 'block';
-                document.getElementById('educationLevel').required = true;
-                adminFormFields.style.display = 'none';
-            } else if (this.value === 'administrator') {
-                educationLevelGroup.style.display = 'none';
-                document.getElementById('educationLevel').required = false;
-                adminFormFields.style.display = 'block';
-            } else {
-                educationLevelGroup.style.display = 'none';
-                document.getElementById('educationLevel').required = false;
-                adminFormFields.style.display = 'none';
+        // Password visibility toggle functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.password-toggle-btn')) {
+                const btn = e.target.closest('.password-toggle-btn');
+                const targetId = btn.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+                
+                if (passwordInput) {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
             }
         });
+
+        // Show/hide education level and admin fields based on user type
+        function updateFormFields() {
+            const userType = document.getElementById('userType').value;
+            const educationLevelContainer = document.getElementById('educationLevelContainer');
+            const educationLevelSelect = document.getElementById('educationLevel');
+            const adminFormFields = document.getElementById('adminFormFields');
+            
+            if (userType === 'student' || userType === 'tutor') {
+                // Show education level for students and tutors
+                educationLevelContainer.style.display = 'block';
+                educationLevelSelect.required = true;
+                adminFormFields.style.display = 'none';
+            } else if (userType === 'administrator') {
+                // Hide education level for administrators, show admin fields
+                educationLevelContainer.style.display = 'none';
+                educationLevelSelect.required = false;
+                educationLevelSelect.value = '';
+                adminFormFields.style.display = 'block';
+            } else if (userType === 'parent') {
+                // Hide education level for parents
+                educationLevelContainer.style.display = 'none';
+                educationLevelSelect.required = false;
+                educationLevelSelect.value = '';
+                adminFormFields.style.display = 'none';
+            } else {
+                // Default: hide everything
+                educationLevelContainer.style.display = 'none';
+                educationLevelSelect.required = false;
+                adminFormFields.style.display = 'none';
+            }
+        }
+
+        // Listen for user type changes
+        document.getElementById('userType').addEventListener('change', updateFormFields);
+
+        // Set initial state on page load
+        window.addEventListener('load', updateFormFields);
 
         // Handle signup form
         document.getElementById('signupForm').addEventListener('submit', async (e) => {

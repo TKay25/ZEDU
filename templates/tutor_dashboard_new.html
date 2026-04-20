@@ -354,8 +354,19 @@
         }
 
         .modal-header {
-            border-bottom: 1px solid var(--gray-200);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-bottom: none;
             padding: 1.28rem;
+            color: white;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .modal-header .btn-close:hover {
+            opacity: 1;
         }
 
         .modal-title {
@@ -828,12 +839,12 @@
     <div class="modal fade" id="createCourseModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-bottom: none; padding: 1.5rem; color: white;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-book" style="font-size: 1.28rem; color: var(--primary);"></i>
-                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Create New Course</h5>
+                        <i class="fas fa-book" style="font-size: 1.28rem; color: white;"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: white;">Create New Course</h5>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: brightness(0) invert(1); opacity: 0.8;"></button>
                 </div>
                 <div class="modal-body" style="padding: 1.5rem;">
                     <form id="createCourseForm">
@@ -884,12 +895,12 @@
     <div class="modal fade" id="uploadMaterialModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-bottom: none; padding: 1.5rem; color: white;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 1.28rem; color: var(--success);"></i>
-                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Upload Course Material</h5>
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 1.28rem; color: white;"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: white;">Upload Course Material</h5>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: brightness(0) invert(1); opacity: 0.8;"></button>
                 </div>
                 <div class="modal-body" style="padding: 1.5rem;">
                     <form id="uploadMaterialForm">
@@ -938,12 +949,12 @@
     <div class="modal fade" id="liveSessionModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-bottom: none; padding: 1.5rem; color: white;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-broadcast-tower" style="font-size: 1.28rem; color: var(--warning);"></i>
-                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Schedule Live Session</h5>
+                        <i class="fas fa-broadcast-tower" style="font-size: 1.28rem; color: white;"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: white;">Schedule Live Session</h5>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: brightness(0) invert(1); opacity: 0.8;"></button>
                 </div>
                 <div class="modal-body" style="padding: 1.5rem;">
                     <form id="liveSessionForm">

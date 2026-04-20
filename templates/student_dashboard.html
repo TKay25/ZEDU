@@ -729,6 +729,40 @@
             box-shadow: 0 0 10px rgba(139, 26, 26, 0.2);
         }
 
+        /* Password Toggle Styles */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper .form-control {
+            padding-right: 2.5rem;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #888;
+            font-size: 1rem;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--primary-blue);
+        }
+
+        .password-toggle-btn:focus {
+            outline: none;
+        }
+
         /* ===== MESSAGES ===== */
         .message-alert {
             padding: 1rem;
@@ -1039,7 +1073,10 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">My Profile</h5>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-user-circle" style="font-size: 1.2rem; color: var(--primary-blue);"></i>
+                        <h5 class="modal-title" style="margin: 0;">My Profile</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -1075,17 +1112,30 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Settings</h5>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-cog" style="font-size: 1.2rem; color: var(--primary-blue);"></i>
+                        <h5 class="modal-title" style="margin: 0;">Settings</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <h6 style="font-weight: 700; margin-bottom: 1rem;">Account Settings</h6>
                     <div class="mb-3">
                         <label class="form-label">Change Password</label>
-                        <input type="password" class="form-control" placeholder="New password" id="newPassword">
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" placeholder="New password" id="newPassword">
+                            <button type="button" class="password-toggle-btn" data-target="newPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <input type="password" class="form-control" placeholder="Confirm password" id="confirmPassword">
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" placeholder="Confirm password" id="confirmPassword">
+                            <button type="button" class="password-toggle-btn" data-target="confirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button class="btn btn-primary-small" onclick="changePassword()">Update Password</button>
                     
@@ -1114,7 +1164,10 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Learning Statistics</h5>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-chart-bar" style="font-size: 1.2rem; color: var(--primary-blue);"></i>
+                        <h5 class="modal-title" style="margin: 0;">Learning Statistics</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -1148,6 +1201,28 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Password visibility toggle functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.password-toggle-btn')) {
+                const btn = e.target.closest('.password-toggle-btn');
+                const targetId = btn.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+                
+                if (passwordInput) {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
+            }
+        });
+
         // State Management
         let currentUser = null;
         let enrolledCourses = [];
