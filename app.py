@@ -3,7 +3,10 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        init_global_forum, get_global_forum, get_course_forum, get_forum_threads, create_thread,
                        get_thread_posts, create_post, update_user_profile, update_user_avatar,
                        upload_course_material, get_course_materials, create_live_session, start_live_session,
-                       end_live_session, get_course_live_sessions, save_recorded_lesson, get_recorded_lessons)
+                       end_live_session, get_course_live_sessions, save_recorded_lesson, get_recorded_lessons,
+                       request_parent_student_link, approve_parent_student_link, reject_parent_student_link,
+                       get_pending_links_for_student, get_approved_students_for_parent, unlink_parent_student,
+                       get_parent_student_links, unlink_parent_student_by_link)
 import os
 from datetime import timedelta
 import base64
@@ -52,7 +55,7 @@ def signup():
         "confirm_password": "password123",
         "full_name": "John Doe",
         "user_type": "student|tutor|parent",
-        "education_level": "primary|high_school|university",
+        "education_level": "primary|high_school|university" (NOT required for parents),
         "country_code": "+1",
         "whatsapp_number": "1234567890"
     }
@@ -79,13 +82,18 @@ def signup():
     if data.get('user_type') not in ['student', 'tutor', 'parent']:
         return jsonify({"success": False, "message": "Invalid user type"}), 400
 
+    # Education level is optional for parents (they can have kids in different levels)
+    education_level = data.get('education_level')
+    if data.get('user_type') != 'parent' and not education_level:
+        return jsonify({"success": False, "message": "Education level required for students and tutors"}), 400
+
     # Create user (convert email to lowercase for consistency)
     result = create_user(
         email=data.get('email', '').lower(),
         password=data.get('password'),
         full_name=data.get('full_name'),
         user_type=data.get('user_type'),
-        education_level=data.get('education_level'),
+        education_level=education_level,  # Optional for parents
         country_code=data.get('country_code'),
         whatsapp_number=data.get('whatsapp_number')
     )
@@ -681,6 +689,126 @@ def save_lesson_api(course_id):
             file_size=data.get('file_size')
         )
         return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# ============== PARENT-STUDENT LINKING ROUTES ==============
+
+@app.route('/api/parent/link-student', methods=['POST'])
+def request_link_student():
+    """Parent requests to link a student account"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'parent':
+        return jsonify({"success": False, "message": "Only parents can link students"}), 403
+    
+    data = request.get_json()
+    student_email = data.get('student_email')
+    relationship_type = data.get('relationship_type', 'parent')
+    
+    if not student_email:
+        return jsonify({"success": False, "message": "Student email is required"}), 400
+    
+    if relationship_type not in ['parent', 'guardian', 'custodian']:
+        return jsonify({"success": False, "message": "Invalid relationship type"}), 400
+    
+    try:
+        result = request_parent_student_link(user_id, student_email, relationship_type)
+        return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/student/pending-links', methods=['GET'])
+def get_pending_links():
+    """Get pending parent linking requests for a student"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'student':
+        return jsonify({"success": False, "message": "Only students can view pending links"}), 403
+    
+    try:
+        links = get_pending_links_for_student(user_id)
+        return jsonify({"success": True, "pending_links": links}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/student/approve-link/<verification_code>', methods=['POST'])
+def approve_link(verification_code):
+    """Student approves a parent linking request"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'student':
+        return jsonify({"success": False, "message": "Only students can approve links"}), 403
+    
+    try:
+        result = approve_parent_student_link(user_id, verification_code)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/student/reject-link/<verification_code>', methods=['POST'])
+def reject_link(verification_code):
+    """Student rejects a parent linking request"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'student':
+        return jsonify({"success": False, "message": "Only students can reject links"}), 403
+    
+    try:
+        result = reject_parent_student_link(user_id, verification_code)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/parent/linked-students', methods=['GET'])
+def get_linked_students():
+    """Get all students linked to a parent (all statuses: pending, approved, rejected)"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'parent':
+        return jsonify({"success": False, "message": "Only parents can view linked students"}), 403
+    
+    try:
+        result = get_parent_student_links(user_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/parent/unlink-student', methods=['POST'])
+def unlink_student_endpoint():
+    """Parent unlinks a student account by link_id"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'parent':
+        return jsonify({"success": False, "message": "Only parents can unlink students"}), 403
+    
+    try:
+        data = request.get_json()
+        link_id = data.get('link_id')
+        
+        if not link_id:
+            return jsonify({"success": False, "message": "link_id is required"}), 400
+        
+        result = unlink_parent_student_by_link(user_id, link_id)
+        return jsonify(result), 200 if result['success'] else 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

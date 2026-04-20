@@ -2,6 +2,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import hashlib
 import os
+import random
+import string
 from datetime import datetime
 
 # Database connection string
@@ -1210,6 +1212,363 @@ def get_recorded_lessons(course_id):
     except Exception as e:
         print(f"Error getting recorded lessons: {e}")
         return []
+    finally:
+        cursor.close()
+        conn.close()
+
+# ============== PARENT-STUDENT LINKING ==============
+
+def generate_verification_code():
+    """
+    Generate a random 6-digit verification code
+    """
+    return ''.join(random.choices(string.digits, k=6))
+
+def request_parent_student_link(parent_id, student_email, relationship_type='parent'):
+    """
+    Create a linking request from parent to student
+    Generates a verification code for the student to confirm
+    Max 7 links per parent enforced
+    Returns: linking_id and verification_code if successful
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        # Verify student exists
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(%s) AND user_type = 'student'", (student_email,))
+        student = cursor.fetchone()
+        
+        if not student:
+            return {"success": False, "message": "Student not found with that email"}
+        
+        student_id = student[0]
+        
+        # Check if link already exists with this specific student
+        cursor.execute(
+            "SELECT id, status FROM parent_student_links WHERE parent_id = %s AND student_id = %s",
+            (parent_id, student_id)
+        )
+        existing = cursor.fetchone()
+        
+        if existing:
+            if existing[1] == 'approved':
+                return {"success": False, "message": "This student is already linked to your account"}
+            elif existing[1] == 'pending':
+                return {"success": False, "message": "A linking request is already pending for this student"}
+        
+        # Check if parent has reached 7 links limit (count approved links)
+        cursor.execute(
+            "SELECT COUNT(*) FROM parent_student_links WHERE parent_id = %s AND status = 'approved'",
+            (parent_id,)
+        )
+        approved_count = cursor.fetchone()[0]
+        
+        if approved_count >= 7:
+            return {"success": False, "message": "You can link up to 7 children. Please unlink a child first to add more."}
+        
+        # Generate verification code
+        verification_code = generate_verification_code()
+        
+        # Create linking request
+        cursor.execute("""
+            INSERT INTO parent_student_links (parent_id, student_id, relationship_type, status, verification_code, created_at)
+            VALUES (%s, %s, %s, 'pending', %s, CURRENT_TIMESTAMP)
+            RETURNING id, verification_code, created_at;
+        """, (parent_id, student_id, relationship_type, verification_code))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": f"Link request sent to {student_email}",
+            "link_id": result[0],
+            "verification_code": result[1],
+            "created_at": result[2],
+            "data": {
+                "verification_code": result[1]
+            },
+            "student_email": student_email
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating link request: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def approve_parent_student_link(student_id, verification_code):
+    """
+    Approve a parent-student link using verification code
+    Called by student to confirm parent linking
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Find pending link with this code
+        cursor.execute("""
+            SELECT id, parent_id, student_id, verification_code, status
+            FROM parent_student_links
+            WHERE student_id = %s AND verification_code = %s AND status = 'pending'
+        """, (student_id, verification_code))
+        
+        link = cursor.fetchone()
+        
+        if not link:
+            return {"success": False, "message": "Invalid verification code or link already processed"}
+        
+        # Approve the link
+        cursor.execute("""
+            UPDATE parent_student_links
+            SET status = 'approved', approval_date = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+            RETURNING id, parent_id, student_id, relationship_type, approval_date;
+        """, (link['id'],))
+        
+        approved_link = cursor.fetchone()
+        conn.commit()
+        
+        # Get parent details for confirmation
+        cursor2 = conn.cursor(cursor_factory=RealDictCursor)
+        cursor2.execute("SELECT id, full_name, email FROM users WHERE id = %s", (link['parent_id'],))
+        parent = cursor2.fetchone()
+        cursor2.close()
+        
+        return {
+            "success": True,
+            "message": f"Account successfully linked to parent {parent['full_name']}",
+            "link": {
+                "id": approved_link['id'],
+                "parent_id": approved_link['parent_id'],
+                "parent_name": parent['full_name'],
+                "parent_email": parent['email'],
+                "relationship_type": approved_link['relationship_type'],
+                "approval_date": approved_link['approval_date']
+            }
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error approving link: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def reject_parent_student_link(student_id, verification_code):
+    """
+    Reject a parent-student link
+    Called by student to decline parent linking
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        # Find pending link with this code
+        cursor.execute("""
+            SELECT id, parent_id FROM parent_student_links
+            WHERE student_id = %s AND verification_code = %s AND status = 'pending'
+        """, (student_id, verification_code))
+        
+        link = cursor.fetchone()
+        
+        if not link:
+            return {"success": False, "message": "Invalid verification code or link already processed"}
+        
+        # Reject the link
+        cursor.execute("""
+            UPDATE parent_student_links
+            SET status = 'rejected', updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (link[0],))
+        
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": "Parent linking request rejected"
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error rejecting link: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_pending_links_for_student(student_id):
+    """
+    Get all pending parent linking requests for a student
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT psl.id, psl.verification_code, psl.relationship_type, psl.created_at,
+                   u.id as parent_id, u.full_name as parent_name, u.email as parent_email, u.education_level
+            FROM parent_student_links psl
+            JOIN users u ON psl.parent_id = u.id
+            WHERE psl.student_id = %s AND psl.status = 'pending'
+            ORDER BY psl.created_at DESC;
+        """, (student_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting pending links: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_approved_students_for_parent(parent_id):
+    """
+    Get all approved students linked to a parent
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT psl.id as link_id, psl.relationship_type, psl.approval_date,
+                   u.id as student_id, u.full_name as student_name, u.email as student_email, u.education_level, u.created_at
+            FROM parent_student_links psl
+            JOIN users u ON psl.student_id = u.id
+            WHERE psl.parent_id = %s AND psl.status = 'approved'
+            ORDER BY u.full_name ASC;
+        """, (parent_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting linked students: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_parent_student_links(parent_id):
+    """
+    Get all student links for a parent (all statuses: pending, approved, rejected)
+    Used by parent dashboard to display all access points
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed", "data": []}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT psl.id as link_id, psl.student_id, psl.status, psl.relationship_type, 
+                   psl.verification_code, psl.approval_date, psl.created_at,
+                   u.full_name as student_name, u.email as student_email, u.education_level
+            FROM parent_student_links psl
+            JOIN users u ON psl.student_id = u.id
+            WHERE psl.parent_id = %s
+            ORDER BY psl.created_at DESC;
+        """, (parent_id,))
+        
+        results = cursor.fetchall()
+        links = [dict(row) for row in results]
+        
+        return {
+            "success": True,
+            "data": links,
+            "count": len(links)
+        }
+    except Exception as e:
+        print(f"Error getting parent student links: {e}")
+        return {"success": False, "message": str(e), "data": []}
+    finally:
+        cursor.close()
+        conn.close()
+
+def unlink_parent_student(parent_id, student_id):
+    """
+    Unlink a parent-student relationship
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Verify the relationship exists and parent owns it
+        cursor.execute("""
+            SELECT id FROM parent_student_links
+            WHERE parent_id = %s AND student_id = %s AND status = 'approved'
+        """, (parent_id, student_id))
+        
+        link = cursor.fetchone()
+        if not link:
+            return {"success": False, "message": "This student is not linked to your account"}
+        
+        # Delete the link
+        cursor.execute("""
+            DELETE FROM parent_student_links
+            WHERE parent_id = %s AND student_id = %s
+        """, (parent_id, student_id))
+        
+        conn.commit()
+        
+        return {"success": True, "message": "Student successfully unlinked"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error unlinking accounts: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def unlink_parent_student_by_link(parent_id, link_id):
+    """
+    Unlink a parent-student relationship by link_id
+    Works for any status (pending, approved, rejected)
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Verify the link exists and parent owns it
+        cursor.execute("""
+            SELECT id, status FROM parent_student_links
+            WHERE id = %s AND parent_id = %s
+        """, (link_id, parent_id))
+        
+        link = cursor.fetchone()
+        if not link:
+            return {"success": False, "message": "This link does not exist or you don't have permission to modify it"}
+        
+        # Delete the link
+        cursor.execute("""
+            DELETE FROM parent_student_links
+            WHERE id = %s
+        """, (link_id,))
+        
+        conn.commit()
+        
+        status = link['status']
+        action = "unlinked" if status == 'approved' else "cancelled"
+        return {"success": True, "message": f"Child link successfully {action}"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error unlinking accounts: {e}")
+        return {"success": False, "message": str(e)}
     finally:
         cursor.close()
         conn.close()

@@ -632,6 +632,271 @@
         body.dark-theme .navbar-actions a:hover {
             color: var(--primary);
         }
+
+        /* Access Points / Linked Students */
+        .access-points-section {
+            margin-bottom: 4rem;
+        }
+
+        .access-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .access-title {
+            font-size: 1.28rem;
+            font-weight: 900;
+            color: var(--dark);
+        }
+
+        .link-student-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .link-student-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 27, 42, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .access-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .access-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .access-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 32px rgba(13, 27, 42, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .access-card-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            padding: 1.5rem 1.25rem;
+            color: white;
+            text-align: center;
+        }
+
+        .access-card-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin: 0 auto 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .access-card-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .access-card-email {
+            font-size: 0.72rem;
+            opacity: 0.9;
+        }
+
+        .access-card-body {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .access-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .access-info-label {
+            font-size: 0.72rem;
+            color: var(--gray-600);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .access-info-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .access-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .status-approved {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .access-card-footer {
+            padding: 0 1.25rem 1.25rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .access-action-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .access-view-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            flex: 2;
+        }
+
+        .access-view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(13, 27, 42, 0.25);
+        }
+
+        .access-unlink-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .access-unlink-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .access-resend-btn {
+            background: rgba(94, 59, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .access-resend-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .access-points-count {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
+        .access-empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: 12px;
+            border: 2px dashed var(--gray-200);
+        }
+
+        .access-empty-icon {
+            font-size: 2.4rem;
+            color: var(--gray-200);
+            margin-bottom: 1rem;
+        }
+
+        .access-empty-text {
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .access-link-prompt-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .access-link-prompt-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 27, 42, 0.3);
+        }
+
+        body.dark-theme .access-card {
+            background: #222;
+            border-color: #333;
+        }
+
+        body.dark-theme .access-card:hover {
+            border-color: var(--primary);
+        }
+
+        body.dark-theme .access-info-row {
+            border-bottom-color: #333;
+        }
+
+        body.dark-theme .access-empty-state {
+            background: #222;
+            border-color: #333;
+        }
     </style>
 </head>
 <body>
@@ -703,11 +968,6 @@
                             <i class="fas fa-user-tie"></i>
                             <span id="parentName">-</span>
                         </div>
-                        <div style="color: var(--gray-300);">•</div>
-                        <div class="subtitle-item">
-                            <i class="fas fa-graduation-cap"></i>
-                            <span id="parentEducation">-</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -718,8 +978,8 @@
                     <div class="stat-icon stat-icon-primary">
                         <i class="fas fa-child"></i>
                     </div>
-                    <div class="stat-value" id="studentCount">0</div>
-                    <div class="stat-label">Students</div>
+                    <div class="stat-value" id="linkedStudentCount">0</div>
+                    <div class="stat-label">Linked Children</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon stat-icon-success">
@@ -744,6 +1004,33 @@
                 </div>
             </div>
 
+            <!-- Access Points Section - My Children -->
+            <div class="access-points-section">
+                <div class="access-header">
+                    <div>
+                        <h2 class="access-title">
+                            <i class="fas fa-home"></i> My Children's Access Points
+                            <span class="access-points-count" id="accessPointsCount">0/7</span>
+                        </h2>
+                    </div>
+                    <button class="link-student-btn" id="linkStudentBtn">
+                        <i class="fas fa-plus-circle"></i> Link New Child
+                    </button>
+                </div>
+
+                <div class="access-cards-grid" id="accessPointsContainer">
+                    <div class="access-empty-state">
+                        <div class="access-empty-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="access-empty-text">No children linked yet. Link your children to monitor their progress and manage their learning journey.</div>
+                        <button class="access-link-prompt-btn" id="linkFromEmptyBtn">
+                            <i class="fas fa-plus-circle"></i> Link First Child
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Students Section -->
             <div class="section-header">
                 <h2 class="section-title">Your Students</h2>
@@ -755,6 +1042,63 @@
                         <i class="fas fa-inbox"></i>
                     </div>
                     <div>No students added yet. Link your children to monitor their progress.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link Student Modal -->
+    <div class="modal fade" id="linkStudentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Link New Child</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="linkStudentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Child's Email Address</label>
+                            <input type="email" class="form-control" id="studentEmail" placeholder="child@example.com" required>
+                            <small class="text-muted">Enter the email address of the student account you want to link.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Relationship Type</label>
+                            <select class="form-select" id="relationshipType" required>
+                                <option value="">Select relationship...</option>
+                                <option value="parent">Parent</option>
+                                <option value="guardian">Guardian</option>
+                                <option value="custodian">Custodian</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-primary">
+                            <i class="fas fa-info-circle"></i>
+                            Once you link, the child will receive a verification request they must approve. You can link up to 7 children.
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Link Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Links Info Modal -->
+    <div class="modal fade" id="pendingCodeModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Share Verification Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Share this verification code with your child so they can approve the link:</p>
+                    <div style="text-align: center; padding: 2rem; background: var(--gray-100); border-radius: 12px; margin: 1rem 0;">
+                        <div id="verificationCodeDisplay" style="font-size: 2rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary);">
+                            -
+                        </div>
+                        <small style="color: var(--gray-600); display: block; margin-top: 1rem;">Valid for 24 hours</small>
+                    </div>
+                    <p style="color: var(--gray-600); font-size: 0.9rem;">Your child will need to enter this code in their dashboard to approve the link.</p>
                 </div>
             </div>
         </div>
@@ -780,7 +1124,6 @@
                 if (data.success) {
                     const profile = data.profile;
                     document.getElementById('parentName').textContent = formatText(profile.name) || 'N/A';
-                    document.getElementById('parentEducation').textContent = formatText(profile.education_level) || 'N/A';
                     if (profile.initials) {
                         document.getElementById('userInitials').textContent = profile.initials;
                     }
@@ -790,16 +1133,221 @@
             }
         }
 
-        // Load students
-        async function loadStudents() {
+        // Load linked students for parent
+        async function loadLinkedStudents() {
             try {
-                const response = await fetch('/api/students');
+                const response = await fetch('/api/parent/linked-students');
                 const data = await response.json();
                 if (data.success) {
-                    const students = data.students;
-                    document.getElementById('studentCount').textContent = students.length;
+                    const linkedStudents = data.data || [];
+                    document.getElementById('linkedStudentCount').textContent = linkedStudents.length;
+                    document.getElementById('accessPointsCount').textContent = `${linkedStudents.length}/7`;
                     
-                    if (students.length === 0) {
+                    if (linkedStudents.length === 0) {
+                        document.getElementById('accessPointsContainer').innerHTML = `
+                            <div class="access-empty-state">
+                                <div class="access-empty-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div class="access-empty-text">No children linked yet. Link your children to monitor their progress and manage their learning journey.</div>
+                                <button class="access-link-prompt-btn" id="linkFromEmptyBtn2">
+                                    <i class="fas fa-plus-circle"></i> Link First Child
+                                </button>
+                            </div>
+                        `;
+                        document.getElementById('linkFromEmptyBtn2').addEventListener('click', openLinkStudentModal);
+                    } else {
+                        renderAccessPoints(linkedStudents);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading linked students:', error);
+            }
+        }
+
+        // Render access points cards for linked students
+        function renderAccessPoints(linkedStudents) {
+            const container = document.getElementById('accessPointsContainer');
+            container.innerHTML = linkedStudents.map(link => {
+                const statusClass = link.status === 'approved' ? 'status-approved' : 
+                                  link.status === 'pending' ? 'status-pending' : 'status-rejected';
+                const statusText = link.status.charAt(0).toUpperCase() + link.status.slice(1);
+                const statusIcon = link.status === 'approved' ? 'fas fa-check-circle' : 
+                                 link.status === 'pending' ? 'fas fa-clock' : 'fas fa-times-circle';
+
+                let actionButtons = '';
+                if (link.status === 'approved') {
+                    actionButtons = `
+                        <button class="access-action-btn access-view-btn" onclick="viewStudentProfile(${link.student_id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="access-action-btn access-unlink-btn" onclick="unlinkStudent(${link.link_id})">
+                            <i class="fas fa-unlink"></i> Unlink
+                        </button>
+                    `;
+                } else if (link.status === 'pending') {
+                    actionButtons = `
+                        <button class="access-action-btn access-view-btn" onclick="showVerificationCode('${link.verification_code}')">
+                            <i class="fas fa-key"></i> Show Code
+                        </button>
+                        <button class="access-action-btn access-unlink-btn" onclick="cancelLink(${link.link_id})">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="access-card">
+                        <div class="access-card-header">
+                            <div class="access-card-avatar">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="access-card-name">${link.student_name}</div>
+                            <div class="access-card-email">${link.student_email}</div>
+                        </div>
+                        <div class="access-card-body">
+                            <div class="access-info-row">
+                                <span class="access-info-label">Education Level</span>
+                                <span class="access-info-value">${link.education_level || 'Not specified'}</span>
+                            </div>
+                            <div class="access-info-row">
+                                <span class="access-info-label">Relationship</span>
+                                <span class="access-info-value">${formatText(link.relationship_type)}</span>
+                            </div>
+                            <div style="padding-bottom: 0.75rem;">
+                                <span class="access-status-badge ${statusClass}">
+                                    <i class="${statusIcon}"></i> ${statusText}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="access-card-footer">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Open link student modal
+        function openLinkStudentModal() {
+            const modal = new bootstrap.Modal(document.getElementById('linkStudentModal'));
+            document.getElementById('linkStudentForm').reset();
+            modal.show();
+        }
+
+        // Handle link student form submission
+        document.getElementById('linkStudentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('studentEmail').value;
+            const relationshipType = document.getElementById('relationshipType').value;
+
+            try {
+                const response = await fetch('/api/parent/link-student', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_email: email,
+                        relationship_type: relationshipType
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Link request sent! Share the verification code with your child to approve.');
+                    // Show the verification code
+                    if (data.data && data.data.verification_code) {
+                        document.getElementById('verificationCodeDisplay').textContent = data.data.verification_code;
+                        const codeModal = new bootstrap.Modal(document.getElementById('pendingCodeModal'));
+                        codeModal.show();
+                    }
+                    document.getElementById('linkStudentForm').reset();
+                    bootstrap.Modal.getInstance(document.getElementById('linkStudentModal')).hide();
+                    loadLinkedStudents();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error linking student:', error);
+                alert('Error linking student');
+            }
+        });
+
+        // Show verification code
+        function showVerificationCode(code) {
+            document.getElementById('verificationCodeDisplay').textContent = code;
+            const modal = new bootstrap.Modal(document.getElementById('pendingCodeModal'));
+            modal.show();
+        }
+
+        // Unlink student
+        async function unlinkStudent(linkId) {
+            if (!confirm('Are you sure you want to unlink this child? You can link them again later.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/parent/unlink-student`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ link_id: linkId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Child unlinked successfully');
+                    loadLinkedStudents();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error unlinking student:', error);
+                alert('Error unlinking student');
+            }
+        }
+
+        // Cancel pending link
+        async function cancelLink(linkId) {
+            if (!confirm('Are you sure you want to cancel this link request?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/parent/unlink-student`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ link_id: linkId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Link request cancelled');
+                    loadLinkedStudents();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error cancelling link:', error);
+                alert('Error cancelling link');
+            }
+        }
+
+        // View student profile
+        function viewStudentProfile(studentId) {
+            window.location.href = `/student/${studentId}/profile`;
+        }
+
+        // Load students (old endpoint - kept for compatibility)
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/parent/linked-students');
+                const data = await response.json();
+                if (data.success) {
+                    const students = data.data || [];
+                    // Filter only approved links
+                    const approvedStudents = students.filter(s => s.status === 'approved');
+                    
+                    if (approvedStudents.length === 0) {
                         document.getElementById('studentsContainer').innerHTML = `
                             <div class="empty-state">
                                 <div class="empty-state-icon">
@@ -809,7 +1357,7 @@
                             </div>
                         `;
                     } else {
-                        renderStudents(students);
+                        renderStudents(approvedStudents);
                     }
                 }
             } catch (error) {
@@ -825,8 +1373,8 @@
                         <div class="student-avatar">
                             <i class="fas fa-user-graduate"></i>
                         </div>
-                        <div class="student-name">${student.full_name}</div>
-                        <div class="student-email">${student.email}</div>
+                        <div class="student-name">${student.student_name}</div>
+                        <div class="student-email">${student.student_email}</div>
                     </div>
                     <div class="student-body">
                         <div class="student-info">
@@ -845,13 +1393,17 @@
                             </div>
                         </div>
                         <div class="student-footer">
-                            <button class="action-btn">View Profile</button>
+                            <button class="action-btn" onclick="viewStudentProfile(${student.student_id})">View Profile</button>
                             <button class="action-btn message-btn">Message</button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
+
+        // Event listeners
+        document.getElementById('linkStudentBtn').addEventListener('click', openLinkStudentModal);
+        document.getElementById('linkFromEmptyBtn').addEventListener('click', openLinkStudentModal);
 
         // Logout
         document.getElementById('logoutNavBtn').addEventListener('click', async (e) => {
@@ -878,6 +1430,7 @@
         window.addEventListener('load', () => {
             loadThemePreference();
             loadParentProfile();
+            loadLinkedStudents();
             loadStudents();
         });
     </script>
