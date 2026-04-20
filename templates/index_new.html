@@ -257,6 +257,28 @@
             text-decoration: none;
         }
 
+        .btn-admin {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn-admin:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: translateY(-3px);
+            text-decoration: none;
+        }
+
         /* About Section */
         .about-section {
             padding: 80px 0;
@@ -794,7 +816,7 @@
                     <button class="btn btn-outline-custom" data-bs-toggle="modal" data-bs-target="#loginModal">
                         <i class="fas fa-sign-in-alt"></i> Login
                     </button>
-                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#adminLoginModal">
+                    <button class="btn btn-outline-custom" data-bs-toggle="modal" data-bs-target="#adminLoginModal">
                         <i class="fas fa-building"></i> Admin
                     </button>
                     <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#signupModal">
@@ -822,7 +844,7 @@
                         <button class="btn btn-parent" data-user-type="parent" data-bs-toggle="modal" data-bs-target="#signupModal">
                             <i class="fas fa-users"></i> Parent
                         </button>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#adminLoginModal" style="background: #ef4444; border: none;">
+                        <button class="btn btn-admin" data-bs-toggle="modal" data-bs-target="#adminLoginModal">
                             <i class="fas fa-building"></i> Admin Portal
                         </button>
                     </div>
