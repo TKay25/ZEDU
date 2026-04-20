@@ -277,6 +277,11 @@ def create_tables():
             );
         """)
 
+        # Add last_login column to existing users table (for databases upgraded from earlier versions)
+        cursor.execute("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP;
+        """)
+
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")

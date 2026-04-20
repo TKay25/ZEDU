@@ -186,8 +186,11 @@ def login():
         session['email'] = user['email']
         session['user_type'] = user['user_type']
         
-        # Update last login timestamp
-        update_last_login(user['id'])
+        # Update last login timestamp (non-blocking - doesn't affect login if it fails)
+        try:
+            update_last_login(user['id'])
+        except Exception as e:
+            print(f"Warning: Could not update last login: {e}")
         
         # Redirect to appropriate dashboard based on user type
         redirect_url = '/'
@@ -899,8 +902,11 @@ def admin_login():
         session['email'] = admin['email']
         session['user_type'] = admin['user_type']
         
-        # Update last login timestamp
-        update_last_login(admin['id'])
+        # Update last login timestamp (non-blocking - doesn't affect login if it fails)
+        try:
+            update_last_login(admin['id'])
+        except Exception as e:
+            print(f"Warning: Could not update last login: {e}")
         
         return jsonify({
             "success": True,
