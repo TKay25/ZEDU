@@ -1155,15 +1155,23 @@
         // Fetch user profile
         async function loadProfile() {
             try {
-                const response = await fetch('/api/user-profile');
+                const response = await fetch('/api/profile');
                 const data = await response.json();
-                if (data.success) {
-                    const profile = data.profile;
-                    document.getElementById('studentName').textContent = formatText(profile.name) || 'N/A';
-                    document.getElementById('studentEducation').textContent = formatText(profile.education_level) || 'N/A';
-                    if (profile.initials) {
-                        document.getElementById('userInitials').textContent = profile.initials;
-                    }
+                if (data.success && data.user) {
+                    const user = data.user;
+                    document.getElementById('studentName').textContent = user.full_name || 'N/A';
+                    
+                    // Map education level
+                    const eduMap = {
+                        'primary': 'Primary School',
+                        'high_school': 'High School',
+                        'university': 'University'
+                    };
+                    document.getElementById('studentEducation').textContent = eduMap[user.education_level] || (user.education_level || 'N/A');
+                    
+                    // Set initials
+                    const initials = user.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('userInitials').textContent = initials;
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);

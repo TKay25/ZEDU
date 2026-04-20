@@ -1197,14 +1197,15 @@
         // Load parent profile information
         async function loadParentProfile() {
             try {
-                const response = await fetch('/api/user-profile');
+                const response = await fetch('/api/profile');
                 const data = await response.json();
-                if (data.success) {
-                    const profile = data.profile;
-                    document.getElementById('parentName').textContent = formatText(profile.name) || 'N/A';
-                    if (profile.initials) {
-                        document.getElementById('userInitials').textContent = profile.initials;
-                    }
+                if (data.success && data.user) {
+                    const user = data.user;
+                    document.getElementById('parentName').textContent = user.full_name || 'N/A';
+                    
+                    // Set initials
+                    const initials = user.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('userInitials').textContent = initials;
                 }
             } catch (error) {
                 console.error('Error loading parent profile:', error);

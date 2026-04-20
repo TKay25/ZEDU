@@ -830,6 +830,30 @@
         </div>
     </nav>
 
+    <!-- Welcome Banner (shown when logged in) -->
+    <div id="welcomeBanner" style="display: none; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div class="container">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                        <span id="userInitials">U</span>
+                    </div>
+                    <div>
+                        <div style="font-size: 1rem; font-weight: 700;">
+                            👋 Welcome back! <span id="welcomeName">User</span>
+                        </div>
+                        <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">
+                            <span id="userRole" style="text-transform: capitalize; font-weight: 600;"></span> • <span id="userEducation" style="opacity: 0.8;"></span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="logoutUser()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
@@ -1508,11 +1532,93 @@
             }
         }
 
+        // Load user profile if logged in
+        async function loadUserProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                
+                if (data.success && data.user) {
+                    const user = data.user;
+                    displayWelcomeBanner(user);
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+
+        // Display welcome banner with user info
+        function displayWelcomeBanner(user) {
+            const banner = document.getElementById('welcomeBanner');
+            const nameEl = document.getElementById('welcomeName');
+            const initialsEl = document.getElementById('userInitials');
+            const roleEl = document.getElementById('userRole');
+            const educationEl = document.getElementById('userEducation');
+            
+            // Set user name
+            const firstName = user.full_name.split(' ')[0];
+            nameEl.textContent = firstName;
+            
+            // Set initials
+            const initials = user.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+            initialsEl.textContent = initials;
+            
+            // Set role
+            const roleMap = {
+                'student': '👨‍🎓 Student',
+                'tutor': '👨‍🏫 Tutor',
+                'parent': '👨‍👩‍👧 Parent',
+                'administrator': '🏢 Administrator'
+            };
+            roleEl.textContent = roleMap[user.user_type] || user.user_type;
+            
+            // Set education level (for students/tutors/parents)
+            const eduMap = {
+                'primary': 'Primary School',
+                'high_school': 'High School',
+                'university': 'University'
+            };
+            
+            // For administrators, don't show education level
+            if (user.user_type === 'administrator') {
+                educationEl.parentElement.innerHTML = '<span id="userRole" style="text-transform: capitalize; font-weight: 600;"></span>';
+                roleEl.textContent = roleMap[user.user_type];
+            } else {
+                educationEl.textContent = eduMap[user.education_level] || (user.education_level || 'Not specified');
+            }
+            
+            // Show banner
+            banner.style.display = 'block';
+            
+            // Hide all modals
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            const signupModal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+            const adminLoginModal = bootstrap.Modal.getInstance(document.getElementById('adminLoginModal'));
+            if (loginModal) loginModal.hide();
+            if (signupModal) signupModal.hide();
+            if (adminLoginModal) adminLoginModal.hide();
+        }
+
+        // Logout function
+        async function logoutUser() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                document.getElementById('welcomeBanner').style.display = 'none';
+                location.reload();
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
         // Load on DOM ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadThemePreference);
+            document.addEventListener('DOMContentLoaded', () => {
+                loadThemePreference();
+                loadUserProfile();
+            });
         } else {
             loadThemePreference();
+            loadUserProfile();
         }
 
         // Password visibility toggle functionality
