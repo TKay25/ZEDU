@@ -25,7 +25,7 @@ ZEDU/
 ├── .env.example              # Environment variables template
 ├── DATABASE_SETUP.md         # Detailed database documentation
 ├── templates/
-│   └── index.html            # Landing page with sign-up/login modals
+│   └── index_new.html        # Landing page with sign-up/login modals (active)
 └── README.md                 # This file
 ```
 
@@ -195,7 +195,7 @@ Edit the CSS variables in `templates/index.html`:
 ```
 
 ### Content
-Edit course information, instructor profiles, and testimonials in `templates/index.html`
+Edit course information, instructor profiles, and testimonials in `templates/index_new.html`
 
 ### Database
 To add new tables or fields:

@@ -64,7 +64,7 @@ pip install Flask
 ```
 
 **Template not loading?**
-Make sure the `templates/` folder exists and contains `index.html`
+Make sure the `templates/` folder exists and contains `index_new.html`
 
 ## Next Steps
 
