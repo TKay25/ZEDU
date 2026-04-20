@@ -252,6 +252,120 @@
             text-decoration: none;
         }
 
+        /* About Section */
+        .about-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 3rem 0;
+            padding: 2rem 0;
+        }
+
+        .about-stat {
+            background: var(--gray-100);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 2px solid var(--gray-200);
+        }
+
+        .about-stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+        }
+
+        .about-stat-label {
+            font-size: 0.95rem;
+            color: var(--gray-600);
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            list-style: none;
+            padding: 0;
+        }
+
+        .about-features li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--gray-800);
+            font-weight: 500;
+        }
+
+        .about-features li i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            width: 30px;
+            text-align: center;
+        }
+
+        .about-image {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .about-image i {
+            font-size: 150px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .about-image {
+                height: 300px;
+            }
+
+            .about-text h2 {
+                font-size: 2rem;
+            }
+        }
+
         /* Education Levels Section */
         .education-section {
             padding: 80px 0;
@@ -599,6 +713,60 @@
                 </div>
                 <div class="col-lg-6 d-none d-lg-block text-center">
                     <i class="fas fa-book-open" style="font-size: 200px; color: rgba(255,255,255,0.1);"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About ZEDU</h2>
+                    <p>ZEDU is a revolutionary online learning platform dedicated to making quality education accessible to everyone, everywhere. We connect passionate tutors with eager learners, breaking down barriers and creating opportunities for growth.</p>
+                    
+                    <ul class="about-features">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Expert-Led Courses</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Flexible Learning</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Global Community</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Affordable Pricing</span>
+                        </li>
+                    </ul>
+
+                    <div class="about-stats">
+                        <div class="about-stat">
+                            <span class="about-stat-value">10K+</span>
+                            <span class="about-stat-label">Active Students</span>
+                        </div>
+                        <div class="about-stat">
+                            <span class="about-stat-value">500+</span>
+                            <span class="about-stat-label">Expert Tutors</span>
+                        </div>
+                        <div class="about-stat">
+                            <span class="about-stat-value">1000+</span>
+                            <span class="about-stat-label">Quality Courses</span>
+                        </div>
+                        <div class="about-stat">
+                            <span class="about-stat-value">150+</span>
+                            <span class="about-stat-label">Countries Reached</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-image">
+                    <i class="fas fa-graduation-cap"></i>
                 </div>
             </div>
         </div>
