@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
 from db_helper import (create_tables, create_user, authenticate_user, get_user_by_id, get_tutors, get_all_users,
                        init_global_forum, get_global_forum, get_course_forum, get_forum_threads, create_thread,
-                       get_thread_posts, create_post)
+                       get_thread_posts, create_post, update_user_profile, update_user_avatar)
 import os
 from datetime import timedelta
+import base64
 
 app = Flask(__name__)
 
@@ -165,6 +166,54 @@ def get_profile():
         return jsonify({"success": True, "user": dict(user)}), 200
     else:
         return jsonify({"success": False, "message": "User not found"}), 404
+
+@app.route('/api/profile/update', methods=['POST'])
+def update_profile():
+    """Update user profile information"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    data = request.get_json()
+    
+    # Update profile with provided fields
+    result = update_user_profile(
+        user_id=user_id,
+        full_name=data.get('full_name'),
+        country_code=data.get('country'),
+        whatsapp_number=data.get('whatsapp'),
+        bio=data.get('bio')
+    )
+    
+    if result['success']:
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 400
+
+@app.route('/api/profile/upload-photo', methods=['POST'])
+def upload_profile_photo():
+    """Upload and update user profile photo"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    try:
+        data = request.get_json()
+        photo_data = data.get('photo')
+        
+        if not photo_data:
+            return jsonify({"success": False, "message": "No photo provided"}), 400
+        
+        # Store the base64 encoded photo data directly
+        # In production, you might want to save to cloud storage (AWS S3, etc.)
+        # For now, we store it as a data URL
+        result = update_user_avatar(user_id, photo_data)
+        
+        return jsonify(result), 200 if result['success'] else 400
+        
+    except Exception as e:
+        print(f"Error uploading photo: {e}")
+        return jsonify({"success": False, "message": f"Error uploading photo: {str(e)}"}), 500
 
 @app.route('/api/tutors', methods=['GET'])
 def get_tutors_list():

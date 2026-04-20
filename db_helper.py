@@ -288,7 +288,7 @@ def authenticate_user(email, password):
 
 def get_user_by_id(user_id):
     """
-    Get user by ID
+    Get user by ID (with all profile fields)
     """
     conn = get_db_connection()
     if not conn:
@@ -296,7 +296,7 @@ def get_user_by_id(user_id):
 
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        cursor.execute("SELECT id, email, full_name, user_type, education_level, created_at FROM users WHERE id = %s;", (user_id,))
+        cursor.execute("SELECT id, email, full_name, user_type, education_level, country_code, whatsapp_number, avatar_url, bio, created_at FROM users WHERE id = %s;", (user_id,))
         result = cursor.fetchone()
         return result
     except Exception as e:
@@ -326,6 +326,88 @@ def get_all_users(limit=100):
         cursor.close()
         conn.close()
 
+def update_user_profile(user_id, full_name=None, country_code=None, whatsapp_number=None, bio=None):
+    """
+    Update user profile information
+    Returns: dict with success status
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        # Build dynamic UPDATE query based on provided fields
+        updates = []
+        values = []
+        
+        if full_name is not None:
+            updates.append("full_name = %s")
+            values.append(full_name)
+        if country_code is not None:
+            updates.append("country_code = %s")
+            values.append(country_code)
+        if whatsapp_number is not None:
+            updates.append("whatsapp_number = %s")
+            values.append(whatsapp_number)
+        if bio is not None:
+            updates.append("bio = %s")
+            values.append(bio)
+        
+        if not updates:
+            return {"success": False, "message": "No fields to update"}
+        
+        # Add updated_at timestamp and user_id
+        updates.append("updated_at = CURRENT_TIMESTAMP")
+        values.append(user_id)
+        
+        query = f"UPDATE users SET {', '.join(updates)} WHERE id = %s RETURNING id, email, full_name, user_type, education_level, country_code, whatsapp_number, avatar_url, bio, created_at;"
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {"success": True, "message": "Profile updated successfully", "user": dict(result)}
+        else:
+            return {"success": False, "message": "User not found"}
+    except Exception as e:
+        print(f"Error updating user profile: {e}")
+        conn.rollback()
+        return {"success": False, "message": f"Error updating profile: {str(e)}"}
+    finally:
+        cursor.close()
+        conn.close()
+
+def update_user_avatar(user_id, avatar_url):
+    """
+    Update user avatar URL
+    Returns: dict with success status
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET avatar_url = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s RETURNING id, email, full_name, avatar_url;",
+            (avatar_url, user_id)
+        )
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {"success": True, "message": "Avatar updated successfully", "user": dict(result)}
+        else:
+            return {"success": False, "message": "User not found"}
+    except Exception as e:
+        print(f"Error updating user avatar: {e}")
+        conn.rollback()
+        return {"success": False, "message": f"Error updating avatar: {str(e)}"}
+    finally:
+        cursor.close()
+        conn.close()
+
 def get_tutors():
     """
     Get all tutors
@@ -336,7 +418,7 @@ def get_tutors():
 
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        cursor.execute("SELECT id, email, full_name, bio, education_level FROM users WHERE user_type = 'tutor' LIMIT 100;")
+        cursor.execute("SELECT id, email, full_name, bio, education_level, avatar_url FROM users WHERE user_type = 'tutor' LIMIT 100;")
         results = cursor.fetchall()
         return results
     except Exception as e:
