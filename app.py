@@ -317,12 +317,36 @@ def get_students():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/account')
+def account_page():
+    """Account page"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect('/')
+    
+    user = get_user_by_id(user_id)
+    if user:
+        return render_template('account.html', user=dict(user))
+    return redirect('/')
+
+@app.route('/settings')
+def settings_page():
+    """Settings page"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect('/')
+    
+    user = get_user_by_id(user_id)
+    if user:
+        return render_template('settings.html', user=dict(user))
+    return redirect('/')
+
 # Forum Routes
 @app.route('/forums')
 def forums():
     """Forums page"""
     user_id = session.get('user_id')
-    return render_template('forums.html', user_id=user_id)
+    return render_template('forums_new.html', user_id=user_id)
 
 @app.route('/forum/thread/<int:thread_id>')
 def view_thread(thread_id):

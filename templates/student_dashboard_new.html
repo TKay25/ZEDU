@@ -39,6 +39,8 @@
         }
 
         /* Top Navbar */
+        .top-navbar {
+            background: white;
             padding: 0.8rem 1.6rem;
             display: flex;
             justify-content: space-between;
@@ -46,7 +48,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .navbar-brand {
@@ -93,7 +95,7 @@
         /* Main Container */
         .main-container {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 1fr;
             min-height: calc(100vh - 60px);
         }
 
@@ -103,6 +105,7 @@
             border-right: 1px solid var(--gray-200);
             padding: 1.6rem 0;
             overflow-y: auto;
+            display: none;
         }
 
         .nav-section {
@@ -706,20 +709,28 @@
         </div>
         <div class="navbar-actions">
             <input type="text" class="search-box" placeholder="Search courses...">
+            
+            <!-- Navigation Links -->
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="/dashboard" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+                <a href="/forums" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-comments"></i> Forums
+                </a>
+                <a href="/account" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-user-circle"></i> Account
+                </a>
+                <a href="/settings" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="#" id="logoutBtn" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--danger)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+
             <div class="user-profile dropdown">
                 <div class="avatar" id="userInitials">ZV</div>
-                <div class="dropdown-menu dropdown-menu-end" style="position: absolute; top: 100%; right: 0; margin-top: 0.5rem;">
-                    <a class="dropdown-item" href="/api/profile">
-                        <i class="fas fa-user"></i> Profile
-                    </a>
-                    <a class="dropdown-item" href="/forums">
-                        <i class="fas fa-comments"></i> Forums
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -727,31 +738,6 @@
     <!-- Main Container -->
     <div class="main-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="nav-section">
-                <div class="nav-section-title">Learning</div>
-                <a href="#" class="nav-item active">
-                    <i class="fas fa-book-open"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="/forums" class="nav-item">
-                    <i class="fas fa-comments"></i>
-                    <span>Forums</span>
-                </a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Account</div>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
-                <a href="#" class="nav-item" id="logoutNavBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
-
         <!-- Content Area -->
         <div class="content-area">
             <!-- Page Header -->
@@ -1166,12 +1152,6 @@
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            await fetch('/api/logout', { method: 'POST' });
-            window.location.href = '/';
-        });
-
-        document.getElementById('logoutNavBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             await fetch('/api/logout', { method: 'POST' });
             window.location.href = '/';
