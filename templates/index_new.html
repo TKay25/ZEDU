@@ -749,6 +749,9 @@
                     <button class="btn btn-outline-custom" data-bs-toggle="modal" data-bs-target="#loginModal">
                         <i class="fas fa-sign-in-alt"></i> Login
                     </button>
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#adminLoginModal">
+                        <i class="fas fa-building"></i> Admin
+                    </button>
                     <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#signupModal">
                         Get Started
                     </button>
@@ -773,6 +776,9 @@
                         </button>
                         <button class="btn btn-parent" data-user-type="parent" data-bs-toggle="modal" data-bs-target="#signupModal">
                             <i class="fas fa-users"></i> Parent
+                        </button>
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#adminLoginModal" style="background: #ef4444; border: none;">
+                            <i class="fas fa-building"></i> Admin Portal
                         </button>
                     </div>
                 </div>
@@ -1028,6 +1034,7 @@
                                     <option value="student">Student</option>
                                     <option value="tutor">Tutor</option>
                                     <option value="parent">Parent</option>
+                                    <option value="administrator">School/Organization Administrator</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -1292,7 +1299,97 @@
                                 <input type="tel" class="form-control" id="whatsapp" placeholder="+1 (555) 000-0000">
                             </div>
                         </div>
+                        <!-- Administrator-specific fields -->
+                        <div id="adminFormFields" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">School/Organization Name</label>
+                                    <input type="text" class="form-control" id="adminOrgName" placeholder="e.g., ABC School District">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Organization Type</label>
+                                    <select class="form-select" id="adminOrgType">
+                                        <option value="">Select type</option>
+                                        <option value="primary_school">Primary School</option>
+                                        <option value="secondary_school">Secondary School</option>
+                                        <option value="university">University</option>
+                                        <option value="training_center">Training Center</option>
+                                        <option value="tutoring_center">Tutoring Center</option>
+                                        <option value="corporate">Corporate/Company</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Organization Phone</label>
+                                    <input type="tel" class="form-control" id="adminPhone" placeholder="(123) 456-7890">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="adminAddress" placeholder="Street address">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" id="adminCity" placeholder="City">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">State/Province</label>
+                                    <input type="text" class="form-control" id="adminState" placeholder="State">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Postal Code</label>
+                                    <input type="text" class="form-control" id="adminZip" placeholder="Postal code">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Payment Plan</label>
+                                    <select class="form-select" id="adminPaymentPlan">
+                                        <option value="">Select plan</option>
+                                        <option value="students_pay">Students Pay</option>
+                                        <option value="school_pays">School Pays</option>
+                                        <option value="hybrid">Hybrid</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Estimated Number of Students</label>
+                                <input type="number" class="form-control" id="adminStudentCount" placeholder="100" min="1">
+                            </div>
+                            <div class="alert alert-info" style="border-radius: 8px;">
+                                <i class="fas fa-info-circle"></i>
+                                Your account will be pending administrator approval. We'll contact you with additional details after review.
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-primary-custom w-100">Create Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Administrator Login Modal -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Administrator Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminLoginForm">
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="adminLoginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="adminLoginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100">Sign In</button>
                     </form>
                 </div>
             </div>
@@ -1322,19 +1419,54 @@
             loadThemePreference();
         }
 
+        // Show/hide education level and admin fields based on user type
+        document.getElementById('userType').addEventListener('change', function() {
+            const educationLevelGroup = document.getElementById('educationLevel').parentElement.parentElement;
+            const adminFormFields = document.getElementById('adminFormFields');
+            
+            if (this.value === 'student' || this.value === 'tutor') {
+                educationLevelGroup.style.display = 'block';
+                document.getElementById('educationLevel').required = true;
+                adminFormFields.style.display = 'none';
+            } else if (this.value === 'administrator') {
+                educationLevelGroup.style.display = 'none';
+                document.getElementById('educationLevel').required = false;
+                adminFormFields.style.display = 'block';
+            } else {
+                educationLevelGroup.style.display = 'none';
+                document.getElementById('educationLevel').required = false;
+                adminFormFields.style.display = 'none';
+            }
+        });
+
         // Handle signup form
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const userType = document.getElementById('userType').value;
+            
             const formData = {
                 email: document.getElementById('email').value,
                 password: document.getElementById('password').value,
                 confirm_password: document.getElementById('confirmPassword').value,
                 full_name: document.getElementById('fullName').value,
-                user_type: document.getElementById('userType').value,
+                user_type: userType,
                 country_code: document.getElementById('countryCode').value,
                 education_level: document.getElementById('educationLevel').value,
                 whatsapp_number: document.getElementById('whatsapp').value
             };
+
+            // Add admin-specific fields if administrator
+            if (userType === 'administrator') {
+                formData.org_name = document.getElementById('adminOrgName').value;
+                formData.org_type = document.getElementById('adminOrgType').value;
+                formData.org_phone = document.getElementById('adminPhone').value;
+                formData.org_address = document.getElementById('adminAddress').value;
+                formData.org_city = document.getElementById('adminCity').value;
+                formData.org_state = document.getElementById('adminState').value;
+                formData.org_zip = document.getElementById('adminZip').value;
+                formData.payment_plan = document.getElementById('adminPaymentPlan').value;
+                formData.estimated_student_count = document.getElementById('adminStudentCount').value;
+            }
 
             try {
                 const response = await fetch('/api/signup', {
@@ -1344,9 +1476,20 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    alert('Account created! Please login.');
+                    if (userType === 'administrator') {
+                        alert('Account created! Your application is pending review. You will be notified once it is approved.');
+                    } else {
+                        alert('Account created! Please login.');
+                    }
                     document.getElementById('signupForm').reset();
                     bootstrap.Modal.getInstance(document.getElementById('signupModal')).hide();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error creating account: ' + error.message);
+            }
+        });
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -1385,6 +1528,31 @@
             btn.addEventListener('click', () => {
                 document.getElementById('userType').value = btn.dataset.userType;
             });
+        });
+
+        // Handle admin login form
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                email: document.getElementById('adminLoginEmail').value,
+                password: document.getElementById('adminLoginPassword').value
+            };
+
+            try {
+                const response = await fetch('/api/admin-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error logging in');
+            }
         });
 
         // Handle education level buttons

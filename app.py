@@ -6,7 +6,8 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        end_live_session, get_course_live_sessions, save_recorded_lesson, get_recorded_lessons,
                        request_parent_student_link, approve_parent_student_link, reject_parent_student_link,
                        get_pending_links_for_student, get_approved_students_for_parent, unlink_parent_student,
-                       get_parent_student_links, unlink_parent_student_by_link)
+                       get_parent_student_links, unlink_parent_student_by_link, create_admin_application,
+                       get_admin_applications, approve_admin_application, reject_admin_application, authenticate_admin)
 import os
 from datetime import timedelta
 import base64
@@ -79,15 +80,52 @@ def signup():
         return jsonify({"success": False, "message": "Invalid email format"}), 400
 
     # Validate user type
-    if data.get('user_type') not in ['student', 'tutor', 'parent']:
+    if data.get('user_type') not in ['student', 'tutor', 'parent', 'administrator']:
         return jsonify({"success": False, "message": "Invalid user type"}), 400
 
-    # Education level is optional for parents (they can have kids in different levels)
+    # Education level is optional for parents and administrators
     education_level = data.get('education_level')
-    if data.get('user_type') != 'parent' and not education_level:
+    if data.get('user_type') not in ['parent', 'administrator'] and not education_level:
         return jsonify({"success": False, "message": "Education level required for students and tutors"}), 400
 
-    # Create user (convert email to lowercase for consistency)
+    # Handle administrator signup
+    if data.get('user_type') == 'administrator':
+        # Validate admin-specific fields
+        required_admin_fields = ['org_name', 'org_type', 'org_phone', 'org_address', 
+                                'org_city', 'org_state', 'org_zip', 'payment_plan', 'estimated_student_count']
+        
+        for field in required_admin_fields:
+            if not data.get(field):
+                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+        
+        # Create admin application (pending approval)
+        result = create_admin_application(
+            email=data.get('email', '').lower(),
+            password=data.get('password'),
+            full_name=data.get('full_name'),
+            org_name=data.get('org_name'),
+            org_type=data.get('org_type'),
+            org_phone=data.get('org_phone'),
+            org_address=data.get('org_address'),
+            org_city=data.get('org_city'),
+            org_state=data.get('org_state'),
+            org_zip=data.get('org_zip'),
+            payment_plan=data.get('payment_plan'),
+            estimated_student_count=int(data.get('estimated_student_count')),
+            country_code=data.get('country_code'),
+            whatsapp_number=data.get('whatsapp_number')
+        )
+        
+        print(f"[DEBUG SIGNUP ADMIN] create_admin_application result: {result}")
+        
+        if result['success']:
+            print(f"[DEBUG SIGNUP ADMIN] Admin application created successfully with ID: {result.get('application_id')}")
+            return jsonify(result), 201
+        else:
+            print(f"[DEBUG SIGNUP ADMIN] Admin application creation failed: {result.get('message')}")
+            return jsonify(result), 400
+    
+    # Regular user signup (student, tutor, parent)
     result = create_user(
         email=data.get('email', '').lower(),
         password=data.get('password'),
@@ -808,6 +846,117 @@ def unlink_student_endpoint():
             return jsonify({"success": False, "message": "link_id is required"}), 400
         
         result = unlink_parent_student_by_link(user_id, link_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# ========== ADMINISTRATOR ENDPOINTS ==========
+
+@app.route('/admin-approvals')
+def admin_approvals_page():
+    """Render the admin approvals dashboard"""
+    # This page should only be accessible after admin login
+    user_id = session.get('user_id')
+    user = get_user_by_id(user_id) if user_id else None
+    
+    if not user or user['user_type'] != 'administrator':
+        return redirect('/')
+    
+    return render_template('admin_approvals.html')
+
+@app.route('/api/admin-login', methods=['POST'])
+def admin_login():
+    """
+    Handle administrator login
+    Expected JSON: {
+        "email": "admin@example.com",
+        "password": "password123"
+    }
+    """
+    data = request.get_json()
+    
+    if not data.get('email') or not data.get('password'):
+        return jsonify({"success": False, "message": "Email and password required"}), 400
+    
+    admin = authenticate_admin(data.get('email', '').lower(), data.get('password'))
+    
+    if admin:
+        session.permanent = True
+        session['user_id'] = admin['id']
+        session['email'] = admin['email']
+        session['user_type'] = admin['user_type']
+        
+        return jsonify({
+            "success": True,
+            "message": "Admin login successful",
+            "user_id": admin['id'],
+            "email": admin['email'],
+            "user_type": admin['user_type'],
+            "redirect_url": "/admin-approvals"
+        }), 200
+    else:
+        return jsonify({"success": False, "message": "Invalid email or password"}), 401
+
+@app.route('/api/admin/applications', methods=['GET'])
+def get_admin_applications_endpoint():
+    """Get all admin applications grouped by status"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'administrator':
+        return jsonify({"success": False, "message": "Unauthorized access"}), 403
+    
+    try:
+        result = get_admin_applications()
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/admin/applications/approve', methods=['POST'])
+def approve_admin_application_endpoint():
+    """Approve an admin application"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'administrator':
+        return jsonify({"success": False, "message": "Unauthorized access"}), 403
+    
+    try:
+        data = request.get_json()
+        admin_id = data.get('admin_id')
+        
+        if not admin_id:
+            return jsonify({"success": False, "message": "admin_id is required"}), 400
+        
+        result = approve_admin_application(admin_id, user_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/admin/applications/reject', methods=['POST'])
+def reject_admin_application_endpoint():
+    """Reject an admin application"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'administrator':
+        return jsonify({"success": False, "message": "Unauthorized access"}), 403
+    
+    try:
+        data = request.get_json()
+        admin_id = data.get('admin_id')
+        reason = data.get('reason', '')
+        
+        if not admin_id:
+            return jsonify({"success": False, "message": "admin_id is required"}), 400
+        
+        result = reject_admin_application(admin_id, reason)
         return jsonify(result), 200 if result['success'] else 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

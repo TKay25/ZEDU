@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Approvals - ZEDU Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0d1b2a;
+            --primary-dark: #050d15;
+            --primary-light: #1a3a52;
+            --secondary: #8B2635;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dark: #0F172A;
+            --light: #F8FAFC;
+            --gray-100: #F1F5F9;
+            --gray-200: #E2E8F0;
+            --gray-600: #475569;
+            --gray-800: #1E293B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--light);
+            color: var(--gray-800);
+        }
+
+        .top-navbar {
+            background: white;
+            border-bottom: 2px solid var(--gray-200);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar-brand {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .content-area {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .stat-icon-primary {
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.2), rgba(26, 58, 82, 0.2));
+            color: var(--primary);
+        }
+
+        .stat-icon-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--dark);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: var(--gray-100);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .table thead th {
+            color: var(--gray-800);
+            font-weight: 700;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--gray-200);
+            transition: background 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(13, 27, 42, 0.03);
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .status-approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .action-btn-approve {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+
+        .action-btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .action-btn-reject {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .action-btn-reject:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .action-btn-details {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .action-btn-details:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--gray-200);
+            margin-bottom: 1rem;
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            border-bottom: 2px solid var(--gray-200);
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            font-weight: 700;
+            color: var(--gray-600);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            color: var(--dark);
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: 2px solid;
+            padding: 1rem;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-shield-alt"></i> ZEDU Admin Control Panel
+        </div>
+        <div class="navbar-actions">
+            <a href="#" onclick="logout()" style="text-decoration: none; color: var(--gray-600); font-weight: 600;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Administrator Approvals</h1>
+                <p style="color: var(--gray-600); margin-top: 0.5rem;">Review and manage school/organization administrator signups</p>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-primary">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="pendingCount">0</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: var(--success);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="approvedCount">0</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-warning">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="rejectedCount">0</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Applications Table -->
+        <div style="margin-bottom: 2rem;">
+            <h2 class="section-title">Pending Applications</h2>
+            <div class="table-container">
+                <table class="table" id="pendingTable">
+                    <thead>
+                        <tr>
+                            <th>Organization Name</th>
+                            <th>Admin Name</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Students</th>
+                            <th>Payment Plan</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i class="fas fa-inbox"></i>
+                                </div>
+                                <div>No pending applications</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Approved Applications Table -->
+        <div style="margin-bottom: 2rem;">
+            <h2 class="section-title">Approved Administrators</h2>
+            <div class="table-container">
+                <table class="table" id="approvedTable">
+                    <thead>
+                        <tr>
+                            <th>Organization Name</th>
+                            <th>Admin Name</th>
+                            <th>Email</th>
+                            <th>Students</th>
+                            <th>Status</th>
+                            <th>Approved On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvedTableBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>No approved administrators yet</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Details Modal -->
+    <div class="modal fade" id="adminDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200);">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-building" style="font-size: 1.28rem; color: var(--primary);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800;">Administrator Details</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <div class="detail-label">Administrator Name</div>
+                                <div class="detail-value" id="detailAdminName">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <div class="detail-label">Email Address</div>
+                                <div class="detail-value" id="detailEmail">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Organization Name</div>
+                        <div class="detail-value" id="detailOrgName">-</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <div class="detail-label">Organization Type</div>
+                                <div class="detail-value" id="detailOrgType">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <div class="detail-label">Estimated Students</div>
+                                <div class="detail-value" id="detailStudents">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Contact Phone</div>
+                        <div class="detail-value" id="detailPhone">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Address</div>
+                        <div class="detail-value" id="detailAddress">-</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <div class="detail-label">City</div>
+                                <div class="detail-value" id="detailCity">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <div class="detail-label">State/Province</div>
+                                <div class="detail-value" id="detailState">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Postal Code</div>
+                        <div class="detail-value" id="detailZip">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Payment Plan</div>
+                        <div class="detail-value" id="detailPaymentPlan">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Submission Date</div>
+                        <div class="detail-value" id="detailSubmittedDate">-</div>
+                    </div>
+                </div>
+                <div class="modal-footer" id="detailModalFooter" style="border-top: 2px solid var(--gray-200); padding: 1rem 1.5rem;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allAdmins = {
+            pending: [],
+            approved: [],
+            rejected: []
+        };
+
+        // Load administrator applications
+        async function loadAdministrators() {
+            try {
+                const response = await fetch('/api/admin/applications');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allAdmins = data.data;
+                    updateStats();
+                    renderTables();
+                }
+            } catch (error) {
+                console.error('Error loading administrators:', error);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('pendingCount').textContent = allAdmins.pending.length;
+            document.getElementById('approvedCount').textContent = allAdmins.approved.length;
+            document.getElementById('rejectedCount').textContent = allAdmins.rejected.length;
+        }
+
+        function renderTables() {
+            renderPendingTable();
+            renderApprovedTable();
+        }
+
+        function renderPendingTable() {
+            const tbody = document.getElementById('pendingTableBody');
+            
+            if (allAdmins.pending.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-state-icon"><i class="fas fa-inbox"></i></div><div>No pending applications</div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allAdmins.pending.map(admin => `
+                <tr>
+                    <td><strong>${admin.org_name}</strong></td>
+                    <td>${admin.full_name}</td>
+                    <td>${admin.email}</td>
+                    <td>${formatText(admin.org_type)}</td>
+                    <td>${admin.student_count}</td>
+                    <td>${formatText(admin.payment_plan)}</td>
+                    <td><small>${new Date(admin.created_at).toLocaleDateString()}</small></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn action-btn-details" onclick="showDetails(${admin.id}, 'pending')">
+                                <i class="fas fa-eye"></i> Details
+                            </button>
+                            <button class="action-btn action-btn-approve" onclick="approveAdmin(${admin.id})">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="action-btn action-btn-reject" onclick="rejectAdmin(${admin.id})">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderApprovedTable() {
+            const tbody = document.getElementById('approvedTableBody');
+            
+            if (allAdmins.approved.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon"><i class="fas fa-check-circle"></i></div><div>No approved administrators yet</div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allAdmins.approved.map(admin => `
+                <tr>
+                    <td><strong>${admin.org_name}</strong></td>
+                    <td>${admin.full_name}</td>
+                    <td>${admin.email}</td>
+                    <td>${admin.student_count}</td>
+                    <td><span class="status-badge status-approved">Active</span></td>
+                    <td><small>${new Date(admin.approved_at).toLocaleDateString()}</small></td>
+                    <td>
+                        <button class="action-btn action-btn-details" onclick="showDetails(${admin.id}, 'approved')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showDetails(adminId, status) {
+            const admins = allAdmins[status];
+            const admin = admins.find(a => a.id === adminId);
+            
+            if (!admin) return;
+
+            document.getElementById('detailAdminName').textContent = admin.full_name;
+            document.getElementById('detailEmail').textContent = admin.email;
+            document.getElementById('detailOrgName').textContent = admin.org_name;
+            document.getElementById('detailOrgType').textContent = formatText(admin.org_type);
+            document.getElementById('detailStudents').textContent = admin.student_count;
+            document.getElementById('detailPhone').textContent = admin.phone;
+            document.getElementById('detailAddress').textContent = admin.address;
+            document.getElementById('detailCity').textContent = admin.city;
+            document.getElementById('detailState').textContent = admin.state;
+            document.getElementById('detailZip').textContent = admin.zip;
+            document.getElementById('detailPaymentPlan').textContent = formatText(admin.payment_plan);
+            document.getElementById('detailSubmittedDate').textContent = new Date(admin.created_at).toLocaleDateString();
+
+            const footer = document.getElementById('detailModalFooter');
+            if (status === 'pending') {
+                footer.innerHTML = `
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn action-btn-approve" onclick="approveAdmin(${admin.id})">
+                        <i class="fas fa-check"></i> Approve
+                    </button>
+                    <button type="button" class="btn action-btn-reject" onclick="rejectAdmin(${admin.id})">
+                        <i class="fas fa-times"></i> Reject
+                    </button>
+                `;
+            } else {
+                footer.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>`;
+            }
+
+            new bootstrap.Modal(document.getElementById('adminDetailsModal')).show();
+        }
+
+        async function approveAdmin(adminId) {
+            if (!confirm('Are you sure you want to approve this administrator?')) return;
+
+            try {
+                const response = await fetch('/api/admin/applications/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ admin_id: adminId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Administrator approved successfully!');
+                    bootstrap.Modal.getInstance(document.getElementById('adminDetailsModal'))?.hide();
+                    loadAdministrators();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function rejectAdmin(adminId) {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (!reason) return;
+
+            try {
+                const response = await fetch('/api/admin/applications/reject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ admin_id: adminId, reason: reason })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Administrator rejected');
+                    bootstrap.Modal.getInstance(document.getElementById('adminDetailsModal'))?.hide();
+                    loadAdministrators();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function formatText(text) {
+            if (!text) return '-';
+            return text.replace(/_/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
+
+        // Load data on page load
+        window.addEventListener('load', () => {
+            loadAdministrators();
+        });
+    </script>
+</body>
+</html>

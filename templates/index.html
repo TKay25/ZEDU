@@ -2044,6 +2044,9 @@
                         <button type="button" class="btn btn-secondary-custom btn-lg" data-bs-toggle="modal" data-bs-target="#tutorModal">
                             <i class="fas fa-chalkboard"></i> Become a Tutor
                         </button>
+                        <button type="button" class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#adminModal" style="background: var(--danger); border-color: var(--danger);">
+                            <i class="fas fa-building"></i> Admin Portal
+                        </button>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -3071,6 +3074,46 @@
         </div>
     </div>
 
+    <!-- Administrator Login Modal -->
+    <div class="modal fade" id="adminModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-building" style="font-size: 1.28rem; color: var(--danger);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Administrator Login</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <form id="adminLoginForm">
+                        <div class="mb-3">
+                            <label for="adminEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="adminEmail" placeholder="your@email.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label">Password</label>
+                            <div class="password-toggle-wrapper">
+                                <input type="password" class="form-control password-field" id="adminPassword" placeholder="••••••••" required>
+                                <button type="button" class="password-toggle-btn" data-target="adminPassword" title="Toggle password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="rememberAdmin">
+                            <label class="form-check-label" for="rememberAdmin">Remember me</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
+                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="administrator" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign up now</a></small>
+                    <button type="submit" form="adminLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Sign Up Modal -->
     <div class="modal fade" id="signupModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -3318,6 +3361,7 @@
                                 <option value="student">Student</option>
                                 <option value="tutor">Tutor</option>
                                 <option value="parent">Parent</option>
+                                <option value="administrator">School/Organization Administrator</option>
                             </select>
                         </div>
                         <div class="mb-3" id="educationLevelGroup">
@@ -3328,6 +3372,65 @@
                                 <option value="high_school">High School</option>
                                 <option value="university">University/Advanced</option>
                             </select>
+                        </div>
+                        <!-- Administrator-specific fields -->
+                        <div id="adminFormFields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="adminOrgName" class="form-label">School/Organization Name</label>
+                                <input type="text" class="form-control" id="adminOrgName" placeholder="e.g., ABC School District">
+                            </div>
+                            <div class="mb-3">
+                                <label for="adminOrgType" class="form-label">Organization Type</label>
+                                <select class="form-select" id="adminOrgType">
+                                    <option value="">Select type</option>
+                                    <option value="primary_school">Primary School</option>
+                                    <option value="secondary_school">Secondary School</option>
+                                    <option value="university">University</option>
+                                    <option value="training_center">Training Center</option>
+                                    <option value="tutoring_center">Tutoring Center</option>
+                                    <option value="corporate">Corporate/Company</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="adminPhone" class="form-label">Organization Contact Phone</label>
+                                <input type="tel" class="form-control" id="adminPhone" placeholder="(123) 456-7890">
+                            </div>
+                            <div class="mb-3">
+                                <label for="adminAddress" class="form-label">Organization Address</label>
+                                <input type="text" class="form-control" id="adminAddress" placeholder="Street address">
+                            </div>
+                            <div class="mb-3">
+                                <label for="adminCity" class="form-label">City</label>
+                                <input type="text" class="form-control" id="adminCity" placeholder="City">
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="adminState" class="form-label">State/Province</label>
+                                    <input type="text" class="form-control" id="adminState" placeholder="State">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="adminZip" class="form-label">Postal Code</label>
+                                    <input type="text" class="form-control" id="adminZip" placeholder="Postal code">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="adminPaymentPlan" class="form-label">Payment Plan</label>
+                                <select class="form-select" id="adminPaymentPlan">
+                                    <option value="">Select payment plan</option>
+                                    <option value="students_pay">Students Pay Individually</option>
+                                    <option value="school_pays">School/Organization Pays for All Students</option>
+                                    <option value="hybrid">Hybrid (Mixed Payment)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="adminStudentCount" class="form-label">Estimated Number of Students</label>
+                                <input type="number" class="form-control" id="adminStudentCount" placeholder="100" min="1">
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                Your account will be pending administrator approval. We'll contact you with additional details after review.
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="signupPassword" class="form-label">Password</label>
@@ -3545,21 +3648,105 @@
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
 
                 console.log('Sending signup request...'); // Debug logging
+                
+                // Build request body
+                const requestBody = {
+                    email: email,
+                    password: password,
+                    confirm_password: confirmPassword,
+                    full_name: fullName,
+                    user_type: userType,
+                    education_level: educationLevel,
+                    country_code: countryCode,
+                    whatsapp_number: whatsappNumber
+                };
+
+                // Add administrator-specific fields if applicable
+                if (userType === 'administrator') {
+                    const orgName = document.getElementById('adminOrgName').value.trim();
+                    const orgType = document.getElementById('adminOrgType').value;
+                    const orgPhone = document.getElementById('adminPhone').value.trim();
+                    const orgAddress = document.getElementById('adminAddress').value.trim();
+                    const orgCity = document.getElementById('adminCity').value.trim();
+                    const orgState = document.getElementById('adminState').value.trim();
+                    const orgZip = document.getElementById('adminZip').value.trim();
+                    const paymentPlan = document.getElementById('adminPaymentPlan').value;
+                    const studentCount = document.getElementById('adminStudentCount').value;
+
+                    // Validate admin fields
+                    if (!orgName) {
+                        showSignupMessage('Please enter organization name', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!orgType) {
+                        showSignupMessage('Please select organization type', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!orgPhone) {
+                        showSignupMessage('Please enter organization phone', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!orgAddress) {
+                        showSignupMessage('Please enter organization address', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!orgCity) {
+                        showSignupMessage('Please enter city', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!orgState) {
+                        showSignupMessage('Please enter state/province', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!orgZip) {
+                        showSignupMessage('Please enter postal code', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!paymentPlan) {
+                        showSignupMessage('Please select payment plan', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                    if (!studentCount) {
+                        showSignupMessage('Please enter estimated student count', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+
+                    // Add to request body
+                    requestBody.org_name = orgName;
+                    requestBody.org_type = orgType;
+                    requestBody.org_phone = orgPhone;
+                    requestBody.org_address = orgAddress;
+                    requestBody.org_city = orgCity;
+                    requestBody.org_state = orgState;
+                    requestBody.org_zip = orgZip;
+                    requestBody.payment_plan = paymentPlan;
+                    requestBody.estimated_student_count = parseInt(studentCount);
+                }
+
                 const response = await fetch('/api/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                        confirm_password: confirmPassword,
-                        full_name: fullName,
-                        user_type: userType,
-                        education_level: educationLevel,
-                        country_code: countryCode,
-                        whatsapp_number: whatsappNumber
-                    })
+                    body: JSON.stringify(requestBody)
                 });
                 
                 console.log('Response status:', response.status); // Debug logging
@@ -3568,15 +3755,24 @@
                 console.log('Response data:', data); // Debug logging
 
                 if (data.success) {
-                    showSignupMessage('Account created successfully!', 'success');
+                    if (userType === 'administrator') {
+                        showSignupMessage('Account created successfully! Your organization details have been submitted for review. We will contact you soon with our decision.', 'success');
+                    } else {
+                        showSignupMessage('Account created successfully!', 'success');
+                    }
+                    
                     setTimeout(() => {
                         document.getElementById('signupForm').reset();
                         const signupModal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
                         signupModal.hide();
                         showSignupMessage('');
                         
-                        // For parents: show child linking modal first
-                        if (userType === 'parent') {
+                        // For administrators: show success message, don't show login modal
+                        if (userType === 'administrator') {
+                            // Admin account is pending approval
+                            alert('Your account has been submitted for approval. We will send you an email with updates shortly.');
+                        } else if (userType === 'parent') {
+                            // For parents: show child linking modal first
                             const linkModal = new bootstrap.Modal(document.getElementById('parentLinkChildModal'));
                             linkModal.show();
                         } else {
@@ -3621,21 +3817,30 @@
             }
         }
 
-        // Show/hide education level based on user type
+        // Show/hide education level and admin fields based on user type
         document.getElementById('signupUserType').addEventListener('change', function() {
             const educationLevelGroup = document.getElementById('educationLevelGroup');
+            const adminFormFields = document.getElementById('adminFormFields');
             const educationLevelLabel = document.getElementById('educationLevelLabel');
+            
             if (this.value === 'student') {
                 educationLevelGroup.style.display = 'block';
                 educationLevelLabel.textContent = 'Education Level';
                 document.getElementById('signupEducationLevel').required = true;
+                adminFormFields.style.display = 'none';
             } else if (this.value === 'tutor') {
                 educationLevelGroup.style.display = 'block';
                 educationLevelLabel.textContent = 'Teaching Level';
                 document.getElementById('signupEducationLevel').required = true;
+                adminFormFields.style.display = 'none';
+            } else if (this.value === 'administrator') {
+                educationLevelGroup.style.display = 'none';
+                document.getElementById('signupEducationLevel').required = false;
+                adminFormFields.style.display = 'block';
             } else {
                 educationLevelGroup.style.display = 'none';
                 document.getElementById('signupEducationLevel').required = false;
+                adminFormFields.style.display = 'none';
             }
         });
 
@@ -3854,6 +4059,51 @@
                 if (data.success) {
                     console.log('Login successful, redirecting to:', data.redirect_url);
                     window.location.href = data.redirect_url || '/parent-dashboard';
+                } else {
+                    console.warn('Login failed:', data.message);
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Administrator Login Handler
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            // Validate fields
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                console.warn('Login attempt with missing fields - Email:', email, 'Password length:', password.length);
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+                
+                console.log('Attempting admin login for:', email);
+                const response = await fetch('/api/admin-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (data.success) {
+                    console.log('Login successful, redirecting to:', data.redirect_url);
+                    window.location.href = data.redirect_url || '/admin-approvals';
                 } else {
                     console.warn('Login failed:', data.message);
                     alert(data.message || 'Login failed');

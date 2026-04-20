@@ -1573,6 +1573,239 @@ def unlink_parent_student_by_link(parent_id, link_id):
         cursor.close()
         conn.close()
 
+
+# ========== ADMINISTRATOR FUNCTIONS ==========
+
+def create_admin_application(email, password, full_name, org_name, org_type, org_phone, org_address, 
+                            org_city, org_state, org_zip, payment_plan, estimated_student_count, 
+                            country_code=None, whatsapp_number=None):
+    """
+    Create an administrator application (pending approval)
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Check if email already exists in admin_applications or users table
+        cursor.execute("SELECT id FROM admin_applications WHERE LOWER(email) = LOWER(%s)", (email,))
+        if cursor.fetchone():
+            return {"success": False, "message": "This email is already registered as an administrator"}
+        
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(%s)", (email,))
+        if cursor.fetchone():
+            return {"success": False, "message": "This email is already registered as a user"}
+        
+        # Hash the password
+        password_hash = hash_password(password)
+        
+        # Insert admin application
+        cursor.execute("""
+            INSERT INTO admin_applications 
+            (full_name, email, password_hash, org_name, org_type, org_phone, org_address, 
+             org_city, org_state, org_zip, payment_plan, estimated_student_count, 
+             country_code, whatsapp_number, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+            RETURNING id
+        """, (full_name, email.lower(), password_hash, org_name, org_type, org_phone, 
+              org_address, org_city, org_state, org_zip, payment_plan, estimated_student_count, 
+              country_code, whatsapp_number))
+        
+        app_id = cursor.fetchone()['id']
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": "Admin application submitted successfully. Awaiting approval.",
+            "application_id": app_id
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating admin application: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_admin_applications(status='all'):
+    """
+    Get admin applications grouped by status
+    status: 'all', 'pending', 'approved', 'rejected'
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        result = {"pending": [], "approved": [], "rejected": []}
+        
+        statuses_to_fetch = [status] if status != 'all' else ['pending', 'approved', 'rejected']
+        
+        for st in statuses_to_fetch:
+            cursor.execute("""
+                SELECT id, full_name, email, org_name, org_type, org_phone, org_address,
+                       org_city, org_state, org_zip, payment_plan, estimated_student_count,
+                       status, created_at, approved_at, rejection_reason
+                FROM admin_applications
+                WHERE status = %s
+                ORDER BY created_at DESC
+            """, (st,))
+            
+            apps = cursor.fetchall()
+            result[st] = [dict(app) for app in apps]
+        
+        return {"success": True, "data": result}
+    except Exception as e:
+        print(f"Error fetching admin applications: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def approve_admin_application(application_id, admin_user_id=None):
+    """
+    Approve an admin application: create user account and move to approved_admins
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Get the application
+        cursor.execute("""
+            SELECT * FROM admin_applications
+            WHERE id = %s AND status = 'pending'
+        """, (application_id,))
+        
+        app = cursor.fetchone()
+        if not app:
+            return {"success": False, "message": "Application not found or already processed"}
+        
+        # Create user account for the admin
+        cursor.execute("""
+            INSERT INTO users 
+            (email, password, full_name, user_type, country_code, whatsapp_number)
+            VALUES (%s, %s, %s, 'administrator', %s, %s)
+            RETURNING id
+        """, (app['email'], app['password_hash'], app['full_name'], 
+              app['country_code'], app['whatsapp_number']))
+        
+        user_id = cursor.fetchone()['id']
+        
+        # Update application status
+        cursor.execute("""
+            UPDATE admin_applications
+            SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by_admin_id = %s
+            WHERE id = %s
+        """, (admin_user_id, application_id))
+        
+        # Add to approved_admins table
+        cursor.execute("""
+            INSERT INTO approved_admins 
+            (user_id, application_id, org_name, org_type, org_phone, org_address,
+             org_city, org_state, org_zip, payment_plan, estimated_student_count)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (user_id, application_id, app['org_name'], app['org_type'], app['org_phone'],
+              app['org_address'], app['org_city'], app['org_state'], app['org_zip'],
+              app['payment_plan'], app['estimated_student_count']))
+        
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": "Admin application approved successfully",
+            "user_id": user_id,
+            "email": app['email']
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error approving admin application: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def reject_admin_application(application_id, reason=""):
+    """
+    Reject an admin application
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Get the application
+        cursor.execute("""
+            SELECT email FROM admin_applications
+            WHERE id = %s AND status = 'pending'
+        """, (application_id,))
+        
+        app = cursor.fetchone()
+        if not app:
+            return {"success": False, "message": "Application not found or already processed"}
+        
+        # Update application status
+        cursor.execute("""
+            UPDATE admin_applications
+            SET status = 'rejected', rejection_reason = %s
+            WHERE id = %s
+        """, (reason, application_id))
+        
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": "Admin application rejected",
+            "email": app['email']
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error rejecting admin application: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def authenticate_admin(email, password):
+    """
+    Authenticate an administrator (approved admin only)
+    Returns user object if successful, None if failed
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Check if email exists in approved_admins (via users table)
+        cursor.execute("""
+            SELECT u.id, u.email, u.full_name, u.user_type, u.password, u.created_at
+            FROM users u
+            INNER JOIN approved_admins aa ON u.id = aa.user_id
+            WHERE LOWER(u.email) = LOWER(%s) AND u.user_type = 'administrator'
+        """, (email,))
+        
+        user = cursor.fetchone()
+        
+        if user and verify_password(password, user['password']):
+            return dict(user)
+        
+        return None
+    except Exception as e:
+        print(f"Error authenticating admin: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
 if __name__ == "__main__":
     # Test database connection and create tables
     print("Connecting to database...")
