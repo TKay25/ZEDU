@@ -1068,7 +1068,7 @@
 
         /* Modal Styling */
         .modal-content {
-            border-radius: 16px !important;
+            border-radius: 24px !important;
             border: none !important;
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1) !important;
             background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
@@ -2990,9 +2990,12 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
-                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="student" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign up now</a></small>
-                    <button type="submit" form="studentLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap; display: flex; justify-content: space-between; align-items: flex-start;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="border: 2px solid var(--danger); color: var(--danger); background: transparent; font-weight: 600;"><i class="fas fa-times"></i> Close</button>
+                    <div style="width: 100%; text-align: center; margin: 0 auto;">
+                        <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center; display: block;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="student" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign up now</a></small>
+                        <button type="submit" form="studentLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3030,9 +3033,12 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
-                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">New tutor? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="tutor" style="color: var(--primary); text-decoration: none; font-weight: 600;">Apply now</a></small>
-                    <button type="submit" form="tutorLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap; display: flex; justify-content: space-between; align-items: flex-start;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="border: 2px solid var(--danger); color: var(--danger); background: transparent; font-weight: 600;"><i class="fas fa-times"></i> Close</button>
+                    <div style="width: 100%; text-align: center; margin: 0 auto;">
+                        <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center; display: block;">New tutor? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="tutor" style="color: var(--primary); text-decoration: none; font-weight: 600;">Apply now</a></small>
+                        <button type="submit" form="tutorLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3070,9 +3076,12 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
-                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="parent" style="color: var(--primary); text-decoration: none; font-weight: 600;">Create one</a></small>
-                    <button type="submit" form="parentLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap; display: flex; justify-content: space-between; align-items: flex-start;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="border: 2px solid var(--danger); color: var(--danger); background: transparent; font-weight: 600;"><i class="fas fa-times"></i> Close</button>
+                    <div style="width: 100%; text-align: center; margin: 0 auto;">
+                        <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center; display: block;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="parent" style="color: var(--primary); text-decoration: none; font-weight: 600;">Create one</a></small>
+                        <button type="submit" form="parentLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3084,7 +3093,7 @@
             <div class="modal-content">
                 <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-building" style="font-size: 1.28rem; color: var(--danger);"></i>
+                        <i class="fas fa-building" style="font-size: 1.28rem; color: var(--);"></i>
                         <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Administrator Login</h5>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -3110,9 +3119,12 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
-                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="administrator" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign up now</a></small>
-                    <button type="submit" form="adminLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap; display: flex; justify-content: space-between; align-items: flex-start;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="border: 2px solid var(--danger); color: var(--danger); background: transparent; font-weight: 600;"><i class="fas fa-times"></i> Close</button>
+                    <div style="width: 100%; text-align: center; margin: 0 auto;">
+                        <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center; display: block;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="administrator" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign up now</a></small>
+                        <button type="submit" form="adminLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3461,9 +3473,12 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
-                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Already have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#studentModal" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign in</a></small>
-                    <button type="submit" form="signupForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Create Account</button>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap; display: flex; justify-content: space-between; align-items: flex-start;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="border: 2px solid var(--danger); color: var(--danger); background: transparent; font-weight: 600;"><i class="fas fa-times"></i> Close</button>
+                    <div style="width: 100%; text-align: center; margin: 0 auto;">
+                        <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center; display: block;">Already have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#studentModal" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign in</a></small>
+                        <button type="submit" form="signupForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Create Account</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3504,9 +3519,12 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50);">
-                    <button type="button" class="btn btn-outline-secondary" id="skipLinkingBtn" onclick="skipChildLinking()" style="border: 2px solid var(--gray-200);">Skip for Now</button>
-                    <button type="submit" form="parentLinkChildForm" class="primary-btn" id="linkChildSubmitBtn" style="padding: 0.6rem 1.5rem;">Send Link Request</button>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); display: flex; justify-content: space-between;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="border: 2px solid var(--danger); color: var(--danger); background: transparent; font-weight: 600;"><i class="fas fa-times"></i> Close</button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="button" class="btn btn-outline-secondary" id="skipLinkingBtn" onclick="skipChildLinking()" style="border: 2px solid var(--gray-200);">Skip for Now</button>
+                        <button type="submit" form="parentLinkChildForm" class="primary-btn" id="linkChildSubmitBtn" style="padding: 0.6rem 1.5rem;">Send Link Request</button>
+                    </div>
                 </div>
             </div>
         </div>
