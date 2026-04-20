@@ -440,6 +440,100 @@
             border-top: 1px solid var(--gray-200);
         }
 
+        /* Assignment Item */
+        .assignment-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .assignment-item:hover {
+            box-shadow: 0 4px 12px rgba(13, 27, 42, 0.1);
+            transform: translateX(4px);
+        }
+
+        .assignment-info {
+            flex: 1;
+        }
+
+        .assignment-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--dark);
+            margin: 0 0 0.3rem 0;
+        }
+
+        .assignment-course {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin: 0;
+        }
+
+        .assignment-due {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 0.3rem;
+        }
+
+        .assignment-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-due-soon {
+            background: rgba(251, 146, 60, 0.1);
+            color: #f97316;
+        }
+
+        .status-not-started {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* Activity Item */
+        .activity-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        .activity-description {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            margin: 0.5rem 0 0 0;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .main-container {
@@ -714,6 +808,142 @@
                     <button class="empty-state-btn" onclick="alert('Explore Courses')">Explore Courses</button>
                 </div>
             </div>
+
+            <!-- Upcoming Assignments Section -->
+            <div class="section-header" style="margin-top: 3rem;">
+                <h2 class="section-title">📋 Upcoming Assignments</h2>
+                <a href="#" class="view-all-btn">View All →</a>
+            </div>
+
+            <div id="assignmentsContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="empty-state-title">No Pending Assignments</div>
+                    <p>You're all caught up! No assignments due soon.</p>
+                </div>
+            </div>
+
+            <!-- Performance Overview Section -->
+            <div class="section-header" style="margin-top: 3rem;">
+                <h2 class="section-title">📊 Performance Overview</h2>
+                <a href="#" class="view-all-btn">View Detailed Stats →</a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 3rem;">
+                <!-- GPA Card -->
+                <div style="background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%); border-radius: 16px; padding: 1.6rem; color: white; box-shadow: 0 8px 20px rgba(13, 27, 42, 0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div>
+                            <p style="font-size: 0.8rem; opacity: 0.9; margin: 0 0 0.5rem 0;">Current GPA</p>
+                            <h3 style="font-size: 2rem; font-weight: 800; margin: 0;">3.8</h3>
+                        </div>
+                        <i class="fas fa-star" style="font-size: 2rem; opacity: 0.7;"></i>
+                    </div>
+                    <p style="font-size: 0.75rem; opacity: 0.8; margin: 0;">On track for distinction</p>
+                </div>
+
+                <!-- Study Time Card -->
+                <div style="background: linear-gradient(135deg, #5e3bee 0%, #8b5cf6 100%); border-radius: 16px; padding: 1.6rem; color: white; box-shadow: 0 8px 20px rgba(94, 59, 238, 0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div>
+                            <p style="font-size: 0.8rem; opacity: 0.9; margin: 0 0 0.5rem 0;">This Week</p>
+                            <h3 style="font-size: 2rem; font-weight: 800; margin: 0;">14h 32m</h3>
+                        </div>
+                        <i class="fas fa-clock" style="font-size: 2rem; opacity: 0.7;"></i>
+                    </div>
+                    <p style="font-size: 0.75rem; opacity: 0.8; margin: 0;">+2h from last week</p>
+                </div>
+            </div>
+
+            <!-- Recommended Courses Section -->
+            <div class="section-header">
+                <h2 class="section-title">✨ Recommended For You</h2>
+                <a href="#" class="view-all-btn">Browse All →</a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;" id="recommendedContainer">
+                <!-- Recommended course cards will be populated here -->
+                <div style="background: white; border-radius: 16px; padding: 1.6rem; border: 1px solid #e5e7eb; text-align: center;">
+                    <i class="fas fa-lightbulb" style="font-size: 2.4rem; color: #fbbf24; margin-bottom: 0.8rem;"></i>
+                    <p style="color: #6b7280; font-size: 0.95rem;">Recommendations based on your interests will appear here</p>
+                </div>
+            </div>
+
+            <!-- Study Resources Section -->
+            <div class="section-header">
+                <h2 class="section-title">📚 Study Resources</h2>
+                <a href="#" class="view-all-btn">Manage Resources →</a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.2rem; margin-bottom: 3rem;">
+                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
+                    <i class="fas fa-file-pdf" style="font-size: 1.6rem; color: #ef4444; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">12 PDFs</p>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Downloaded materials</p>
+                </div>
+                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
+                    <i class="fas fa-video" style="font-size: 1.6rem; color: #3b82f6; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">8 Videos</p>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Saved for later</p>
+                </div>
+                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
+                    <i class="fas fa-bookmark" style="font-size: 1.6rem; color: #10b981; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">25 Articles</p>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Reading list</p>
+                </div>
+                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
+                    <i class="fas fa-sticky-note" style="font-size: 1.6rem; color: #f59e0b; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">17 Notes</p>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Personal notes</p>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="section-header">
+                <h2 class="section-title">🔄 Recent Activity</h2>
+                <a href="#" class="view-all-btn">View Timeline →</a>
+            </div>
+
+            <div id="activityContainer" style="margin-bottom: 3rem;">
+                <div style="background: white; border-radius: 12px; padding: 1.2rem; border-left: 4px solid #5e3bee;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: #1f2937;">Assignment Submitted</h4>
+                        <span style="font-size: 0.75rem; color: #6b7280;">2 hours ago</span>
+                    </div>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #6b7280;">Submitted "Data Structures Quiz" in Advanced Programming</p>
+                </div>
+            </div>
+
+            <!-- Achievements/Certificates Section -->
+            <div class="section-header">
+                <h2 class="section-title">🏆 Achievements & Certificates</h2>
+                <a href="#" class="view-all-btn">View All →</a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1.2rem; margin-bottom: 3rem;" id="achievementsContainer">
+                <div style="text-align: center; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; padding: 1.2rem; color: white; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);">
+                    <i class="fas fa-medal" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">Fast Learner</p>
+                    <p style="font-size: 0.7rem; opacity: 0.9; margin: 0;">Completed 5 courses</p>
+                </div>
+                <div style="text-align: center; background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); border-radius: 12px; padding: 1.2rem; color: white; box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2);">
+                    <i class="fas fa-fire" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">30-Day Streak</p>
+                    <p style="font-size: 0.7rem; opacity: 0.9; margin: 0;">Active learner</p>
+                </div>
+                <div style="text-align: center; background: linear-gradient(135deg, #34d399 0%, #10b981 100%); border-radius: 12px; padding: 1.2rem; color: white; box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2);">
+                    <i class="fas fa-certificate" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">Python Master</p>
+                    <p style="font-size: 0.7rem; opacity: 0.9; margin: 0;">Expert level</p>
+                </div>
+                <div style="text-align: center; background: #f3f4f6; border-radius: 12px; padding: 1.2rem; border: 2px dashed #9ca3af; color: #6b7280;">
+                    <i class="fas fa-lock" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">Locked</p>
+                    <p style="font-size: 0.7rem; margin: 0;">Complete 2 more courses</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -794,6 +1024,146 @@
             `).join('');
         }
 
+        // Load assignments
+        async function loadAssignments() {
+            try {
+                // For now, showing mock data
+                const container = document.getElementById('assignmentsContainer');
+                const assignments = [
+                    {
+                        id: 1,
+                        title: 'Data Structures Quiz',
+                        course: 'Advanced Programming',
+                        dueDate: '2026-04-25',
+                        status: 'due-soon'
+                    },
+                    {
+                        id: 2,
+                        title: 'Python Project - Web Scraper',
+                        course: 'Python Fundamentals',
+                        dueDate: '2026-04-28',
+                        status: 'not-started'
+                    },
+                    {
+                        id: 3,
+                        title: 'Mathematics Assignment Chapter 5',
+                        course: 'Pre-calculus',
+                        dueDate: '2026-05-02',
+                        status: 'due-soon'
+                    }
+                ];
+
+                if (assignments.length > 0) {
+                    container.innerHTML = assignments.map(assignment => `
+                        <div class="assignment-item">
+                            <div class="assignment-info">
+                                <p class="assignment-title">${assignment.title}</p>
+                                <p class="assignment-course">${assignment.course}</p>
+                                <p class="assignment-due">Due: ${new Date(assignment.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                            </div>
+                            <div class="assignment-status ${assignment.status === 'due-soon' ? 'status-due-soon' : 'status-not-started'}">
+                                ${assignment.status === 'due-soon' ? 'Due Soon' : 'Not Started'}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+            }
+        }
+
+        // Load activity
+        async function loadActivity() {
+            try {
+                const container = document.getElementById('activityContainer');
+                const activities = [
+                    {
+                        title: 'Assignment Submitted',
+                        course: 'Advanced Programming',
+                        description: 'Submitted "Data Structures Quiz"',
+                        time: '2 hours ago'
+                    },
+                    {
+                        title: 'Course Completed',
+                        course: 'Python Fundamentals',
+                        description: 'Successfully completed Python Fundamentals course',
+                        time: '1 day ago'
+                    },
+                    {
+                        title: 'Achievement Unlocked',
+                        course: 'Learning',
+                        description: 'Earned "30-Day Streak" achievement',
+                        time: '3 days ago'
+                    },
+                    {
+                        title: 'Course Enrolled',
+                        course: 'Pre-calculus',
+                        description: 'Enrolled in Pre-calculus course',
+                        time: '5 days ago'
+                    }
+                ];
+
+                if (activities.length > 0) {
+                    container.innerHTML = activities.map(activity => `
+                        <div class="activity-item">
+                            <div class="activity-header">
+                                <h4 class="activity-title">${activity.title}</h4>
+                                <span class="activity-time">${activity.time}</span>
+                            </div>
+                            <p class="activity-description">${activity.description}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
+        }
+
+        // Load recommendations
+        async function loadRecommendations() {
+            try {
+                const container = document.getElementById('recommendedContainer');
+                const recommendations = [
+                    {
+                        id: 1,
+                        title: 'Machine Learning Basics',
+                        instructor: 'Prof. Smith',
+                        students: 1250,
+                        level: 'Intermediate'
+                    },
+                    {
+                        id: 2,
+                        title: 'Web Development with React',
+                        instructor: 'Prof. Johnson',
+                        students: 2100,
+                        level: 'Beginner'
+                    },
+                    {
+                        id: 3,
+                        title: 'Database Design',
+                        instructor: 'Prof. Williams',
+                        students: 890,
+                        level: 'Advanced'
+                    }
+                ];
+
+                if (recommendations.length > 0) {
+                    container.innerHTML = recommendations.map(course => `
+                        <div style="background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.boxShadow='0 8px 20px rgba(13, 27, 42, 0.1)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
+                            <h4 style="font-size: 0.9rem; font-weight: 700; color: #1f2937; margin: 0 0 0.5rem 0;">${course.title}</h4>
+                            <p style="font-size: 0.8rem; color: #6b7280; margin: 0 0 0.8rem 0;">${course.instructor}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.7rem; background: #f0f9ff; color: #0369a1; padding: 0.3rem 0.6rem; border-radius: 12px; font-weight: 600;">${course.level}</span>
+                                <span style="font-size: 0.7rem; color: #9ca3af;">${course.students} students</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+            }
+        }
+
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
             e.preventDefault();
@@ -811,6 +1181,9 @@
         window.addEventListener('load', () => {
             loadProfile();
             loadEnrollments();
+            loadAssignments();
+            loadActivity();
+            loadRecommendations();
         });
 
         // User profile dropdown
