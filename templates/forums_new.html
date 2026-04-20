@@ -395,6 +395,47 @@
                 width: 200px;
             }
         }
+
+        /* Dark Theme */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .top-navbar {
+            background: #222;
+            border-bottom-color: #333;
+        }
+
+        body.dark-theme .search-box {
+            background: #333;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .search-box:focus {
+            background: #2a2a2a;
+        }
+
+        body.dark-theme .thread-card {
+            background: #222;
+            border-color: #333;
+        }
+
+        body.dark-theme .thread-card:hover {
+            background: #2a2a2a;
+        }
+
+        body.dark-theme .page-title {
+            color: #e8f4f8;
+        }
+
+        body.dark-theme .navbar-actions a {
+            color: #999;
+        }
+
+        body.dark-theme .navbar-actions a:hover {
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -574,8 +615,23 @@
             }
         }
 
+        // Load theme preference
+        function loadThemePreference() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (theme === 'auto') {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.body.classList.add('dark-theme');
+                }
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        }
+
         // Load data on page load
         window.addEventListener('load', () => {
+            loadThemePreference();
             loadProfile();
         });
     </script>

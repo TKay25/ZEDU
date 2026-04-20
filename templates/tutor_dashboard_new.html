@@ -553,6 +553,117 @@
         .btn-close:focus {
             box-shadow: 0 0 0 0.25rem rgba(13, 27, 42, 0.25);
         }
+
+        /* Dark Theme */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .top-navbar {
+            background: #222;
+            border-bottom-color: #333;
+        }
+
+        body.dark-theme .search-box {
+            background: #333;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .search-box:focus {
+            background: #2a2a2a;
+        }
+
+        body.dark-theme .table-container {
+            background: #222;
+            border-color: #333;
+        }
+
+        body.dark-theme .table thead {
+            background: #1a1a1a;
+            border-bottom-color: #333;
+        }
+
+        body.dark-theme .table thead th {
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .table tbody td {
+            border-color: #333;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .table tbody tr:hover {
+            background: #2a2a2a;
+        }
+
+        body.dark-theme .stat-card {
+            background: #222;
+            border-color: #333;
+        }
+
+        body.dark-theme .page-title {
+            color: #e8f4f8;
+        }
+
+        body.dark-theme .section-title {
+            color: #e8f4f8;
+        }
+
+        body.dark-theme .modal-content {
+            background: #222;
+            border-color: #333;
+        }
+
+        body.dark-theme .modal-header {
+            border-bottom-color: #333;
+        }
+
+        body.dark-theme .modal-title {
+            color: #e8f4f8;
+        }
+
+        body.dark-theme .form-label {
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .form-control,
+        body.dark-theme .form-select {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .form-control:focus,
+        body.dark-theme .form-select:focus {
+            background: #1a1a1a;
+            border-color: var(--primary);
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .btn-close {
+            filter: invert(1);
+        }
+
+        body.dark-theme .empty-state {
+            color: #999;
+        }
+
+        body.dark-theme .empty-state-icon {
+            color: #444;
+        }
+
+        body.dark-theme a {
+            color: var(--primary);
+        }
+
+        body.dark-theme .navbar-actions a {
+            color: #999;
+        }
+
+        body.dark-theme .navbar-actions a:hover {
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -773,12 +884,17 @@
                             <textarea class="form-control" id="materialDescription" rows="3" placeholder="Brief description"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">File URL</label>
-                            <input type="url" class="form-control" id="materialFileUrl" placeholder="https://example.com/file.pdf" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">File Size (MB)</label>
-                            <input type="number" class="form-control" id="materialFileSize" step="0.1">
+                            <label class="form-label">Select File</label>
+                            <div style="border: 2px dashed var(--gray-200); border-radius: 8px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s ease;" id="fileDropZone">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+                                <p style="margin: 0.5rem 0; color: var(--gray-600); font-weight: 600;">Click to upload or drag & drop</p>
+                                <p style="margin: 0; font-size: 0.8rem; color: var(--gray-600);"><span id="acceptedFileTypes">PDF (max 50MB)</span></p>
+                                <input type="file" id="materialFile" style="display: none;" required>
+                            </div>
+                            <div id="fileInfo" style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;">
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                                <span id="fileName" style="margin-left: 0.5rem; font-weight: 600;"></span>
+                            </div>
                         </div>
                         <div class="mb-3" id="videoDurationContainer" style="display: none;">
                             <label class="form-label">Video Duration (seconds)</label>
@@ -960,58 +1076,124 @@
             currentMaterialType = type;
             const modal = new bootstrap.Modal(document.getElementById('uploadMaterialModal'));
             document.getElementById('uploadMaterialForm').reset();
+            document.getElementById('fileInfo').style.display = 'none';
             
-            // Show/hide video duration field based on material type
-            const videoDurationContainer = document.getElementById('videoDurationContainer');
+            // Set file input accept and types based on material type
+            const fileInput = document.getElementById('materialFile');
+            const acceptedTypes = document.getElementById('acceptedFileTypes');
             if (type === 'video') {
-                videoDurationContainer.style.display = 'block';
+                fileInput.accept = 'video/mp4,video/webm,video/ogg';
+                acceptedTypes.textContent = 'MP4, WebM, OGG (max 500MB)';
+                document.getElementById('videoDurationContainer').style.display = 'block';
             } else {
-                videoDurationContainer.style.display = 'none';
+                fileInput.accept = 'application/pdf';
+                acceptedTypes.textContent = 'PDF (max 50MB)';
+                document.getElementById('videoDurationContainer').style.display = 'none';
             }
             
             modal.show();
+        }
+
+        // File drop zone handling
+        const fileDropZone = document.getElementById('fileDropZone');
+        const materialFile = document.getElementById('materialFile');
+
+        fileDropZone.addEventListener('click', () => materialFile.click());
+
+        fileDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileDropZone.style.background = 'rgba(94, 59, 238, 0.1)';
+            fileDropZone.style.borderColor = 'var(--primary)';
+        });
+
+        fileDropZone.addEventListener('dragleave', () => {
+            fileDropZone.style.background = 'transparent';
+            fileDropZone.style.borderColor = 'var(--gray-200)';
+        });
+
+        fileDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileDropZone.style.background = 'transparent';
+            fileDropZone.style.borderColor = 'var(--gray-200)';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                materialFile.files = files;
+                handleFileSelect({ target: { files } });
+            }
+        });
+
+        materialFile.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const maxSize = currentMaterialType === 'video' ? 500 * 1024 * 1024 : 50 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB`);
+                materialFile.value = '';
+                return;
+            }
+
+            document.getElementById('fileName').textContent = file.name + ' (' + (file.size / (1024 * 1024)).toFixed(2) + 'MB)';
+            document.getElementById('fileInfo').style.display = 'block';
         }
 
         document.getElementById('uploadMaterialForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const courseId = document.getElementById('materialCourseId').value;
+            const file = document.getElementById('materialFile').files[0];
+
             if (!courseId) {
                 alert('Please select a course');
                 return;
             }
 
-            const formData = {
-                title: document.getElementById('materialTitle').value,
-                description: document.getElementById('materialDescription').value,
-                material_type: currentMaterialType,
-                file_url: document.getElementById('materialFileUrl').value,
-                file_size: parseInt(document.getElementById('materialFileSize').value) || null
-            };
-
-            if (currentMaterialType === 'video') {
-                formData.duration_seconds = parseInt(document.getElementById('videoDuration').value) || null;
+            if (!file) {
+                alert('Please select a file');
+                return;
             }
 
-            try {
-                const response = await fetch(`/api/course/${courseId}/material/upload`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
+            // Read file as base64
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const base64Data = event.target.result;
 
-                const data = await response.json();
-                if (data.success) {
-                    alert(`${currentMaterialType.toUpperCase()} uploaded successfully!`);
-                    document.getElementById('uploadMaterialForm').reset();
-                    bootstrap.Modal.getInstance(document.getElementById('uploadMaterialModal')).hide();
-                } else {
-                    alert('Error: ' + data.message);
+                const formData = {
+                    title: document.getElementById('materialTitle').value,
+                    description: document.getElementById('materialDescription').value,
+                    material_type: currentMaterialType,
+                    file_data: base64Data,
+                    file_size: Math.round(file.size / (1024 * 1024))
+                };
+
+                if (currentMaterialType === 'video') {
+                    formData.duration_seconds = parseInt(document.getElementById('videoDuration').value) || null;
                 }
-            } catch (error) {
-                console.error('Error uploading material:', error);
-                alert('Error uploading material');
-            }
+
+                try {
+                    const response = await fetch(`/api/course/${courseId}/material/upload`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`${currentMaterialType.toUpperCase()} uploaded successfully!`);
+                        document.getElementById('uploadMaterialForm').reset();
+                        document.getElementById('fileInfo').style.display = 'none';
+                        bootstrap.Modal.getInstance(document.getElementById('uploadMaterialModal')).hide();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error uploading material:', error);
+                    alert('Error uploading material');
+                }
+            };
+            reader.readAsDataURL(file);
         });
 
         // Live Session Functions
@@ -1067,8 +1249,23 @@
             window.location.href = '/';
         });
 
+        // Load theme preference
+        function loadThemePreference() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (theme === 'auto') {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.body.classList.add('dark-theme');
+                }
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        }
+
         // Load on page load
         window.addEventListener('load', () => {
+            loadThemePreference();
             loadCourses();
         });
     </script>

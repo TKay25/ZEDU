@@ -272,15 +272,24 @@ def enroll_course():
         return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/dashboard')
-def student_dashboard():
-    """Student dashboard"""
+def dashboard():
+    """Universal dashboard that redirects to appropriate user dashboard"""
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/')
     
     user = get_user_by_id(user_id)
-    if user and user['user_type'] == 'student':
+    if not user:
+        return redirect('/')
+    
+    # Redirect to appropriate dashboard based on user type
+    if user['user_type'] == 'student':
         return render_template('student_dashboard_new.html', user=dict(user))
+    elif user['user_type'] == 'tutor':
+        return render_template('tutor_dashboard_new.html', user=dict(user))
+    elif user['user_type'] == 'parent':
+        return render_template('parent_dashboard_new.html', user=dict(user))
+    
     return redirect('/')
 
 @app.route('/tutor-dashboard')

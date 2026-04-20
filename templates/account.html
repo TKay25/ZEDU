@@ -527,6 +527,56 @@
                 width: 200px;
             }
         }
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .top-navbar {
+            background: #222;
+            border-bottom-color: #333;
+        }
+
+        body.dark-theme .modal-content {
+            background: #222;
+            border-color: #333;
+        }
+
+        body.dark-theme .modal-header {
+            border-bottom-color: #333;
+        }
+
+        body.dark-theme .modal-title {
+            color: #e8f4f8;
+        }
+
+        body.dark-theme .form-label {
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .form-control {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .form-control:focus {
+            background: #1a1a1a;
+            border-color: var(--primary);
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .btn-close {
+            filter: invert(1);
+        }
+
+        body.dark-theme .navbar-actions a {
+            color: #999;
+        }
+
+        body.dark-theme .navbar-actions a:hover {
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -979,8 +1029,23 @@
             }
         });
 
+        // Load theme preference
+        function loadThemePreference() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (theme === 'auto') {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.body.classList.add('dark-theme');
+                }
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        }
+
         // Load data on page load
         window.addEventListener('load', () => {
+            loadThemePreference();
             loadProfile();
         });
     </script>
