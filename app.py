@@ -492,7 +492,7 @@ def get_course_materials_api(course_id):
 
 @app.route('/api/course/<int:course_id>/material/upload', methods=['POST'])
 def upload_material_api(course_id):
-    """Upload course material (PDF, video, etc.)"""
+    """Upload course material (PDF, video, etc.) - accepts base64 encoded file data"""
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({"success": False, "message": "Not authenticated"}), 401
@@ -504,8 +504,8 @@ def upload_material_api(course_id):
     data = request.get_json()
     
     # Validate required fields
-    if not all([data.get('title'), data.get('material_type'), data.get('file_url')]):
-        return jsonify({"success": False, "message": "Missing required fields (title, material_type, file_url)"}), 400
+    if not all([data.get('title'), data.get('material_type'), data.get('file_data')]):
+        return jsonify({"success": False, "message": "Missing required fields (title, material_type, file_data)"}), 400
     
     # Validate material type
     if data.get('material_type') not in ['pdf', 'video', 'document']:
@@ -518,7 +518,7 @@ def upload_material_api(course_id):
             title=data.get('title'),
             description=data.get('description'),
             material_type=data.get('material_type'),
-            file_url=data.get('file_url'),
+            file_data=data.get('file_data'),
             file_size=data.get('file_size'),
             duration_seconds=data.get('duration_seconds')
         )

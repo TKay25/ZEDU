@@ -886,9 +886,9 @@ def create_post(thread_id, user_id, content):
 
 # ============== COURSE MATERIALS ==============
 
-def upload_course_material(course_id, instructor_id, title, description, material_type, file_url, file_size=None, duration_seconds=None):
+def upload_course_material(course_id, instructor_id, title, description, material_type, file_data, file_size=None, duration_seconds=None):
     """
-    Upload course material (PDF, video, document)
+    Upload course material (PDF, video, document) - stores base64 file data
     """
     conn = get_db_connection()
     if not conn:
@@ -900,7 +900,7 @@ def upload_course_material(course_id, instructor_id, title, description, materia
             INSERT INTO course_materials (course_id, instructor_id, title, description, material_type, file_url, file_size, duration_seconds)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id, title, material_type, created_at;
-        """, (course_id, instructor_id, title, description, material_type, file_url, file_size, duration_seconds))
+        """, (course_id, instructor_id, title, description, material_type, file_data, file_size, duration_seconds))
         
         result = cursor.fetchone()
         conn.commit()
