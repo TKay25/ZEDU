@@ -710,9 +710,17 @@
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Instructor Dashboard</h1>
-                    <p style="font-size: 0.9rem; color: var(--gray-600); margin: 0.5rem 0 0 0;">
-                        <span id="tutorName">-</span> • <span id="tutorEducation">-</span>
-                    </p>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-user-tie" style="font-size: 0.9rem; color: var(--primary);"></i>
+                            <span id="tutorName" style="font-weight: 600; color: var(--dark); font-size: 0.9rem;">-</span>
+                        </div>
+                        <div style="color: var(--gray-300);">•</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-graduation-cap" style="font-size: 0.9rem; color: var(--success);"></i>
+                            <span id="tutorEducation" style="font-weight: 600; color: var(--dark); font-size: 0.9rem;">-</span>
+                        </div>
+                    </div>
                 </div>
                 <button class="primary-btn" data-bs-toggle="modal" data-bs-target="#createCourseModal">
                     <i class="fas fa-plus"></i> Create Course
@@ -962,6 +970,16 @@
         let currentMaterialType = 'pdf';
         let courses = [];
 
+        // Format text: remove underscores, replace with spaces, title case each word
+        function formatText(text) {
+            if (!text || text === '-') return '-';
+            return text
+                .replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+        }
+
         // Load tutor profile information
         async function loadTutorProfile() {
             try {
@@ -969,8 +987,8 @@
                 const data = await response.json();
                 if (data.success) {
                     const profile = data.profile;
-                    document.getElementById('tutorName').textContent = profile.name || 'N/A';
-                    document.getElementById('tutorEducation').textContent = profile.education_level || 'N/A';
+                    document.getElementById('tutorName').textContent = formatText(profile.name) || 'N/A';
+                    document.getElementById('tutorEducation').textContent = formatText(profile.education_level) || 'N/A';
                     if (profile.initials) {
                         document.getElementById('userInitials').textContent = profile.initials;
                     }
