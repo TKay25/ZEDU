@@ -5,7 +5,7 @@ Run this script once to initialize the database and create all necessary tables
 """
 
 import sys
-from db_helper import create_tables, get_db_connection
+from db_helper import create_tables, get_db_connection, get_all_users
 
 def main():
     print("=" * 60)
@@ -30,6 +30,16 @@ def main():
     if create_tables():
         print()
         print("✅ Database initialization complete!")
+        print()
+        print("📋 Users table:")
+        print("-" * 60)
+        users = get_all_users(limit=100)
+        if users:
+            for user in users:
+                print(user)
+        else:
+            print("No users found in database")
+        print("-" * 60)
         print()
         print("Next steps:")
         print("1. Install dependencies: pip install -r requirements.txt")

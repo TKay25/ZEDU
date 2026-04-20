@@ -256,6 +256,7 @@ def get_user_by_email(email):
         cursor.execute("SELECT * FROM users WHERE LOWER(email) = LOWER(%s);", (email,))
         result = cursor.fetchone()
         return result
+    
     except Exception as e:
         print(f"Error getting user: {e}")
         return None
