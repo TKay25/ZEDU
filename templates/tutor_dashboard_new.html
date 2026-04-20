@@ -661,6 +661,40 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Course Materials Section -->
+            <div class="section-header" style="margin-top: 3rem;">
+                <h2 class="section-title">📚 Course Materials & Sessions</h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: white; padding: 1.6rem; border-radius: 12px; border: 1px solid var(--gray-200); cursor: pointer; transition: all 0.3s ease;" 
+                     onmouseover="this.style.boxShadow='0 10px 25px rgba(94, 59, 238, 0.1)'; this.style.transform='translateY(-4px)'"
+                     onmouseout="this.style.boxShadow=''; this.style.transform=''"
+                     onclick="openMaterialModal('pdf')">
+                    <div style="font-size: 2.4rem; color: var(--primary); margin-bottom: 1rem;"><i class="fas fa-file-pdf"></i></div>
+                    <h3 style="font-weight: 700; color: var(--dark); margin-bottom: 0.5rem;">Upload PDF Notes</h3>
+                    <p style="font-size: 0.9rem; color: var(--gray-600);">Share course notes and materials</p>
+                </div>
+
+                <div style="background: white; padding: 1.6rem; border-radius: 12px; border: 1px solid var(--gray-200); cursor: pointer; transition: all 0.3s ease;" 
+                     onmouseover="this.style.boxShadow='0 10px 25px rgba(94, 59, 238, 0.1)'; this.style.transform='translateY(-4px)'"
+                     onmouseout="this.style.boxShadow=''; this.style.transform=''"
+                     onclick="openMaterialModal('video')">
+                    <div style="font-size: 2.4rem; color: var(--success); margin-bottom: 1rem;"><i class="fas fa-video"></i></div>
+                    <h3 style="font-weight: 700; color: var(--dark); margin-bottom: 0.5rem;">Upload Videos</h3>
+                    <p style="font-size: 0.9rem; color: var(--gray-600);">Upload recorded lessons and tutorials</p>
+                </div>
+
+                <div style="background: white; padding: 1.6rem; border-radius: 12px; border: 1px solid var(--gray-200); cursor: pointer; transition: all 0.3s ease;" 
+                     onmouseover="this.style.boxShadow='0 10px 25px rgba(94, 59, 238, 0.1)'; this.style.transform='translateY(-4px)'"
+                     onmouseout="this.style.boxShadow=''; this.style.transform=''"
+                     onclick="openLiveSessionModal()">
+                    <div style="font-size: 2.4rem; color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-broadcast-tower"></i></div>
+                    <h3 style="font-weight: 700; color: var(--dark); margin-bottom: 0.5rem;">Start Live Session</h3>
+                    <p style="font-size: 0.9rem; color: var(--gray-600);">Conduct live classes and record them</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -714,16 +748,121 @@
         </div>
     </div>
 
+    <!-- Upload Material Modal -->
+    <div class="modal fade" id="uploadMaterialModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Course Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadMaterialForm">
+                        <div class="mb-3">
+                            <label class="form-label">Select Course</label>
+                            <select class="form-select" id="materialCourseId" required>
+                                <option value="">Choose a course...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Material Title</label>
+                            <input type="text" class="form-control" id="materialTitle" placeholder="e.g., Chapter 1 Notes" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="materialDescription" rows="3" placeholder="Brief description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">File URL</label>
+                            <input type="url" class="form-control" id="materialFileUrl" placeholder="https://example.com/file.pdf" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">File Size (MB)</label>
+                            <input type="number" class="form-control" id="materialFileSize" step="0.1">
+                        </div>
+                        <div class="mb-3" id="videoDurationContainer" style="display: none;">
+                            <label class="form-label">Video Duration (seconds)</label>
+                            <input type="number" class="form-control" id="videoDuration">
+                        </div>
+                        <button type="submit" class="primary-btn w-100">Upload Material</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Session Modal -->
+    <div class="modal fade" id="liveSessionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule Live Session</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="liveSessionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Select Course</label>
+                            <select class="form-select" id="sessionCourseId" required>
+                                <option value="">Choose a course...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Session Title</label>
+                            <input type="text" class="form-control" id="sessionTitle" placeholder="e.g., Q&A Session" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="sessionDescription" rows="3" placeholder="Session details"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Scheduled Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="sessionDateTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Meeting URL (Zoom, Google Meet, etc.)</label>
+                            <input type="url" class="form-control" id="sessionUrl" placeholder="https://zoom.us/j/...">
+                        </div>
+                        <div class="alert alert-primary">
+                            <i class="fas fa-info-circle"></i>
+                            You'll be able to start the session, record it, and save the recording as a video lesson.
+                        </div>
+                        <button type="submit" class="primary-btn w-100">Schedule Session</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let currentMaterialType = 'pdf';
+        let courses = [];
+
         // Load instructor courses
         async function loadCourses() {
             try {
                 const response = await fetch('/api/my-courses');
                 const data = await response.json();
                 if (data.success) {
-                    const courses = data.courses;
+                    courses = data.courses;
                     document.getElementById('courseCount').textContent = courses.length;
+                    
+                    // Populate course dropdowns
+                    const courseSelects = [
+                        document.getElementById('materialCourseId'),
+                        document.getElementById('sessionCourseId')
+                    ];
+                    
+                    courseSelects.forEach(select => {
+                        select.innerHTML = '<option value="">Choose a course...</option>';
+                        courses.forEach(course => {
+                            const option = document.createElement('option');
+                            option.value = course.id;
+                            option.textContent = course.title;
+                            select.appendChild(option);
+                        });
+                    });
                     
                     if (courses.length === 0) {
                         document.getElementById('coursesTableBody').innerHTML = `
@@ -816,8 +955,113 @@
             }
         });
 
+        // Material Upload Functions
+        function openMaterialModal(type) {
+            currentMaterialType = type;
+            const modal = new bootstrap.Modal(document.getElementById('uploadMaterialModal'));
+            document.getElementById('uploadMaterialForm').reset();
+            
+            // Show/hide video duration field based on material type
+            const videoDurationContainer = document.getElementById('videoDurationContainer');
+            if (type === 'video') {
+                videoDurationContainer.style.display = 'block';
+            } else {
+                videoDurationContainer.style.display = 'none';
+            }
+            
+            modal.show();
+        }
+
+        document.getElementById('uploadMaterialForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const courseId = document.getElementById('materialCourseId').value;
+            if (!courseId) {
+                alert('Please select a course');
+                return;
+            }
+
+            const formData = {
+                title: document.getElementById('materialTitle').value,
+                description: document.getElementById('materialDescription').value,
+                material_type: currentMaterialType,
+                file_url: document.getElementById('materialFileUrl').value,
+                file_size: parseInt(document.getElementById('materialFileSize').value) || null
+            };
+
+            if (currentMaterialType === 'video') {
+                formData.duration_seconds = parseInt(document.getElementById('videoDuration').value) || null;
+            }
+
+            try {
+                const response = await fetch(`/api/course/${courseId}/material/upload`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(`${currentMaterialType.toUpperCase()} uploaded successfully!`);
+                    document.getElementById('uploadMaterialForm').reset();
+                    bootstrap.Modal.getInstance(document.getElementById('uploadMaterialModal')).hide();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error uploading material:', error);
+                alert('Error uploading material');
+            }
+        });
+
+        // Live Session Functions
+        function openLiveSessionModal() {
+            const modal = new bootstrap.Modal(document.getElementById('liveSessionModal'));
+            document.getElementById('liveSessionForm').reset();
+            modal.show();
+        }
+
+        document.getElementById('liveSessionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const courseId = document.getElementById('sessionCourseId').value;
+            if (!courseId) {
+                alert('Please select a course');
+                return;
+            }
+
+            const scheduledAt = new Date(document.getElementById('sessionDateTime').value).toISOString();
+
+            const formData = {
+                title: document.getElementById('sessionTitle').value,
+                description: document.getElementById('sessionDescription').value,
+                scheduled_at: scheduledAt,
+                session_url: document.getElementById('sessionUrl').value
+            };
+
+            try {
+                const response = await fetch(`/api/course/${courseId}/session/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Live session scheduled successfully!');
+                    document.getElementById('liveSessionForm').reset();
+                    bootstrap.Modal.getInstance(document.getElementById('liveSessionModal')).hide();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error creating live session:', error);
+                alert('Error creating live session');
+            }
+        });
+
         // Logout
-        document.getElementById('logoutNavBtn').addEventListener('click', async (e) => {
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             await fetch('/api/logout', { method: 'POST' });
             window.location.href = '/';

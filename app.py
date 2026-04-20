@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
 from db_helper import (create_tables, create_user, authenticate_user, get_user_by_id, get_tutors, get_all_users,
                        init_global_forum, get_global_forum, get_course_forum, get_forum_threads, create_thread,
-                       get_thread_posts, create_post, update_user_profile, update_user_avatar)
+                       get_thread_posts, create_post, update_user_profile, update_user_avatar,
+                       upload_course_material, get_course_materials, create_live_session, start_live_session,
+                       end_live_session, get_course_live_sessions, save_recorded_lesson, get_recorded_lessons)
 import os
 from datetime import timedelta
 import base64
@@ -464,6 +466,168 @@ def create_post_api(thread_id):
     
     try:
         result = create_post(thread_id, user_id, data.get('content'))
+        return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# ============== COURSE MATERIALS ROUTES ==============
+
+@app.route('/api/course/<int:course_id>/materials', methods=['GET'])
+def get_course_materials_api(course_id):
+    """Get all course materials"""
+    try:
+        materials = get_course_materials(course_id)
+        return jsonify({"success": True, "materials": materials}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/course/<int:course_id>/material/upload', methods=['POST'])
+def upload_material_api(course_id):
+    """Upload course material (PDF, video, etc.)"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'tutor':
+        return jsonify({"success": False, "message": "Only tutors can upload materials"}), 403
+    
+    data = request.get_json()
+    
+    # Validate required fields
+    if not all([data.get('title'), data.get('material_type'), data.get('file_url')]):
+        return jsonify({"success": False, "message": "Missing required fields (title, material_type, file_url)"}), 400
+    
+    # Validate material type
+    if data.get('material_type') not in ['pdf', 'video', 'document']:
+        return jsonify({"success": False, "message": "Invalid material type"}), 400
+    
+    try:
+        result = upload_course_material(
+            course_id=course_id,
+            instructor_id=user_id,
+            title=data.get('title'),
+            description=data.get('description'),
+            material_type=data.get('material_type'),
+            file_url=data.get('file_url'),
+            file_size=data.get('file_size'),
+            duration_seconds=data.get('duration_seconds')
+        )
+        return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# ============== LIVE SESSIONS ROUTES ==============
+
+@app.route('/api/course/<int:course_id>/sessions', methods=['GET'])
+def get_sessions_api(course_id):
+    """Get all live sessions for a course"""
+    try:
+        status = request.args.get('status')  # Optional: filter by status (scheduled, live, ended)
+        sessions = get_course_live_sessions(course_id, status)
+        return jsonify({"success": True, "sessions": sessions}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/course/<int:course_id>/session/create', methods=['POST'])
+def create_session_api(course_id):
+    """Create a new live session"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'tutor':
+        return jsonify({"success": False, "message": "Only tutors can create live sessions"}), 403
+    
+    data = request.get_json()
+    
+    # Validate required fields
+    if not all([data.get('title'), data.get('scheduled_at')]):
+        return jsonify({"success": False, "message": "Missing required fields (title, scheduled_at)"}), 400
+    
+    try:
+        result = create_live_session(
+            course_id=course_id,
+            instructor_id=user_id,
+            title=data.get('title'),
+            description=data.get('description'),
+            scheduled_at=data.get('scheduled_at'),
+            session_url=data.get('session_url')
+        )
+        return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/session/<int:session_id>/start', methods=['POST'])
+def start_session_api(session_id):
+    """Start a live session"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        result = start_live_session(session_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/session/<int:session_id>/end', methods=['POST'])
+def end_session_api(session_id):
+    """End a live session"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    data = request.get_json() or {}
+    is_recorded = data.get('is_recorded', False)
+    
+    try:
+        result = end_live_session(session_id, is_recorded)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# ============== RECORDED LESSONS ROUTES ==============
+
+@app.route('/api/course/<int:course_id>/lessons', methods=['GET'])
+def get_lessons_api(course_id):
+    """Get all recorded lessons for a course"""
+    try:
+        lessons = get_recorded_lessons(course_id)
+        return jsonify({"success": True, "lessons": lessons}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/course/<int:course_id>/lesson/save', methods=['POST'])
+def save_lesson_api(course_id):
+    """Save a recorded lesson from a live session"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'tutor':
+        return jsonify({"success": False, "message": "Only tutors can save recorded lessons"}), 403
+    
+    data = request.get_json()
+    
+    # Validate required fields
+    if not all([data.get('title'), data.get('video_url')]):
+        return jsonify({"success": False, "message": "Missing required fields (title, video_url)"}), 400
+    
+    try:
+        result = save_recorded_lesson(
+            course_id=course_id,
+            instructor_id=user_id,
+            title=data.get('title'),
+            description=data.get('description'),
+            video_url=data.get('video_url'),
+            session_id=data.get('session_id'),
+            thumbnail_url=data.get('thumbnail_url'),
+            duration_seconds=data.get('duration_seconds'),
+            file_size=data.get('file_size')
+        )
         return jsonify(result), 201 if result['success'] else 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

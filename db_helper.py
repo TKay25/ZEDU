@@ -156,6 +156,86 @@ def create_tables():
             );
         """)
 
+        # Course Materials table (PDFs, notes, videos)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS course_materials (
+                id SERIAL PRIMARY KEY,
+                course_id INTEGER NOT NULL,
+                instructor_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                material_type VARCHAR(50) NOT NULL CHECK (material_type IN ('pdf', 'video', 'document')),
+                file_url VARCHAR(500) NOT NULL,
+                file_size INTEGER,
+                duration_seconds INTEGER,
+                order_index INTEGER DEFAULT 0,
+                is_published BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+                FOREIGN KEY (instructor_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Live Sessions table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS live_sessions (
+                id SERIAL PRIMARY KEY,
+                course_id INTEGER NOT NULL,
+                instructor_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                scheduled_at TIMESTAMP NOT NULL,
+                started_at TIMESTAMP,
+                ended_at TIMESTAMP,
+                session_url VARCHAR(500),
+                status VARCHAR(50) NOT NULL CHECK (status IN ('scheduled', 'live', 'ended', 'cancelled')),
+                is_recorded BOOLEAN DEFAULT FALSE,
+                max_participants INTEGER DEFAULT 100,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+                FOREIGN KEY (instructor_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Live Session Participants table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS session_participants (
+                id SERIAL PRIMARY KEY,
+                session_id INTEGER NOT NULL,
+                student_id INTEGER NOT NULL,
+                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                left_at TIMESTAMP,
+                duration_minutes INTEGER,
+                FOREIGN KEY (session_id) REFERENCES live_sessions(id) ON DELETE CASCADE,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Recorded Lessons table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS recorded_lessons (
+                id SERIAL PRIMARY KEY,
+                course_id INTEGER NOT NULL,
+                instructor_id INTEGER NOT NULL,
+                session_id INTEGER,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                video_url VARCHAR(500) NOT NULL,
+                thumbnail_url VARCHAR(500),
+                duration_seconds INTEGER,
+                file_size INTEGER,
+                views INTEGER DEFAULT 0,
+                is_published BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+                FOREIGN KEY (instructor_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (session_id) REFERENCES live_sessions(id) ON DELETE SET NULL
+            );
+        """)
+
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
@@ -168,6 +248,12 @@ def create_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_threads_user ON forum_threads(user_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_thread ON forum_posts(thread_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_user ON forum_posts(user_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_course ON course_materials(course_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_instructor ON course_materials(instructor_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_sessions_course ON live_sessions(course_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_sessions_instructor ON live_sessions(instructor_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_recorded_course ON recorded_lessons(course_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_recorded_instructor ON recorded_lessons(instructor_id);")
 
         conn.commit()
         print("✓ Database tables created successfully!")
@@ -794,6 +880,300 @@ def create_post(thread_id, user_id, content):
         conn.rollback()
         print(f"Error creating post: {e}")
         return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+# ============== COURSE MATERIALS ==============
+
+def upload_course_material(course_id, instructor_id, title, description, material_type, file_url, file_size=None, duration_seconds=None):
+    """
+    Upload course material (PDF, video, document)
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO course_materials (course_id, instructor_id, title, description, material_type, file_url, file_size, duration_seconds)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id, title, material_type, created_at;
+        """, (course_id, instructor_id, title, description, material_type, file_url, file_size, duration_seconds))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {
+                "success": True,
+                "message": f"{material_type.upper()} uploaded successfully",
+                "material_id": result[0],
+                "material": {
+                    "id": result[0],
+                    "title": result[1],
+                    "type": result[2],
+                    "created_at": result[3]
+                }
+            }
+        else:
+            return {"success": False, "message": "Failed to upload material"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error uploading material: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_course_materials(course_id):
+    """
+    Get all materials for a course
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, title, description, material_type, file_url, file_size, duration_seconds, order_index, created_at
+            FROM course_materials
+            WHERE course_id = %s AND is_published = TRUE
+            ORDER BY order_index, created_at DESC;
+        """, (course_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting course materials: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+# ============== LIVE SESSIONS ==============
+
+def create_live_session(course_id, instructor_id, title, description, scheduled_at, session_url=None):
+    """
+    Create a new live session
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO live_sessions (course_id, instructor_id, title, description, scheduled_at, session_url, status)
+            VALUES (%s, %s, %s, %s, %s, %s, 'scheduled')
+            RETURNING id, title, scheduled_at;
+        """, (course_id, instructor_id, title, description, scheduled_at, session_url))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {
+                "success": True,
+                "message": "Live session created successfully",
+                "session_id": result[0],
+                "session": {
+                    "id": result[0],
+                    "title": result[1],
+                    "scheduled_at": result[2]
+                }
+            }
+        else:
+            return {"success": False, "message": "Failed to create live session"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating live session: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def start_live_session(session_id):
+    """
+    Start a live session
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE live_sessions
+            SET status = 'live', started_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+            RETURNING id, title, status;
+        """, (session_id,))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {
+                "success": True,
+                "message": "Live session started",
+                "session": {
+                    "id": result[0],
+                    "title": result[1],
+                    "status": result[2]
+                }
+            }
+        else:
+            return {"success": False, "message": "Session not found"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error starting live session: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def end_live_session(session_id, is_recorded=False):
+    """
+    End a live session
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE live_sessions
+            SET status = 'ended', ended_at = CURRENT_TIMESTAMP, is_recorded = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+            RETURNING id, title, status;
+        """, (is_recorded, session_id))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {
+                "success": True,
+                "message": "Live session ended",
+                "session": {
+                    "id": result[0],
+                    "title": result[1],
+                    "status": result[2]
+                }
+            }
+        else:
+            return {"success": False, "message": "Session not found"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error ending live session: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_course_live_sessions(course_id, status=None):
+    """
+    Get live sessions for a course
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        if status:
+            cursor.execute("""
+                SELECT id, title, description, scheduled_at, started_at, ended_at, status, is_recorded
+                FROM live_sessions
+                WHERE course_id = %s AND status = %s
+                ORDER BY scheduled_at DESC;
+            """, (course_id, status))
+        else:
+            cursor.execute("""
+                SELECT id, title, description, scheduled_at, started_at, ended_at, status, is_recorded
+                FROM live_sessions
+                WHERE course_id = %s
+                ORDER BY scheduled_at DESC;
+            """, (course_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting live sessions: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+# ============== RECORDED LESSONS ==============
+
+def save_recorded_lesson(course_id, instructor_id, title, description, video_url, session_id=None, thumbnail_url=None, duration_seconds=None, file_size=None):
+    """
+    Save a recorded lesson from a live session
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO recorded_lessons (course_id, instructor_id, session_id, title, description, video_url, thumbnail_url, duration_seconds, file_size)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id, title, video_url, created_at;
+        """, (course_id, instructor_id, session_id, title, description, video_url, thumbnail_url, duration_seconds, file_size))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {
+                "success": True,
+                "message": "Recorded lesson saved successfully",
+                "lesson_id": result[0],
+                "lesson": {
+                    "id": result[0],
+                    "title": result[1],
+                    "video_url": result[2],
+                    "created_at": result[3]
+                }
+            }
+        else:
+            return {"success": False, "message": "Failed to save recorded lesson"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error saving recorded lesson: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_recorded_lessons(course_id):
+    """
+    Get all recorded lessons for a course
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, title, description, video_url, thumbnail_url, duration_seconds, views, created_at
+            FROM recorded_lessons
+            WHERE course_id = %s AND is_published = TRUE
+            ORDER BY created_at DESC;
+        """, (course_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting recorded lessons: {e}")
+        return []
     finally:
         cursor.close()
         conn.close()
