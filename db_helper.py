@@ -59,7 +59,8 @@ def create_tables():
                 avatar_url VARCHAR(255),
                 verified BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP
             );
         """)
 
@@ -428,12 +429,33 @@ def get_user_by_id(user_id):
 
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        cursor.execute("SELECT id, email, full_name, user_type, education_level, country_code, whatsapp_number, avatar_url, bio, created_at FROM users WHERE id = %s;", (user_id,))
+        cursor.execute("SELECT id, email, full_name, user_type, education_level, country_code, whatsapp_number, avatar_url, bio, created_at, last_login FROM users WHERE id = %s;", (user_id,))
         result = cursor.fetchone()
         return result
     except Exception as e:
         print(f"Error getting user: {e}")
         return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def update_last_login(user_id):
+    """
+    Update the last_login timestamp for a user
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = %s;", (user_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error updating last login: {e}")
+        conn.rollback()
+        return False
     finally:
         cursor.close()
         conn.close()

@@ -10,7 +10,7 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        get_admin_applications, approve_admin_application, reject_admin_application, authenticate_admin,
                        create_noticeboard, get_tutor_noticeboards, get_admin_noticeboards, get_noticeboard_details,
                        create_noticeboard_post, get_noticeboard_posts, update_post_views, pin_noticeboard_post,
-                       unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards)
+                       unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards, update_last_login)
 import os
 from datetime import timedelta
 import base64
@@ -185,6 +185,9 @@ def login():
         session['user_id'] = user['id']
         session['email'] = user['email']
         session['user_type'] = user['user_type']
+        
+        # Update last login timestamp
+        update_last_login(user['id'])
         
         # Redirect to appropriate dashboard based on user type
         redirect_url = '/'
@@ -895,6 +898,9 @@ def admin_login():
         session['user_id'] = admin['id']
         session['email'] = admin['email']
         session['user_type'] = admin['user_type']
+        
+        # Update last login timestamp
+        update_last_login(admin['id'])
         
         return jsonify({
             "success": True,

@@ -496,29 +496,30 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
             margin-top: 1.5rem;
         }
 
         .stat-box {
             background: linear-gradient(135deg, var(--gray-100) 0%, var(--light) 100%);
             border-radius: var(--radius-md);
-            padding: 1rem;
+            padding: 0.75rem;
             border: 1px solid var(--gray-200);
             text-align: center;
         }
 
         .stat-value {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: var(--primary);
         }
 
         .stat-label {
-            font-size: 0.85rem;
+            font-size: 0.7rem;
             color: var(--gray-600);
-            margin-top: 0.5rem;
+            margin-top: 0.3rem;
+            line-height: 1.2;
         }
 
         /* Responsive */
@@ -706,7 +707,7 @@
             
             <div class="info-group">
                 <div class="info-label">Last Login</div>
-                <div class="info-value">Today at 2:15 PM</div>
+                <div class="info-value" id="lastLogin">Loading...</div>
             </div>
 
             <div class="button-group">
@@ -1022,9 +1023,62 @@
                         user.user_type ? user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1) : 'N/A';
                     document.getElementById('country').textContent = user.country_code || 'N/A';
                     document.getElementById('whatsapp').textContent = user.whatsapp_number || 'Not provided';
+                    
+                    // Format and display last login
+                    if (user.last_login) {
+                        document.getElementById('lastLogin').textContent = formatLastLogin(user.last_login);
+                    } else {
+                        document.getElementById('lastLogin').textContent = 'Never logged in';
+                    }
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
+                document.getElementById('lastLogin').textContent = 'Unable to load';
+            }
+        }
+
+        // Format last login time
+        function formatLastLogin(lastLoginStr) {
+            if (!lastLoginStr) return 'Never logged in';
+            
+            try {
+                const lastLoginDate = new Date(lastLoginStr);
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const loginDate = new Date(lastLoginDate.getFullYear(), lastLoginDate.getMonth(), lastLoginDate.getDate());
+                
+                let dateStr = '';
+                
+                // Check if today
+                if (loginDate.getTime() === today.getTime()) {
+                    dateStr = 'Today';
+                } else {
+                    // Check if yesterday
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    if (loginDate.getTime() === yesterday.getTime()) {
+                        dateStr = 'Yesterday';
+                    } else {
+                        // Format as date
+                        dateStr = lastLoginDate.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: lastLoginDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
+                        });
+                    }
+                }
+                
+                // Add time
+                const timeStr = lastLoginDate.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                });
+                
+                return `${dateStr} at ${timeStr}`;
+            } catch (error) {
+                console.error('Error formatting last login:', error);
+                return lastLoginStr;
             }
         }
 
