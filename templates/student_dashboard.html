@@ -1156,42 +1156,6 @@
         let currentSortOrder = 'recent';
         let courseNotifications = [];
 
-        // Generate Demo Courses for new users
-        function generateDemoCourses() {
-            return [
-                {
-                    id: 101,
-                    title: 'Introduction to Mathematics',
-                    level: 'primary',
-                    duration_hours: 20,
-                    rating: 4.8,
-                    total_students: 1250,
-                    instructor_name: 'Prof. Smith',
-                    progress: 65
-                },
-                {
-                    id: 102,
-                    title: 'English Language Fundamentals',
-                    level: 'primary',
-                    duration_hours: 18,
-                    rating: 4.6,
-                    total_students: 890,
-                    instructor_name: 'Mrs. Johnson',
-                    progress: 45
-                },
-                {
-                    id: 103,
-                    title: 'Science Basics',
-                    level: 'primary',
-                    duration_hours: 25,
-                    rating: 4.7,
-                    total_students: 1100,
-                    instructor_name: 'Dr. Williams',
-                    progress: 100
-                }
-            ];
-        }
-
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', async function() {
             await loadUserProfile();
@@ -1230,24 +1194,18 @@
         }
 
         // Load Enrolled Courses
+        // Load Enrolled Courses
         async function loadEnrolledCourses() {
             try {
                 const response = await fetch('/api/enrollments');
                 const data = await response.json();
                 if (data.success) {
                     enrolledCourses = data.enrollments;
-                    // If no courses, add sample demo courses for new users
-                    if (enrolledCourses.length === 0) {
-                        enrolledCourses = generateDemoCourses();
-                    }
                     displayEnrolledCourses();
                     updateStatistics();
                 }
             } catch (error) {
                 console.error('Error loading enrollments:', error);
-                // Use demo courses on error
-                enrolledCourses = generateDemoCourses();
-                displayEnrolledCourses();
             }
         }
 
