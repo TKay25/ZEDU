@@ -104,6 +104,12 @@ def login():
     data = request.get_json()
 
     print(data)
+    
+    # Debug: Print all users in database
+    all_users = get_all_users(limit=100)
+    print(f"[DEBUG] Total users in database: {len(all_users)}")
+    for u in all_users:
+        print(f"  - Email: {u['email']}, Type: {u['user_type']}")
 
     if not data.get('email') or not data.get('password'):
         return jsonify({"success": False, "message": "Email and password required"}), 400

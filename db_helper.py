@@ -41,18 +41,9 @@ def create_tables():
 
     cursor = conn.cursor()
     try:
-        # Drop tables in reverse dependency order (if they exist and cause issues)
-        cursor.execute("DROP TABLE IF EXISTS forum_posts CASCADE;")
-        cursor.execute("DROP TABLE IF EXISTS forum_threads CASCADE;")
-        cursor.execute("DROP TABLE IF EXISTS forums CASCADE;")
-        cursor.execute("DROP TABLE IF EXISTS reviews CASCADE;")
-        cursor.execute("DROP TABLE IF EXISTS enrollments CASCADE;")
-        cursor.execute("DROP TABLE IF EXISTS courses CASCADE;")
-        cursor.execute("DROP TABLE IF EXISTS users CASCADE;")
-
         # Users table
         cursor.execute("""
-            CREATE TABLE users (
+            CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
@@ -72,7 +63,7 @@ def create_tables():
 
         # Courses table
         cursor.execute("""
-            CREATE TABLE courses (
+            CREATE TABLE IF NOT EXISTS courses (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
@@ -92,7 +83,7 @@ def create_tables():
 
         # Enrollments table
         cursor.execute("""
-            CREATE TABLE enrollments (
+            CREATE TABLE IF NOT EXISTS enrollments (
                 id SERIAL PRIMARY KEY,
                 student_id INTEGER NOT NULL,
                 course_id INTEGER NOT NULL,
@@ -107,7 +98,7 @@ def create_tables():
 
         # Reviews/Ratings table
         cursor.execute("""
-            CREATE TABLE reviews (
+            CREATE TABLE IF NOT EXISTS reviews (
                 id SERIAL PRIMARY KEY,
                 course_id INTEGER NOT NULL,
                 student_id INTEGER NOT NULL,
@@ -122,7 +113,7 @@ def create_tables():
 
         # Forums table (global and per-course forums)
         cursor.execute("""
-            CREATE TABLE forums (
+            CREATE TABLE IF NOT EXISTS forums (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 description TEXT,
@@ -136,7 +127,7 @@ def create_tables():
 
         # Forum Threads table
         cursor.execute("""
-            CREATE TABLE forum_threads (
+            CREATE TABLE IF NOT EXISTS forum_threads (
                 id SERIAL PRIMARY KEY,
                 forum_id INTEGER NOT NULL,
                 title VARCHAR(255) NOT NULL,
@@ -151,7 +142,7 @@ def create_tables():
 
         # Forum Posts table
         cursor.execute("""
-            CREATE TABLE forum_posts (
+            CREATE TABLE IF NOT EXISTS forum_posts (
                 id SERIAL PRIMARY KEY,
                 thread_id INTEGER NOT NULL,
                 user_id INTEGER NOT NULL,
@@ -166,17 +157,17 @@ def create_tables():
         """)
 
         # Create indexes for better query performance
-        cursor.execute("CREATE INDEX idx_users_email ON users(email);")
-        cursor.execute("CREATE INDEX idx_users_type ON users(user_type);")
-        cursor.execute("CREATE INDEX idx_courses_instructor ON courses(instructor_id);")
-        cursor.execute("CREATE INDEX idx_enrollments_student ON enrollments(student_id);")
-        cursor.execute("CREATE INDEX idx_enrollments_course ON enrollments(course_id);")
-        cursor.execute("CREATE INDEX idx_forums_course ON forums(course_id);")
-        cursor.execute("CREATE INDEX idx_forums_global ON forums(is_global);")
-        cursor.execute("CREATE INDEX idx_threads_forum ON forum_threads(forum_id);")
-        cursor.execute("CREATE INDEX idx_threads_user ON forum_threads(user_id);")
-        cursor.execute("CREATE INDEX idx_posts_thread ON forum_posts(thread_id);")
-        cursor.execute("CREATE INDEX idx_posts_user ON forum_posts(user_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_courses_instructor ON courses(instructor_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_student ON enrollments(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_course ON enrollments(course_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_forums_course ON forums(course_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_forums_global ON forums(is_global);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_threads_forum ON forum_threads(forum_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_threads_user ON forum_threads(user_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_thread ON forum_posts(thread_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_user ON forum_posts(user_id);")
 
         conn.commit()
         print("✓ Database tables created successfully!")
@@ -215,16 +206,23 @@ def create_user(email, password, full_name, user_type, education_level=None, cou
     Create a new user
     Returns: user_id if successful, None if failed
     """
+    print(f"[DEBUG] create_user called: email={email}, full_name={full_name}, user_type={user_type}")
+    
     if user_exists(email):
+        print(f"[DEBUG] User already exists: {email}")
         return {"success": False, "message": "Email already registered"}
 
     conn = get_db_connection()
     if not conn:
+        print(f"[DEBUG] Database connection failed")
         return {"success": False, "message": "Database connection failed"}
 
+    print(f"[DEBUG] Database connection successful")
     cursor = conn.cursor()
     try:
         hashed_password = hash_password(password)
+        print(f"[DEBUG] Password hashed, inserting user...")
+        
         cursor.execute("""
             INSERT INTO users (email, password, full_name, user_type, education_level, country_code, whatsapp_number)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -232,11 +230,14 @@ def create_user(email, password, full_name, user_type, education_level=None, cou
         """, (email, hashed_password, full_name, user_type, education_level, country_code, whatsapp_number))
         
         user_id = cursor.fetchone()[0]
+        print(f"[DEBUG] User inserted with ID: {user_id}")
+        
         conn.commit()
+        print(f"[DEBUG] Transaction committed successfully")
         return {"success": True, "user_id": user_id, "message": "User created successfully"}
 
     except Exception as e:
-        print(f"Error creating user: {e}")
+        print(f"[ERROR] Error creating user: {e}")
         conn.rollback()
         return {"success": False, "message": str(e)}
     finally:
@@ -269,12 +270,20 @@ def authenticate_user(email, password):
     Authenticate user by email and password
     Returns: user dict if successful, None if failed
     """
+    print(f"[DEBUG] authenticate_user called with email: {email}")
     user = get_user_by_email(email)
+    print(f"[DEBUG] get_user_by_email returned: {user}")
+    
     if not user:
+        print(f"[DEBUG] User not found in database")
         return None
     
-    if verify_password(password, user['password']):
+    password_match = verify_password(password, user['password'])
+    print(f"[DEBUG] Password verification result: {password_match}")
+    
+    if password_match:
         return user
+    print(f"[DEBUG] Password does not match")
     return None
 
 def get_user_by_id(user_id):
