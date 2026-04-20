@@ -217,6 +217,31 @@ def upload_profile_photo():
         print(f"Error uploading photo: {e}")
         return jsonify({"success": False, "message": f"Error uploading photo: {str(e)}"}), 500
 
+@app.route('/api/user-profile', methods=['GET'])
+def get_user_profile():
+    """Get user profile info (name, education level, initials)"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    user = get_user_by_id(user_id)
+    if user:
+        name = user.get('full_name') or user.get('name') or user.get('email', '').split('@')[0]
+        education_level = user.get('education_level') or 'Not Specified'
+        # Generate initials from name
+        initials = ''.join([word[0].upper() for word in name.split() if word])[:2]
+        
+        return jsonify({
+            "success": True,
+            "profile": {
+                "name": name,
+                "education_level": education_level,
+                "initials": initials or "ZV"
+            }
+        }), 200
+    else:
+        return jsonify({"success": False, "message": "User not found"}), 404
+
 @app.route('/api/tutors', methods=['GET'])
 def get_tutors_list():
     """Get list of tutors"""
