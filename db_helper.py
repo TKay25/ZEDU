@@ -990,6 +990,43 @@ def get_course_forum(course_id):
         cursor.close()
         conn.close()
 
+def get_all_forums_with_stats():
+    """
+    Get all forums with thread count, post count, and last activity time
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT 
+                f.id,
+                f.name,
+                f.description,
+                f.is_global,
+                f.created_at,
+                COALESCE(COUNT(DISTINCT ft.id), 0) as thread_count,
+                COALESCE(COUNT(DISTINCT fp.id), 0) as post_count,
+                COALESCE(COUNT(DISTINCT fp.user_id), 0) as member_count,
+                MAX(fp.created_at) as last_activity_time
+            FROM forums f
+            LEFT JOIN forum_threads ft ON f.id = ft.forum_id
+            LEFT JOIN forum_posts fp ON ft.id = fp.thread_id
+            GROUP BY f.id, f.name, f.description, f.is_global, f.created_at
+            ORDER BY f.is_global DESC, MAX(fp.created_at) DESC NULLS LAST;
+        """)
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting forums with stats: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
 def get_forum_threads(forum_id, limit=20):
     """
     Get recent threads in a forum with post counts

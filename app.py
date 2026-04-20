@@ -10,7 +10,8 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        get_admin_applications, approve_admin_application, reject_admin_application, authenticate_admin,
                        create_noticeboard, get_tutor_noticeboards, get_admin_noticeboards, get_noticeboard_details,
                        create_noticeboard_post, get_noticeboard_posts, update_post_views, pin_noticeboard_post,
-                       unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards, update_last_login)
+                       unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards, update_last_login,
+                       get_all_forums_with_stats)
 import os
 from datetime import timedelta
 import base64
@@ -529,6 +530,17 @@ def get_global_forum_api():
         if forum:
             return jsonify({"success": True, "forum": dict(forum)}), 200
         return jsonify({"success": False, "message": "Forum not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/forums', methods=['GET'])
+def get_forums_api():
+    """Get all forums with statistics"""
+    try:
+        forums = get_all_forums_with_stats()
+        if forums:
+            return jsonify({"success": True, "forums": forums}), 200
+        return jsonify({"success": True, "forums": []}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

@@ -483,92 +483,18 @@
 
             <!-- Forums Grid -->
             <div class="forums-container">
-                <!-- Forums List -->
-                <div class="forums-list">
-                    <!-- General Discussion -->
-                    <div class="forum-card" onclick="window.location.href='/thread/1'">
-                        <div class="forum-header">
-                            <div>
-                                <p class="forum-title">General Discussion</p>
-                                <p class="forum-description">General questions, announcements, and casual discussions about ZEDU</p>
-                            </div>
-                            <span class="badge">142 threads</span>
-                        </div>
-                        <div class="forum-meta">
-                            <span><i class="fas fa-comments"></i> 1,245 posts</span>
-                            <span><i class="fas fa-users"></i> 892 members</span>
-                            <span><i class="fas fa-clock"></i> 2 hours ago</span>
-                        </div>
-                    </div>
-
-                    <!-- Course-Specific Forums -->
-                    <div class="forum-card" onclick="window.location.href='/thread/2'">
-                        <div class="forum-header">
-                            <div>
-                                <p class="forum-title">Python Programming</p>
-                                <p class="forum-description">Discuss Python programming concepts, projects, and best practices</p>
-                            </div>
-                            <span class="badge">89 threads</span>
-                        </div>
-                        <div class="forum-meta">
-                            <span><i class="fas fa-comments"></i> 756 posts</span>
-                            <span><i class="fas fa-users"></i> 543 members</span>
-                            <span><i class="fas fa-clock"></i> 1 hour ago</span>
-                        </div>
-                    </div>
-
-                    <!-- Study Groups -->
-                    <div class="forum-card" onclick="window.location.href='/thread/3'">
-                        <div class="forum-header">
-                            <div>
-                                <p class="forum-title">Study Groups & Project Teams</p>
-                                <p class="forum-description">Find study partners, form project teams, and collaborate on assignments</p>
-                            </div>
-                            <span class="badge">56 threads</span>
-                        </div>
-                        <div class="forum-meta">
-                            <span><i class="fas fa-comments"></i> 432 posts</span>
-                            <span><i class="fas fa-users"></i> 389 members</span>
-                            <span><i class="fas fa-clock"></i> 3 hours ago</span>
-                        </div>
-                    </div>
-
-                    <!-- Help Center -->
-                    <div class="forum-card" onclick="window.location.href='/thread/4'">
-                        <div class="forum-header">
-                            <div>
-                                <p class="forum-title">Help & Support</p>
-                                <p class="forum-description">Get help with technical issues, account problems, and platform features</p>
-                            </div>
-                            <span class="badge">34 threads</span>
-                        </div>
-                        <div class="forum-meta">
-                            <span><i class="fas fa-comments"></i> 198 posts</span>
-                            <span><i class="fas fa-users"></i> 267 members</span>
-                            <span><i class="fas fa-clock"></i> 45 minutes ago</span>
-                        </div>
-                    </div>
-
-                    <!-- Resources & Tips -->
-                    <div class="forum-card" onclick="window.location.href='/thread/5'">
-                        <div class="forum-header">
-                            <div>
-                                <p class="forum-title">Resources & Learning Tips</p>
-                                <p class="forum-description">Share useful resources, study tips, and learning strategies</p>
-                            </div>
-                            <span class="badge">67 threads</span>
-                        </div>
-                        <div class="forum-meta">
-                            <span><i class="fas fa-comments"></i> 523 posts</span>
-                            <span><i class="fas fa-users"></i> 612 members</span>
-                            <span><i class="fas fa-clock"></i> 30 minutes ago</span>
-                        </div>
+                <!-- Forums List - Dynamic -->
+                <div class="forums-list" id="forumsList">
+                    <!-- Forums will be loaded dynamically from backend -->
+                    <div style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary); margin-right: 1rem;"></i>
+                        <p>Loading forums...</p>
                     </div>
                 </div>
 
                 <!-- Right Sidebar -->
                 <div class="forums-sidebar">
-                    <button class="create-thread-btn" onclick="alert('Create Thread - Feature Coming Soon')">
+                    <button class="create-thread-btn" onclick="openThreadModal('global')">
                         <i class="fas fa-plus"></i> New Discussion
                     </button>
 
@@ -586,6 +512,30 @@
                         <p style="font-weight: 600; margin: 0 0 0.5rem 0;">Community Guidelines</p>
                         <p style="font-size: 0.8rem; margin: 0; opacity: 0.9;">Be respectful, helpful, and constructive in all interactions</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Discussion Modal -->
+    <div class="modal fade" id="threadModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-comments" style="font-size: 1.2rem; color: var(--secondary);"></i>
+                        <h5 class="modal-title" style="margin: 0;">Start New Discussion</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="threadForm">
+                        <div class="mb-3">
+                            <label class="form-label">Discussion Title</label>
+                            <input type="text" class="form-control" id="threadTitle" placeholder="e.g., How to solve quadratic equations?" required>
+                        </div>
+                        <button type="submit" class="btn" style="background: var(--secondary); color: white;">Create Discussion</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -633,6 +583,124 @@
         window.addEventListener('load', () => {
             loadThemePreference();
             loadProfile();
+            initializeThreadModal();
+        });
+
+        // Initialize thread modal
+        let threadModal;
+        let currentForumId = null;
+
+        function initializeThreadModal() {
+            threadModal = new bootstrap.Modal(document.getElementById('threadModal'));
+            document.getElementById('threadForm').addEventListener('submit', createThread);
+        }
+
+        function openThreadModal(forumId = 'global') {
+            currentForumId = forumId;
+            document.getElementById('threadTitle').value = '';
+            threadModal.show();
+        }
+
+        async function createThread(e) {
+            e.preventDefault();
+            const title = document.getElementById('threadTitle').value.trim();
+            
+            if (!title) {
+                alert('Please enter a discussion title');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/forum/thread', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        forum_id: currentForumId === 'global' ? 1 : currentForumId,
+                        title: title
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Discussion created successfully!');
+                    threadModal.hide();
+                    location.reload(); // Reload to show new thread
+                } else {
+                    alert('Error creating discussion: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error creating thread:', error);
+                alert('Error creating discussion. Please try again.');
+            }
+        }
+
+        // Load forums dynamically
+        async function loadForums() {
+            try {
+                const response = await fetch('/api/forums');
+                const data = await response.json();
+                
+                if (data.success && data.forums && data.forums.length > 0) {
+                    renderForums(data.forums);
+                } else {
+                    // Show message if no forums available
+                    document.getElementById('forumsList').innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <p>No forums available at the moment.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading forums:', error);
+                document.getElementById('forumsList').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: red;">
+                        <p>Error loading forums. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render forums
+        function renderForums(forums) {
+            const forumsList = document.getElementById('forumsList');
+            forumsList.innerHTML = '';
+            
+            forums.forEach(forum => {
+                const threadCount = forum.thread_count || 0;
+                const postCount = forum.post_count || 0;
+                const memberCount = forum.member_count || 0;
+                const lastActivity = forum.last_activity_time || 'Recently';
+                
+                const forumCard = document.createElement('div');
+                forumCard.className = 'forum-card';
+                forumCard.onclick = () => window.location.href = `/forum/${forum.id}`;
+                forumCard.innerHTML = `
+                    <div class="forum-header">
+                        <div>
+                            <p class="forum-title">${forum.name}</p>
+                            <p class="forum-description">${forum.description || ''}</p>
+                        </div>
+                        <span class="badge">${threadCount} thread${threadCount !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="forum-meta">
+                        <span><i class="fas fa-comments"></i> ${postCount} post${postCount !== 1 ? 's' : ''}</span>
+                        <span><i class="fas fa-users"></i> ${memberCount} member${memberCount !== 1 ? 's' : ''}</span>
+                        <span><i class="fas fa-clock"></i> ${lastActivity}</span>
+                    </div>
+                `;
+                forumsList.appendChild(forumCard);
+            });
+        }
+
+        // Load forums on page load
+        window.addEventListener('load', () => {
+            loadThemePreference();
+            loadProfile();
+            initializeThreadModal();
+            loadForums();
         });
     </script>
 </body>
