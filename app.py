@@ -37,7 +37,7 @@ def internal_error(error):
 @app.route('/')
 def landing():
     """Render the landing page"""
-    return render_template('index.html')
+    return render_template('index_new.html')
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -229,7 +229,7 @@ def student_dashboard():
     
     user = get_user_by_id(user_id)
     if user and user['user_type'] == 'student':
-        return render_template('student_dashboard.html', user=dict(user))
+        return render_template('student_dashboard_new.html', user=dict(user))
     return redirect('/')
 
 @app.route('/tutor-dashboard')
@@ -241,7 +241,7 @@ def tutor_dashboard():
     
     user = get_user_by_id(user_id)
     if user and user['user_type'] == 'tutor':
-        return render_template('tutor_dashboard.html', user=dict(user))
+        return render_template('tutor_dashboard_new.html', user=dict(user))
     return redirect('/')
 
 @app.route('/parent-dashboard')
@@ -253,7 +253,7 @@ def parent_dashboard():
     
     user = get_user_by_id(user_id)
     if user and user['user_type'] == 'parent':
-        return render_template('parent_dashboard.html', user=dict(user))
+        return render_template('parent_dashboard_new.html', user=dict(user))
     return redirect('/')
 
 @app.route('/api/create-course', methods=['POST'])
