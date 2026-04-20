@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticeboards - ZEDU</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0d1b2a;
+            --primary-dark: #050d15;
+            --primary-light: #1a3a52;
+            --secondary: #8B2635;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dark: #0F172A;
+            --light: #F8FAFC;
+            --gray-100: #F1F5F9;
+            --gray-200: #E2E8F0;
+            --gray-600: #475569;
+            --gray-800: #1E293B;
+            --radius-md: 12px;
+            --radius-lg: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background-color: var(--light);
+            color: var(--gray-800);
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0.8rem 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .container-fluid {
+            padding: 2rem 0;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+
+        .noticeboard-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .noticeboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .noticeboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .noticeboard-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .noticeboard-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-info {
+            background: rgba(13, 27, 42, 0.1);
+            color: var(--primary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .post-item {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .post-item.pinned {
+            border-left-color: var(--warning);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .post-item.urgent {
+            border-left-color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .post-item.high {
+            border-left-color: var(--secondary);
+            background: rgba(139, 38, 53, 0.05);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.8rem;
+        }
+
+        .post-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .post-author {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            margin-top: 0.3rem;
+        }
+
+        .post-content {
+            color: var(--gray-800);
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--gray-200);
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-low {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065F46;
+        }
+
+        .priority-normal {
+            background: rgba(13, 27, 42, 0.1);
+            color: var(--primary);
+        }
+
+        .priority-high {
+            background: rgba(139, 38, 53, 0.1);
+            color: #7C1D28;
+        }
+
+        .priority-urgent {
+            background: rgba(239, 68, 68, 0.1);
+            color: #991B1B;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 27, 42, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gray-200);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-backdrop {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(6, 16, 27, 0.6) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+            z-index: 1040 !important;
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-bottom: none;
+            padding: 2rem;
+            color: white;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(13, 27, 42, 0.1);
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .pin-icon {
+            color: var(--warning);
+            margin-right: 0.3rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .noticeboard-card {
+                padding: 1rem;
+            }
+
+            .tabs-container {
+                gap: 0;
+            }
+
+            .tab-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap"></i>
+                ZEDU
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/forums">Forums</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/noticeboards">Noticeboards</a>
+                    </li>
+                </ul>
+                <div class="d-flex gap-2 ms-3">
+                    <button class="btn btn-sm btn-outline-primary" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-bullhorn"></i> Noticeboards</h1>
+            <p>Stay updated with important announcements and notices</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <div class="container">
+            <!-- Tabs for different views -->
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('browse', this)">
+                    <i class="fas fa-list"></i> Browse Noticeboards
+                </button>
+                <button class="tab-btn" id="my-btn" style="display:none;" onclick="switchTab('my', this)">
+                    <i class="fas fa-th-list"></i> My Noticeboards
+                </button>
+                <button class="tab-btn" id="create-btn" style="display:none;" onclick="switchTab('create', this)">
+                    <i class="fas fa-plus"></i> Create Noticeboard
+                </button>
+            </div>
+
+            <!-- Browse Noticeboards Tab -->
+            <div id="browse-tab" class="tab-content active">
+                <div id="noticeboards-list"></div>
+                <div id="empty-browse" class="empty-state" style="display:none;">
+                    <i class="fas fa-bell-slash"></i>
+                    <h3>No Noticeboards Available</h3>
+                    <p>There are no noticeboards to display at the moment.</p>
+                </div>
+            </div>
+
+            <!-- My Noticeboards Tab -->
+            <div id="my-tab" class="tab-content">
+                <div id="my-noticeboards-list"></div>
+                <div id="empty-my" class="empty-state" style="display:none;">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Noticeboards Yet</h3>
+                    <p>You haven't created any noticeboards yet. Get started now!</p>
+                    <button class="btn btn-primary-custom" onclick="switchTab('create', document.getElementById('create-btn'))">
+                        Create First Noticeboard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Create Noticeboard Tab -->
+            <div id="create-tab" class="tab-content">
+                <div class="row">
+                    <div class="col-md-8 mx-auto">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3">Create New Noticeboard</h3>
+                                <form id="create-form">
+                                    <div class="mb-3">
+                                        <label class="form-label">Noticeboard Title</label>
+                                        <input type="text" class="form-control" id="nb-title" placeholder="E.g., Class Announcements" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Description</label>
+                                        <textarea class="form-control" id="nb-description" rows="3" placeholder="Describe the purpose of this noticeboard"></textarea>
+                                    </div>
+                                    <div class="mb-3" id="course-container" style="display:none;">
+                                        <label class="form-label">Associated Course</label>
+                                        <select class="form-select" id="nb-course">
+                                            <option value="">Select a course (optional)</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary-custom w-100">
+                                        <i class="fas fa-plus"></i> Create Noticeboard
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Noticeboard Modal -->
+    <div class="modal fade" id="viewNoticeboardModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-bullhorn" style="font-size: 1.28rem; color: white;"></i>
+                        <h5 class="modal-title" style="margin: 0;" id="modal-title">Noticeboard</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-posts"></div>
+                    <div class="mt-3">
+                        <h6>Post a Notice</h6>
+                        <form id="post-form">
+                            <div class="mb-2">
+                                <input type="text" class="form-control" id="post-title" placeholder="Post title" required>
+                            </div>
+                            <div class="mb-2">
+                                <textarea class="form-control" id="post-content" rows="3" placeholder="Write your notice..." required></textarea>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-6">
+                                    <select class="form-select form-select-sm" id="post-priority">
+                                        <option value="normal">Normal Priority</option>
+                                        <option value="high">High Priority</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-sm btn-primary-custom w-100">
+                                        Post Notice
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentNoticeboard = null;
+        let userType = null;
+        let userId = null;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/user/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    userType = data.user.user_type;
+                    userId = data.user.id;
+                    
+                    // Show relevant tabs
+                    if (userType === 'tutor' || userType === 'administrator') {
+                        document.getElementById('my-btn').style.display = 'block';
+                        document.getElementById('create-btn').style.display = 'block';
+                    }
+                    
+                    if (userType === 'tutor') {
+                        document.getElementById('course-container').style.display = 'block';
+                        loadUserCourses();
+                    }
+                }
+                
+                loadNoticeboards();
+            } catch (error) {
+                console.error('Error initializing:', error);
+            }
+        });
+
+        function switchTab(tabName, btn) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            btn.classList.add('active');
+            
+            // Load content if needed
+            if (tabName === 'my') {
+                loadMyNoticeboards();
+            }
+        }
+
+        async function loadNoticeboards() {
+            try {
+                // For now, show empty state
+                // In a real app, you'd fetch from API
+                document.getElementById('noticeboards-list').innerHTML = '';
+                
+                if (userType === 'student') {
+                    const response = await fetch('/api/noticeboards/student/my-noticeboards');
+                    if (response.ok) {
+                        const data = await response.json();
+                        displayNoticeboards(data.noticeboards, 'browse');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading noticeboards:', error);
+            }
+        }
+
+        async function loadMyNoticeboards() {
+            try {
+                let endpoint;
+                if (userType === 'tutor') {
+                    endpoint = `/api/noticeboards/tutor/${userId}`;
+                } else if (userType === 'administrator') {
+                    endpoint = `/api/noticeboards/admin/${userId}`;
+                } else {
+                    return;
+                }
+                
+                const response = await fetch(endpoint);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayNoticeboards(data.noticeboards, 'my');
+                }
+            } catch (error) {
+                console.error('Error loading my noticeboards:', error);
+            }
+        }
+
+        function displayNoticeboards(noticeboards, tabType) {
+            const containerId = tabType === 'browse' ? 'noticeboards-list' : 'my-noticeboards-list';
+            const emptyId = tabType === 'browse' ? 'empty-browse' : 'empty-my';
+            const container = document.getElementById(containerId);
+            const emptyState = document.getElementById(emptyId);
+            
+            if (noticeboards.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            container.innerHTML = noticeboards.map(nb => `
+                <div class="noticeboard-card" onclick="viewNoticeboard(${nb.id}, '${nb.title}')">
+                    <div class="noticeboard-header">
+                        <div>
+                            <div class="noticeboard-title">${nb.title}</div>
+                            <div class="post-author">${nb.owner_name || 'Noticeboard'}</div>
+                        </div>
+                        <div>
+                            <span class="badge badge-info">${nb.post_count || 0} posts</span>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0">${nb.description || 'No description'}</p>
+                    <div class="noticeboard-meta">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar-alt"></i>
+                            ${new Date(nb.created_at).toLocaleDateString()}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function viewNoticeboard(noticeboardId, title) {
+            currentNoticeboard = noticeboardId;
+            document.getElementById('modal-title').textContent = title;
+            
+            try {
+                const response = await fetch(`/api/noticeboards/${noticeboardId}`);
+                if (response.ok) {
+                    const data = response.json();
+                    displayPosts(data.posts);
+                }
+            } catch (error) {
+                console.error('Error viewing noticeboard:', error);
+            }
+            
+            new bootstrap.Modal(document.getElementById('viewNoticeboardModal')).show();
+        }
+
+        function displayPosts(posts) {
+            const container = document.getElementById('modal-posts');
+            if (posts.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No posts yet</p>';
+                return;
+            }
+            
+            container.innerHTML = posts.map(post => `
+                <div class="post-item ${post.is_pinned ? 'pinned' : ''} priority-${post.priority}">
+                    <div class="post-header">
+                        <div>
+                            <div class="post-title">
+                                ${post.is_pinned ? '<i class="fas fa-thumbtack pin-icon"></i>' : ''}
+                                ${post.title}
+                            </div>
+                            <div class="post-author">
+                                By <strong>${post.author_name}</strong>
+                                on ${new Date(post.created_at).toLocaleDateString()}
+                            </div>
+                        </div>
+                        <span class="priority-badge priority-${post.priority}">${post.priority}</span>
+                    </div>
+                    <div class="post-content">${post.content}</div>
+                    <div class="post-footer">
+                        <span><i class="fas fa-eye"></i> ${post.views} views</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadUserCourses() {
+            try {
+                const response = await fetch('/api/tutor/courses');
+                if (response.ok) {
+                    const data = await response.json();
+                    const select = document.getElementById('nb-course');
+                    data.courses.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.id;
+                        option.textContent = course.title;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+            }
+        }
+
+        document.getElementById('create-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('nb-title').value,
+                description: document.getElementById('nb-description').value,
+                course_id: document.getElementById('nb-course').value || null
+            };
+            
+            try {
+                const response = await fetch('/api/noticeboards/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Noticeboard created successfully!');
+                    document.getElementById('create-form').reset();
+                    loadMyNoticeboards();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error creating noticeboard: ' + error.message);
+            }
+        });
+
+        document.getElementById('post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('post-title').value,
+                content: document.getElementById('post-content').value,
+                priority: document.getElementById('post-priority').value
+            };
+            
+            try {
+                const response = await fetch(`/api/noticeboards/${currentNoticeboard}/post`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('post-form').reset();
+                    // Reload posts
+                    viewNoticeboard(currentNoticeboard, document.getElementById('modal-title').textContent);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error posting: ' + error.message);
+            }
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+    </script>
+</body>
+</html>

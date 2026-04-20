@@ -7,7 +7,10 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        request_parent_student_link, approve_parent_student_link, reject_parent_student_link,
                        get_pending_links_for_student, get_approved_students_for_parent, unlink_parent_student,
                        get_parent_student_links, unlink_parent_student_by_link, create_admin_application,
-                       get_admin_applications, approve_admin_application, reject_admin_application, authenticate_admin)
+                       get_admin_applications, approve_admin_application, reject_admin_application, authenticate_admin,
+                       create_noticeboard, get_tutor_noticeboards, get_admin_noticeboards, get_noticeboard_details,
+                       create_noticeboard_post, get_noticeboard_posts, update_post_views, pin_noticeboard_post,
+                       unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards)
 import os
 from datetime import timedelta
 import base64
@@ -45,6 +48,13 @@ def internal_error(error):
 def landing():
     """Render the landing page"""
     return render_template('index_new.html')
+
+@app.route('/noticeboards')
+def noticeboards():
+    """Render the noticeboards page"""
+    if 'user_id' not in session:
+        return redirect('/')
+    return render_template('noticeboards.html')
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -960,6 +970,219 @@ def reject_admin_application_endpoint():
         return jsonify(result), 200 if result['success'] else 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ========== NOTICEBOARD ROUTES ==========
+
+@app.route('/api/noticeboards/create', methods=['POST'])
+def api_create_noticeboard():
+    """Create a new noticeboard (tutor or admin only)"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    
+    if not user or user['user_type'] not in ['tutor', 'administrator']:
+        return jsonify({"success": False, "message": "Only tutors and admins can create noticeboards"}), 403
+    
+    try:
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description', '')
+        course_id = data.get('course_id') if user['user_type'] == 'tutor' else None
+        
+        if not title:
+            return jsonify({"success": False, "message": "Title is required"}), 400
+        
+        result = create_noticeboard(
+            title=title,
+            description=description,
+            owner_id=user_id,
+            owner_type=user['user_type'],
+            institution_id=user_id if user['user_type'] == 'administrator' else None,
+            course_id=course_id
+        )
+        
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/tutor/<int:tutor_id>', methods=['GET'])
+def api_get_tutor_noticeboards(tutor_id):
+    """Get all noticeboards for a tutor"""
+    try:
+        noticeboards = get_tutor_noticeboards(tutor_id)
+        return jsonify({"success": True, "noticeboards": noticeboards}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/admin/<int:admin_id>', methods=['GET'])
+def api_get_admin_noticeboards(admin_id):
+    """Get all noticeboards for an admin"""
+    try:
+        noticeboards = get_admin_noticeboards(admin_id)
+        return jsonify({"success": True, "noticeboards": noticeboards}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/student/my-noticeboards', methods=['GET'])
+def api_get_my_noticeboards():
+    """Get all noticeboards accessible to the logged-in student"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    
+    if not user or user['user_type'] != 'student':
+        return jsonify({"success": False, "message": "Only students can access this endpoint"}), 403
+    
+    try:
+        noticeboards = get_student_noticeboards(user_id)
+        return jsonify({"success": True, "noticeboards": noticeboards}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/<int:noticeboard_id>', methods=['GET'])
+def api_get_noticeboard(noticeboard_id):
+    """Get noticeboard details and posts"""
+    try:
+        noticeboard = get_noticeboard_details(noticeboard_id)
+        
+        if not noticeboard:
+            return jsonify({"success": False, "message": "Noticeboard not found"}), 404
+        
+        posts = get_noticeboard_posts(noticeboard_id)
+        
+        return jsonify({
+            "success": True,
+            "noticeboard": noticeboard,
+            "posts": posts
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/<int:noticeboard_id>/post', methods=['POST'])
+def api_create_noticeboard_post(noticeboard_id):
+    """Create a post on a noticeboard"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    
+    try:
+        # Verify user can post
+        noticeboard = get_noticeboard_details(noticeboard_id)
+        
+        if not noticeboard:
+            return jsonify({"success": False, "message": "Noticeboard not found"}), 404
+        
+        # Only owner or admins/tutors of the institution can post
+        if user['user_type'] not in ['tutor', 'administrator'] and noticeboard['owner_id'] != user_id:
+            return jsonify({"success": False, "message": "You don't have permission to post here"}), 403
+        
+        data = request.get_json()
+        title = data.get('title')
+        content = data.get('content')
+        priority = data.get('priority', 'normal')
+        attachment_url = data.get('attachment_url')
+        
+        if not title or not content:
+            return jsonify({"success": False, "message": "Title and content are required"}), 400
+        
+        result = create_noticeboard_post(
+            noticeboard_id=noticeboard_id,
+            author_id=user_id,
+            title=title,
+            content=content,
+            priority=priority,
+            attachment_url=attachment_url
+        )
+        
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/posts/<int:post_id>/view', methods=['POST'])
+def api_record_post_view(post_id):
+    """Record a view for a noticeboard post"""
+    try:
+        update_post_views(post_id)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/<int:noticeboard_id>/posts/<int:post_id>/pin', methods=['POST'])
+def api_pin_post(noticeboard_id, post_id):
+    """Pin a post to the top of the noticeboard"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    
+    # Verify ownership
+    noticeboard = get_noticeboard_details(noticeboard_id)
+    if not noticeboard or noticeboard['owner_id'] != user_id:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    
+    try:
+        result = pin_noticeboard_post(post_id, noticeboard_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/<int:noticeboard_id>/posts/<int:post_id>/unpin', methods=['POST'])
+def api_unpin_post(noticeboard_id, post_id):
+    """Unpin a post from the top of the noticeboard"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    
+    # Verify ownership
+    noticeboard = get_noticeboard_details(noticeboard_id)
+    if not noticeboard or noticeboard['owner_id'] != user_id:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    
+    try:
+        result = unpin_noticeboard_post(post_id, noticeboard_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/noticeboards/<int:noticeboard_id>/posts/<int:post_id>/delete', methods=['DELETE'])
+def api_delete_post(noticeboard_id, post_id):
+    """Delete a post from a noticeboard"""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    
+    # Verify ownership
+    noticeboard = get_noticeboard_details(noticeboard_id)
+    if not noticeboard or noticeboard['owner_id'] != user_id:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    
+    try:
+        result = delete_noticeboard_post(post_id, noticeboard_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -238,6 +238,44 @@ def create_tables():
             );
         """)
 
+        # Noticeboards table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS noticeboards (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                owner_id INTEGER NOT NULL,
+                owner_type VARCHAR(50) NOT NULL CHECK (owner_type IN ('tutor', 'admin')),
+                institution_id INTEGER,
+                course_id INTEGER,
+                is_published BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (institution_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Noticeboard Posts table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS noticeboard_posts (
+                id SERIAL PRIMARY KEY,
+                noticeboard_id INTEGER NOT NULL,
+                author_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                content TEXT NOT NULL,
+                priority VARCHAR(50) DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+                attachment_url VARCHAR(500),
+                views INTEGER DEFAULT 0,
+                is_pinned BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (noticeboard_id) REFERENCES noticeboards(id) ON DELETE CASCADE,
+                FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
@@ -256,6 +294,12 @@ def create_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_sessions_instructor ON live_sessions(instructor_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_recorded_course ON recorded_lessons(course_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_recorded_instructor ON recorded_lessons(instructor_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_noticeboards_owner ON noticeboards(owner_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_noticeboards_institution ON noticeboards(institution_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_noticeboards_course ON noticeboards(course_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_noticeboard ON noticeboard_posts(noticeboard_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_author ON noticeboard_posts(author_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_pinned ON noticeboard_posts(is_pinned);")
 
         conn.commit()
         print("✓ Database tables created successfully!")
@@ -1805,6 +1849,334 @@ def authenticate_admin(email, password):
     finally:
         cursor.close()
         conn.close()
+
+
+# ========== NOTICEBOARD FUNCTIONS ==========
+
+def create_noticeboard(title, description, owner_id, owner_type, institution_id=None, course_id=None):
+    """
+    Create a new noticeboard for tutor or admin
+    owner_type: 'tutor' or 'admin'
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            INSERT INTO noticeboards (title, description, owner_id, owner_type, institution_id, course_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id, created_at
+        """, (title, description, owner_id, owner_type, institution_id, course_id))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": "Noticeboard created successfully",
+            "noticeboard_id": result['id']
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating noticeboard: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_tutor_noticeboards(tutor_id):
+    """
+    Get all noticeboards owned by a tutor
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, title, description, course_id, is_published, created_at, updated_at,
+                   (SELECT COUNT(*) FROM noticeboard_posts WHERE noticeboard_id = noticeboards.id) as post_count
+            FROM noticeboards
+            WHERE owner_id = %s AND owner_type = 'tutor'
+            ORDER BY is_pinned DESC, created_at DESC
+        """, (tutor_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting tutor noticeboards: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_admin_noticeboards(admin_id):
+    """
+    Get all noticeboards owned by an admin for their institution
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, title, description, is_published, created_at, updated_at,
+                   (SELECT COUNT(*) FROM noticeboard_posts WHERE noticeboard_id = noticeboards.id) as post_count
+            FROM noticeboards
+            WHERE owner_id = %s AND owner_type = 'admin'
+            ORDER BY created_at DESC
+        """, (admin_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting admin noticeboards: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_noticeboard_details(noticeboard_id):
+    """
+    Get detailed information about a noticeboard
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT nb.id, nb.title, nb.description, nb.owner_id, nb.owner_type, nb.is_published,
+                   nb.course_id, nb.institution_id, nb.created_at, nb.updated_at,
+                   u.full_name as owner_name
+            FROM noticeboards nb
+            JOIN users u ON nb.owner_id = u.id
+            WHERE nb.id = %s
+        """, (noticeboard_id,))
+        
+        result = cursor.fetchone()
+        return dict(result) if result else None
+    except Exception as e:
+        print(f"Error getting noticeboard details: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def create_noticeboard_post(noticeboard_id, author_id, title, content, priority='normal', attachment_url=None):
+    """
+    Create a post on a noticeboard
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            INSERT INTO noticeboard_posts (noticeboard_id, author_id, title, content, priority, attachment_url)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id, created_at
+        """, (noticeboard_id, author_id, title, content, priority, attachment_url))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": "Post created successfully",
+            "post_id": result['id']
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating noticeboard post: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_noticeboard_posts(noticeboard_id, limit=50):
+    """
+    Get all posts from a noticeboard, pinned posts first
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT np.id, np.title, np.content, np.priority, np.attachment_url, np.views,
+                   np.is_pinned, np.created_at, np.updated_at,
+                   u.id as author_id, u.full_name as author_name, u.avatar_url
+            FROM noticeboard_posts np
+            JOIN users u ON np.author_id = u.id
+            WHERE np.noticeboard_id = %s
+            ORDER BY np.is_pinned DESC, np.created_at DESC
+            LIMIT %s
+        """, (noticeboard_id, limit))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting noticeboard posts: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_post_views(post_id):
+    """
+    Increment view count for a post
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE noticeboard_posts
+            SET views = views + 1
+            WHERE id = %s
+        """, (post_id,))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error updating post views: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def pin_noticeboard_post(post_id, noticeboard_id):
+    """
+    Pin a post to the top of a noticeboard
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE noticeboard_posts
+            SET is_pinned = TRUE
+            WHERE id = %s AND noticeboard_id = %s
+        """, (post_id, noticeboard_id))
+        
+        conn.commit()
+        return {"success": True, "message": "Post pinned successfully"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error pinning post: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def unpin_noticeboard_post(post_id, noticeboard_id):
+    """
+    Unpin a post from the top of a noticeboard
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE noticeboard_posts
+            SET is_pinned = FALSE
+            WHERE id = %s AND noticeboard_id = %s
+        """, (post_id, noticeboard_id))
+        
+        conn.commit()
+        return {"success": True, "message": "Post unpinned successfully"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error unpinning post: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def delete_noticeboard_post(post_id, noticeboard_id):
+    """
+    Delete a post from a noticeboard
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            DELETE FROM noticeboard_posts
+            WHERE id = %s AND noticeboard_id = %s
+        """, (post_id, noticeboard_id))
+        
+        conn.commit()
+        return {"success": True, "message": "Post deleted successfully"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting post: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_student_noticeboards(student_id):
+    """
+    Get all noticeboards a student has access to:
+    1. From tutors of courses they're enrolled in
+    2. From admin institutions if they belong to any
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Get noticeboards from tutors of enrolled courses
+        cursor.execute("""
+            SELECT DISTINCT nb.id, nb.title, nb.description, nb.owner_id, nb.owner_type,
+                   u.full_name as owner_name, c.id as course_id, c.title as course_title,
+                   nb.created_at, nb.updated_at
+            FROM noticeboard_posts np
+            JOIN noticeboards nb ON np.noticeboard_id = nb.id
+            JOIN users u ON nb.owner_id = u.id
+            LEFT JOIN courses c ON nb.course_id = c.id
+            LEFT JOIN enrollments e ON c.id = e.course_id AND e.student_id = %s
+            WHERE (e.student_id = %s OR nb.course_id IS NULL) AND nb.is_published = TRUE
+            ORDER BY nb.created_at DESC
+        """, (student_id, student_id))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting student noticeboards: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
 
 if __name__ == "__main__":
     # Test database connection and create tables
