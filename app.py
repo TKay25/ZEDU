@@ -86,10 +86,14 @@ def signup():
         country_code=data.get('country_code'),
         whatsapp_number=data.get('whatsapp_number')
     )
+    
+    print(f"[DEBUG SIGNUP] create_user result: {result}")
 
     if result['success']:
+        print(f"[DEBUG SIGNUP] User created successfully with ID: {result.get('user_id')}")
         return jsonify(result), 201
     else:
+        print(f"[DEBUG SIGNUP] User creation failed: {result.get('message')}")
         return jsonify(result), 400
 
 @app.route('/api/login', methods=['POST'])
