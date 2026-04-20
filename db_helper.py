@@ -282,6 +282,114 @@ def create_tables():
             ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP;
         """)
 
+        # Assignments table (for student dashboard)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS assignments (
+                id SERIAL PRIMARY KEY,
+                course_id INTEGER NOT NULL,
+                student_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                due_date TIMESTAMP NOT NULL,
+                priority VARCHAR(50) DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+                status VARCHAR(50) DEFAULT 'not_started' CHECK (status IN ('not_started', 'in_progress', 'submitted', 'graded')),
+                submission_date TIMESTAMP,
+                grade DECIMAL(5, 2),
+                feedback TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Performance Stats table (GPA, study hours, etc.)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS performance_stats (
+                id SERIAL PRIMARY KEY,
+                student_id INTEGER NOT NULL UNIQUE,
+                current_gpa DECIMAL(3, 2) DEFAULT 3.8,
+                total_study_hours DECIMAL(10, 2) DEFAULT 0,
+                weekly_study_hours DECIMAL(10, 2) DEFAULT 0,
+                courses_completed INTEGER DEFAULT 0,
+                achievement_points INTEGER DEFAULT 0,
+                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Study Resources table (PDFs, videos, articles, notes)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS study_resources (
+                id SERIAL PRIMARY KEY,
+                student_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                resource_type VARCHAR(50) CHECK (resource_type IN ('pdf', 'video', 'article', 'note')),
+                content_url VARCHAR(500),
+                course_id INTEGER,
+                saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_accessed TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL
+            );
+        """)
+
+        # Activity Log table (for Recent Activity section)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_log (
+                id SERIAL PRIMARY KEY,
+                student_id INTEGER NOT NULL,
+                activity_type VARCHAR(100) NOT NULL,
+                activity_description TEXT,
+                related_entity_type VARCHAR(50),
+                related_entity_id INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Achievements table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS achievements (
+                id SERIAL PRIMARY KEY,
+                student_id INTEGER NOT NULL,
+                achievement_name VARCHAR(255) NOT NULL,
+                description TEXT,
+                icon_url VARCHAR(500),
+                earned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Certificates table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS certificates (
+                id SERIAL PRIMARY KEY,
+                student_id INTEGER NOT NULL,
+                course_id INTEGER NOT NULL,
+                certificate_name VARCHAR(255) NOT NULL,
+                issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                certificate_url VARCHAR(500),
+                credential_id VARCHAR(100) UNIQUE,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Recommended Courses table (personalized recommendations)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS recommended_courses (
+                id SERIAL PRIMARY KEY,
+                student_id INTEGER NOT NULL,
+                course_id INTEGER NOT NULL,
+                recommendation_score DECIMAL(3, 2),
+                reason_for_recommendation TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+            );
+        """)
+
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
@@ -306,6 +414,15 @@ def create_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_noticeboard ON noticeboard_posts(noticeboard_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_author ON noticeboard_posts(author_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_posts_pinned ON noticeboard_posts(is_pinned);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_assignments_student ON assignments(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_assignments_course ON assignments(course_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_assignments_due ON assignments(due_date);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_performance_student ON performance_stats(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_resources_student ON study_resources(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_activity_student ON activity_log(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_achievements_student ON achievements(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_certificates_student ON certificates(student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_recommended_student ON recommended_courses(student_id);")
 
         conn.commit()
         print("✓ Database tables created successfully!")
