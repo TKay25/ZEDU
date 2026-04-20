@@ -165,7 +165,7 @@ def create_tables():
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
                 material_type VARCHAR(50) NOT NULL CHECK (material_type IN ('pdf', 'video', 'document')),
-                file_url VARCHAR(500) NOT NULL,
+                file_url TEXT NOT NULL,
                 file_size INTEGER,
                 duration_seconds INTEGER,
                 order_index INTEGER DEFAULT 0,
@@ -655,6 +655,42 @@ def get_instructor_courses(instructor_id):
     except Exception as e:
         print(f"Error getting instructor courses: {e}")
         return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def delete_course(course_id, instructor_id):
+    """
+    Delete a course (cascade deletes all related materials and sessions)
+    Verifies the instructor owns the course
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Verify instructor owns this course
+        cursor.execute("""
+            SELECT instructor_id FROM courses WHERE id = %s
+        """, (course_id,))
+        course = cursor.fetchone()
+        
+        if not course:
+            return {"success": False, "message": "Course not found"}
+        
+        if course['instructor_id'] != instructor_id:
+            return {"success": False, "message": "Unauthorized: You don't own this course"}
+        
+        # Delete course (cascade will delete materials, sessions, etc.)
+        cursor.execute("DELETE FROM courses WHERE id = %s", (course_id,))
+        conn.commit()
+        
+        return {"success": True, "message": "Course deleted successfully"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting course: {e}")
+        return {"success": False, "message": str(e)}
     finally:
         cursor.close()
         conn.close()

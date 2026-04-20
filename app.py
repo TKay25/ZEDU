@@ -363,6 +363,24 @@ def get_my_courses():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/api/course/<int:course_id>', methods=['DELETE'])
+def delete_course_api(course_id):
+    """Delete a course (tutor only)"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'tutor':
+        return jsonify({"success": False, "message": "Only tutors can delete courses"}), 403
+    
+    try:
+        from db_helper import delete_course
+        result = delete_course(course_id, user_id)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/api/students', methods=['GET'])
 def get_students():
     """Get students for parent dashboard"""

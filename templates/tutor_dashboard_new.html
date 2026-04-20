@@ -1024,19 +1024,54 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="action-btn" title="Edit">
+                            <button class="action-btn" title="Edit" onclick="editCourse(${course.id})">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="action-btn" title="View">
+                            <button class="action-btn" title="View" onclick="viewCourse(${course.id})">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="action-btn" title="Delete">
+                            <button class="action-btn" title="Delete" onclick="deleteCourse(${course.id}, '${course.title}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        // Action button functions
+        function editCourse(courseId) {
+            alert('Edit course ' + courseId + ' functionality coming soon');
+            // TODO: Open edit course modal with course details pre-filled
+        }
+
+        function viewCourse(courseId) {
+            // Redirect to course view page
+            window.location.href = '/course/' + courseId;
+        }
+
+        async function deleteCourse(courseId, courseName) {
+            if (!confirm(`Are you sure you want to delete "${courseName}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/course/${courseId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Course deleted successfully!');
+                    loadCourses();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error deleting course:', error);
+                alert('Error deleting course');
+            }
         }
 
         // Create course
