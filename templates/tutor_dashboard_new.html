@@ -828,11 +828,14 @@
     <div class="modal fade" id="createCourseModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create New Course</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-book" style="font-size: 1.28rem; color: var(--primary);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Create New Course</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <form id="createCourseForm">
                         <div class="mb-3">
                             <label class="form-label">Course Title</label>
@@ -857,7 +860,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row mb-3">
+                        <div class="row mb-0">
                             <div class="col-md-6">
                                 <label class="form-label">Duration (hours)</label>
                                 <input type="number" class="form-control" id="courseDuration" required>
@@ -867,8 +870,11 @@
                                 <input type="number" class="form-control" id="coursePrice" step="0.01" value="0">
                             </div>
                         </div>
-                        <button type="submit" class="primary-btn w-100">Create Course</button>
                     </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50);">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border: 2px solid var(--gray-200);">Cancel</button>
+                    <button type="submit" form="createCourseForm" class="primary-btn" style="padding: 0.6rem 1.5rem;">Create Course</button>
                 </div>
             </div>
         </div>
@@ -878,11 +884,14 @@
     <div class="modal fade" id="uploadMaterialModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Upload Course Material</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 1.28rem; color: var(--success);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Upload Course Material</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <form id="uploadMaterialForm">
                         <div class="mb-3">
                             <label class="form-label">Select Course</label>
@@ -911,12 +920,15 @@
                                 <span id="fileName" style="margin-left: 0.5rem; font-weight: 600;"></span>
                             </div>
                         </div>
-                        <div class="mb-3" id="videoDurationContainer" style="display: none;">
+                        <div class="mb-0" id="videoDurationContainer" style="display: none;">
                             <label class="form-label">Video Duration (seconds)</label>
                             <input type="number" class="form-control" id="videoDuration">
                         </div>
-                        <button type="submit" class="primary-btn w-100">Upload Material</button>
                     </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50);">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border: 2px solid var(--gray-200);">Cancel</button>
+                    <button type="submit" form="uploadMaterialForm" class="primary-btn" style="padding: 0.6rem 1.5rem;">Upload Material</button>
                 </div>
             </div>
         </div>
@@ -926,11 +938,14 @@
     <div class="modal fade" id="liveSessionModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Schedule Live Session</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-broadcast-tower" style="font-size: 1.28rem; color: var(--warning);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Schedule Live Session</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <form id="liveSessionForm">
                         <div class="mb-3">
                             <label class="form-label">Select Course</label>
@@ -954,12 +969,15 @@
                             <label class="form-label">Meeting URL (Zoom, Google Meet, etc.)</label>
                             <input type="url" class="form-control" id="sessionUrl" placeholder="https://zoom.us/j/...">
                         </div>
-                        <div class="alert alert-primary">
+                        <div class="alert alert-primary" style="margin-bottom: 0;">
                             <i class="fas fa-info-circle"></i>
                             You'll be able to start the session, record it, and save the recording as a video lesson.
                         </div>
-                        <button type="submit" class="primary-btn w-100">Schedule Session</button>
                     </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50);">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border: 2px solid var(--gray-200);">Cancel</button>
+                    <button type="submit" form="liveSessionForm" class="primary-btn" style="padding: 0.6rem 1.5rem;">Schedule Session</button>
                 </div>
             </div>
         </div>

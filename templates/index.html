@@ -2955,11 +2955,14 @@
     <div class="modal fade" id="studentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-graduate"></i> Student Login</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-user-graduate" style="font-size: 1.28rem; color: var(--primary);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Student Login</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <form id="studentLoginForm">
                         <div class="mb-3">
                             <label for="studentEmail" class="form-label">Email Address</label>
@@ -2974,14 +2977,15 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="form-check mb-3">
+                        <div class="form-check mb-0">
                             <input class="form-check-input" type="checkbox" id="rememberStudent">
                             <label class="form-check-label" for="rememberStudent">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-primary-custom">Sign In</button>
                     </form>
-                    <hr>
-                    <p style="text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="student">Sign up now</a></p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
+                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="student" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign up now</a></small>
+                    <button type="submit" form="studentLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
                 </div>
             </div>
         </div>
@@ -2991,11 +2995,14 @@
     <div class="modal fade" id="tutorModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-chalkboard-user"></i> Tutor Login</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-chalkboard-user" style="font-size: 1.28rem; color: var(--success);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Instructor Login</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <form id="tutorLoginForm">
                         <div class="mb-3">
                             <label for="tutorEmail" class="form-label">Email Address</label>
@@ -3010,14 +3017,15 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="form-check mb-3">
+                        <div class="form-check mb-0">
                             <input class="form-check-input" type="checkbox" id="rememberTutor">
                             <label class="form-check-label" for="rememberTutor">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-tutor">Sign In</button>
                     </form>
-                    <hr>
-                    <p style="text-align: center;">New tutor? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="tutor">Apply now</a></p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
+                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">New tutor? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="tutor" style="color: var(--primary); text-decoration: none; font-weight: 600;">Apply now</a></small>
+                    <button type="submit" form="tutorLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
                 </div>
             </div>
         </div>
@@ -3027,11 +3035,14 @@
     <div class="modal fade" id="parentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-users"></i> Parent Login</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-users" style="font-size: 1.28rem; color: var(--warning);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Parent Login</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <form id="parentLoginForm">
                         <div class="mb-3">
                             <label for="parentEmail" class="form-label">Email Address</label>
@@ -3046,14 +3057,15 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="form-check mb-3">
+                        <div class="form-check mb-0">
                             <input class="form-check-input" type="checkbox" id="rememberParent">
                             <label class="form-check-label" for="rememberParent">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-primary-custom">Sign In</button>
                     </form>
-                    <hr>
-                    <p style="text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="parent">Create one</a></p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
+                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Don't have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#signupModal" data-signup-role="parent" style="color: var(--primary); text-decoration: none; font-weight: 600;">Create one</a></small>
+                    <button type="submit" form="parentLoginForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Sign In</button>
                 </div>
             </div>
         </div>
@@ -3063,11 +3075,14 @@
     <div class="modal fade" id="signupModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-plus"></i> Create Account</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-user-plus" style="font-size: 1.28rem; color: var(--primary);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Create Account</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <div id="signupMessage" style="display: none; margin-bottom: 1rem;"></div>
                     <form id="signupForm">
                         <div class="mb-3">
@@ -3333,14 +3348,58 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="form-check mb-3">
+                        <div class="form-check mb-0">
                             <input class="form-check-input" type="checkbox" id="agreeTerms" required>
                             <label class="form-check-label" for="agreeTerms">I agree to the Terms and Conditions</label>
                         </div>
-                        <button type="submit" class="btn btn-primary-custom">Create Account</button>
                     </form>
-                    <hr>
-                    <p style="text-align: center;">Already have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#studentModal">Sign in</a></p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50); flex-wrap: wrap;">
+                    <small style="width: 100%; color: var(--gray-600); margin-bottom: 1rem; text-align: center;">Already have an account? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#studentModal" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign in</a></small>
+                    <button type="submit" form="signupForm" class="primary-btn" style="padding: 0.6rem 1.5rem; width: 100%;">Create Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parent Link First Child Modal (Post-Signup) -->
+    <div class="modal fade" id="parentLinkChildModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-link" style="font-size: 1.28rem; color: var(--primary);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Link Your First Child</h5>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem;">Get started by linking your child's account. You can add up to 7 children.</p>
+                    <form id="parentLinkChildForm">
+                        <div class="mb-3">
+                            <label for="linkChildEmail" class="form-label">Child's Email Address</label>
+                            <input type="email" class="form-control" id="linkChildEmail" placeholder="child@example.com" required>
+                            <small class="form-text text-muted">The email used for their student account</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="linkChildRelationship" class="form-label">Your Relationship</label>
+                            <select class="form-select" id="linkChildRelationship" required>
+                                <option value="">Select relationship...</option>
+                                <option value="parent">Parent</option>
+                                <option value="guardian">Guardian</option>
+                                <option value="custodian">Custodian</option>
+                            </select>
+                        </div>
+                        <div id="linkChildMessage" style="display: none; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;"></div>
+                        <div id="linkChildVerificationCode" style="display: none; text-align: center; padding: 1.5rem; background: #f0f4ff; border-radius: 12px; margin-bottom: 1rem;">
+                            <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 0.75rem;">Share this code with your child:</p>
+                            <div id="codeDisplay" style="font-size: 2.4rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary); font-family: 'Courier New', monospace;"></div>
+                            <small style="color: var(--gray-600); display: block; margin-top: 0.75rem;">Valid for 24 hours</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50);">
+                    <button type="button" class="btn btn-outline-secondary" id="skipLinkingBtn" onclick="skipChildLinking()" style="border: 2px solid var(--gray-200);">Skip for Now</button>
+                    <button type="submit" form="parentLinkChildForm" class="primary-btn" id="linkChildSubmitBtn" style="padding: 0.6rem 1.5rem;">Send Link Request</button>
                 </div>
             </div>
         </div>
@@ -3509,20 +3568,26 @@
                 console.log('Response data:', data); // Debug logging
 
                 if (data.success) {
-                    showSignupMessage('Account created successfully! Redirecting to login...', 'success');
+                    showSignupMessage('Account created successfully!', 'success');
                     setTimeout(() => {
                         document.getElementById('signupForm').reset();
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
-                        modal.hide();
+                        const signupModal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+                        signupModal.hide();
                         showSignupMessage('');
-                        // Show login modal based on user type
-                        const loginModalId = userType === 'student' ? 'studentModal' : 
-                                             userType === 'tutor' ? 'tutorModal' : 'parentModal';
-                        const loginModal = new bootstrap.Modal(document.getElementById(loginModalId));
-                        loginModal.show();
+                        
+                        // For parents: show child linking modal first
+                        if (userType === 'parent') {
+                            const linkModal = new bootstrap.Modal(document.getElementById('parentLinkChildModal'));
+                            linkModal.show();
+                        } else {
+                            // For students and tutors: show login modal
+                            const loginModalId = userType === 'student' ? 'studentModal' : 'tutorModal';
+                            const loginModal = new bootstrap.Modal(document.getElementById(loginModalId));
+                            loginModal.show();
+                        }
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalBtnText;
-                    }, 2000);
+                    }, 1500);
                 } else {
                     showSignupMessage(data.message || 'Sign-up failed', 'error');
                     submitBtn.disabled = false;
@@ -3593,6 +3658,79 @@
                 }
             }
         });
+
+        // Parent Link Child Modal Functions
+        document.getElementById('parentLinkChildForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const childEmail = document.getElementById('linkChildEmail').value.trim();
+            const relationship = document.getElementById('linkChildRelationship').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+            const messageDiv = document.getElementById('linkChildMessage');
+            const verificationCodeDiv = document.getElementById('linkChildVerificationCode');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            messageDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/parent/link-student', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_email: childEmail,
+                        relationship_type: relationship
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show verification code
+                    document.getElementById('codeDisplay').textContent = data.data.verification_code;
+                    verificationCodeDiv.style.display = 'block';
+                    document.getElementById('parentLinkChildForm').style.display = 'none';
+                    submitBtn.textContent = originalBtnText;
+                    document.getElementById('skipLinkingBtn').style.display = 'none';
+                } else {
+                    messageDiv.textContent = data.message || 'Failed to link child';
+                    messageDiv.style.backgroundColor = '#f8d7da';
+                    messageDiv.style.color = '#721c24';
+                    messageDiv.style.border = '1px solid #f5c6cb';
+                    messageDiv.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                messageDiv.textContent = 'An error occurred. Please try again.';
+                messageDiv.style.backgroundColor = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.style.border = '1px solid #f5c6cb';
+                messageDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        });
+
+        // Skip Child Linking
+        function skipChildLinking() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('parentLinkChildModal'));
+            modal.hide();
+            
+            // Reset modal for future use
+            document.getElementById('parentLinkChildForm').reset();
+            document.getElementById('parentLinkChildForm').style.display = 'block';
+            document.getElementById('linkChildMessage').style.display = 'none';
+            document.getElementById('linkChildVerificationCode').style.display = 'none';
+            document.getElementById('skipLinkingBtn').style.display = 'block';
+            document.getElementById('linkChildSubmitBtn').textContent = 'Send Link Request';
+            document.getElementById('linkChildSubmitBtn').disabled = false;
+            
+            // Show parent login modal
+            const loginModal = new bootstrap.Modal(document.getElementById('parentModal'));
+            loginModal.show();
+        }
 
         // Student Login Handler
         document.getElementById('studentLoginForm').addEventListener('submit', async function(e) {

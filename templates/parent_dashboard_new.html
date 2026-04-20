@@ -1051,11 +1051,14 @@
     <div class="modal fade" id="linkStudentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Link New Child</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-link" style="font-size: 1.28rem; color: var(--primary);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Link New Child</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.5rem;">
                     <form id="linkStudentForm">
                         <div class="mb-3">
                             <label class="form-label">Child's Email Address</label>
@@ -1071,12 +1074,15 @@
                                 <option value="custodian">Custodian</option>
                             </select>
                         </div>
-                        <div class="alert alert-primary">
+                        <div class="alert alert-primary" style="margin-bottom: 0;">
                             <i class="fas fa-info-circle"></i>
                             Once you link, the child will receive a verification request they must approve. You can link up to 7 children.
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Send Link Request</button>
                     </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50);">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border: 2px solid var(--gray-200);">Cancel</button>
+                    <button type="submit" form="linkStudentForm" class="primary-btn" style="padding: 0.6rem 1.5rem;">Send Link Request</button>
                 </div>
             </div>
         </div>
@@ -1086,19 +1092,28 @@
     <div class="modal fade" id="pendingCodeModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Share Verification Code</h5>
+                <div class="modal-header" style="border-bottom: 2px solid var(--gray-200); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-key" style="font-size: 1.28rem; color: var(--warning);"></i>
+                        <h5 class="modal-title" style="margin: 0; font-weight: 800; color: var(--dark);">Share Verification Code</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p>Share this verification code with your child so they can approve the link:</p>
-                    <div style="text-align: center; padding: 2rem; background: var(--gray-100); border-radius: 12px; margin: 1rem 0;">
-                        <div id="verificationCodeDisplay" style="font-size: 2rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary);">
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <p style="color: var(--gray-700); margin-bottom: 1.5rem;">Share this verification code with your child so they can approve the link:</p>
+                    <div style="text-align: center; padding: 2rem; background: var(--gray-100); border-radius: 12px; margin: 1.5rem 0;">
+                        <div id="verificationCodeDisplay" style="font-size: 2.4rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary); font-family: 'Courier New', monospace;">
                             -
                         </div>
                         <small style="color: var(--gray-600); display: block; margin-top: 1rem;">Valid for 24 hours</small>
                     </div>
-                    <p style="color: var(--gray-600); font-size: 0.9rem;">Your child will need to enter this code in their dashboard to approve the link.</p>
+                    <div class="alert alert-info" style="margin-bottom: 0;">
+                        <i class="fas fa-lightbulb"></i>
+                        Your child will need to enter this code in their dashboard to approve the link.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--gray-200); padding: 1rem 1.5rem; background: var(--gray-50);">
+                    <button type="button" class="primary-btn" data-bs-dismiss="modal" style="padding: 0.6rem 1.5rem;">Got It</button>
                 </div>
             </div>
         </div>
