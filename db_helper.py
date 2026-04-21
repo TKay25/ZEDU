@@ -2609,6 +2609,144 @@ def get_popular_tags(limit=8):
         conn.close()
 
 
+# ============== STUDENT DASHBOARD DATA ==============
+
+def get_student_gpa(student_id):
+    """
+    Get student's GPA (calculated from course reviews/ratings)
+    """
+    conn = get_db_connection()
+    if not conn:
+        return 0.0
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT AVG(rating * 1.0) FROM reviews
+            WHERE student_id = %s
+        """, (student_id,))
+        
+        result = cursor.fetchone()
+        gpa = result[0] if result[0] else 0.0
+        return round(gpa, 2)
+    except Exception as e:
+        print(f"Error getting student GPA: {e}")
+        return 0.0
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_student_study_hours(student_id, days=7):
+    """
+    Get total study hours for the last N days
+    """
+    conn = get_db_connection()
+    if not conn:
+        return 0
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT SUM(EXTRACT(EPOCH FROM (ended_at - started_at)) / 3600)
+            FROM live_sessions
+            WHERE instructor_id = %s AND status = 'ended' AND ended_at > NOW() - INTERVAL '%s days'
+        """, (student_id, days))
+        
+        result = cursor.fetchone()
+        hours = int(result[0]) if result[0] else 0
+        return hours
+    except Exception as e:
+        print(f"Error getting study hours: {e}")
+        return 0
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_student_recommended_courses(student_id, limit=3):
+    """
+    Get recommended courses based on student's education level
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Get student's education level
+        cursor.execute("SELECT education_level FROM users WHERE id = %s", (student_id,))
+        student = cursor.fetchone()
+        education_level = student['education_level'] if student else 'university'
+        
+        # Get courses not yet enrolled in
+        cursor.execute("""
+            SELECT c.id, c.title, u.full_name as instructor_name, c.level, c.total_students
+            FROM courses c
+            JOIN users u ON c.instructor_id = u.id
+            WHERE c.level = %s 
+            AND c.id NOT IN (SELECT course_id FROM enrollments WHERE student_id = %s)
+            ORDER BY c.rating DESC, c.total_students DESC
+            LIMIT %s
+        """, (education_level, student_id, limit))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting recommended courses: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_student_activity(student_id, limit=10):
+    """
+    Get recent activity for a student
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Get various activities from different tables
+        cursor.execute("""
+            SELECT 
+                'assignment' as activity_type,
+                'Assignment Submitted' as title,
+                c.title as course_name,
+                fp.content as description,
+                fp.created_at
+            FROM forum_posts fp
+            JOIN forum_threads ft ON fp.thread_id = ft.id
+            JOIN forums f ON ft.forum_id = f.id
+            JOIN courses c ON f.course_id = c.id
+            WHERE fp.user_id = %s
+            UNION ALL
+            SELECT 
+                'enrollment' as activity_type,
+                'Course Enrolled' as title,
+                c.title as course_name,
+                'Enrolled in ' || c.title as description,
+                e.enrolled_at as created_at
+            FROM enrollments e
+            JOIN courses c ON e.course_id = c.id
+            WHERE e.student_id = %s
+            ORDER BY created_at DESC
+            LIMIT %s
+        """, (student_id, student_id, limit))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting student activity: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
 if __name__ == "__main__":
     # Test database connection and create tables
     print("Connecting to database...")

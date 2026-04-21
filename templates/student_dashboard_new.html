@@ -1030,11 +1030,11 @@
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                         <div>
                             <p style="font-size: 0.8rem; opacity: 0.9; margin: 0 0 0.5rem 0;">Current GPA</p>
-                            <h3 style="font-size: 2rem; font-weight: 800; margin: 0;">3.8</h3>
+                            <h3 id="gpaValue" style="font-size: 2rem; font-weight: 800; margin: 0;">-</h3>
                         </div>
                         <i class="fas fa-star" style="font-size: 2rem; opacity: 0.7;"></i>
                     </div>
-                    <p style="font-size: 0.75rem; opacity: 0.8; margin: 0;">On track for distinction</p>
+                    <p style="font-size: 0.75rem; opacity: 0.8; margin: 0;" id="gpaStatus">Loading stats...</p>
                 </div>
 
                 <!-- Study Time Card -->
@@ -1042,11 +1042,11 @@
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                         <div>
                             <p style="font-size: 0.8rem; opacity: 0.9; margin: 0 0 0.5rem 0;">This Week</p>
-                            <h3 style="font-size: 2rem; font-weight: 800; margin: 0;">14h 32m</h3>
+                            <h3 id="studyHours" style="font-size: 2rem; font-weight: 800; margin: 0;">-</h3>
                         </div>
                         <i class="fas fa-clock" style="font-size: 2rem; opacity: 0.7;"></i>
                     </div>
-                    <p style="font-size: 0.75rem; opacity: 0.8; margin: 0;">+2h from last week</p>
+                    <p style="font-size: 0.75rem; opacity: 0.8; margin: 0;">Last 7 days</p>
                 </div>
             </div>
 
@@ -1070,27 +1070,9 @@
                 <a href="#" class="view-all-btn">Manage Resources →</a>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.2rem; margin-bottom: 3rem;">
-                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
-                    <i class="fas fa-file-pdf" style="font-size: 1.6rem; color: #ef4444; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">12 PDFs</p>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Downloaded materials</p>
-                </div>
-                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
-                    <i class="fas fa-video" style="font-size: 1.6rem; color: #3b82f6; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">8 Videos</p>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Saved for later</p>
-                </div>
-                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
-                    <i class="fas fa-bookmark" style="font-size: 1.6rem; color: #10b981; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">25 Articles</p>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Reading list</p>
-                </div>
-                <div style="background: #f3f4f6; border-radius: 12px; padding: 1.2rem; text-align: center; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderColor='#0d1b2a'; this.style.background='#fff'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='#f3f4f6'">
-                    <i class="fas fa-sticky-note" style="font-size: 1.6rem; color: #f59e0b; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.85rem; margin: 0; color: #1f2937;">17 Notes</p>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Personal notes</p>
-                </div>
+            <div style="background: white; border-radius: 16px; padding: 2rem; border: 1px solid #e5e7eb; text-align: center; margin-bottom: 3rem;">
+                <i class="fas fa-book-open" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; opacity: 0.6;"></i>
+                <p style="color: var(--gray-600); font-size: 0.95rem;">Enroll in courses to access study materials, videos, PDFs, and notes from your instructors.</p>
             </div>
 
             <!-- Recent Activity Section -->
@@ -1116,25 +1098,9 @@
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1.2rem; margin-bottom: 3rem;" id="achievementsContainer">
-                <div style="text-align: center; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; padding: 1.2rem; color: white; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);">
-                    <i class="fas fa-medal" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">Fast Learner</p>
-                    <p style="font-size: 0.7rem; opacity: 0.9; margin: 0;">Completed 5 courses</p>
-                </div>
-                <div style="text-align: center; background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); border-radius: 12px; padding: 1.2rem; color: white; box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2);">
-                    <i class="fas fa-fire" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">30-Day Streak</p>
-                    <p style="font-size: 0.7rem; opacity: 0.9; margin: 0;">Active learner</p>
-                </div>
-                <div style="text-align: center; background: linear-gradient(135deg, #34d399 0%, #10b981 100%); border-radius: 12px; padding: 1.2rem; color: white; box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2);">
-                    <i class="fas fa-certificate" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">Python Master</p>
-                    <p style="font-size: 0.7rem; opacity: 0.9; margin: 0;">Expert level</p>
-                </div>
-                <div style="text-align: center; background: #f3f4f6; border-radius: 12px; padding: 1.2rem; border: 2px dashed #9ca3af; color: #6b7280;">
-                    <i class="fas fa-lock" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <p style="font-weight: 600; font-size: 0.8rem; margin: 0.5rem 0 0 0;">Locked</p>
-                    <p style="font-size: 0.7rem; margin: 0;">Complete 2 more courses</p>
+                <div style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                    <i class="fas fa-star" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>Start earning achievements by completing courses and milestones!</p>
                 </div>
             </div>
         </div>
@@ -1238,49 +1204,42 @@
             `).join('');
         }
 
+        // Load student statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/student/stats');
+                const data = await response.json();
+                
+                if (data.success && data.stats) {
+                    const gpa = data.stats.gpa || 0;
+                    const hours = data.stats.study_hours || 0;
+                    
+                    document.getElementById('gpaValue').textContent = gpa > 0 ? gpa.toFixed(1) : 'N/A';
+                    document.getElementById('gpaStatus').textContent = gpa > 0 ? `${gpa >= 3.5 ? '✓ On track for distinction' : 'Good progress'}` : 'No grades yet';
+                    
+                    const minutes = hours % 60;
+                    const displayHours = Math.floor(hours / 60);
+                    document.getElementById('studyHours').textContent = hours > 0 ? `${displayHours}h ${minutes}m` : '0h';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('gpaValue').textContent = 'N/A';
+                document.getElementById('studyHours').textContent = '0h';
+            }
+        }
+
         // Load assignments
         async function loadAssignments() {
             try {
-                // For now, showing mock data
+                // Currently, assignments are not stored in database yet
+                // This will show empty state until assignment management is implemented
                 const container = document.getElementById('assignmentsContainer');
-                const assignments = [
-                    {
-                        id: 1,
-                        title: 'Data Structures Quiz',
-                        course: 'Advanced Programming',
-                        dueDate: '2026-04-25',
-                        status: 'due-soon'
-                    },
-                    {
-                        id: 2,
-                        title: 'Python Project - Web Scraper',
-                        course: 'Python Fundamentals',
-                        dueDate: '2026-04-28',
-                        status: 'not-started'
-                    },
-                    {
-                        id: 3,
-                        title: 'Mathematics Assignment Chapter 5',
-                        course: 'Pre-calculus',
-                        dueDate: '2026-05-02',
-                        status: 'due-soon'
-                    }
-                ];
-
-                if (assignments.length > 0) {
-                    container.innerHTML = assignments.map(assignment => `
-                        <div class="assignment-item">
-                            <div class="assignment-info">
-                                <p class="assignment-title">${assignment.title}</p>
-                                <p class="assignment-course">${assignment.course}</p>
-                                <p class="assignment-due">Due: ${new Date(assignment.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                            </div>
-                            <div class="assignment-status ${assignment.status === 'due-soon' ? 'status-due-soon' : 'status-not-started'}">
-                                ${assignment.status === 'due-soon' ? 'Due Soon' : 'Not Started'}
-                            </div>
-                        </div>
-                    `).join('');
-                }
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                        <i class="fas fa-clipboard-list" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No assignments available. Assignments will appear here when your instructors create them.</p>
+                    </div>
+                `;
             } catch (error) {
                 console.error('Error loading assignments:', error);
             }
@@ -1289,89 +1248,78 @@
         // Load activity
         async function loadActivity() {
             try {
+                const response = await fetch('/api/student/activity');
+                const data = await response.json();
                 const container = document.getElementById('activityContainer');
-                const activities = [
-                    {
-                        title: 'Assignment Submitted',
-                        course: 'Advanced Programming',
-                        description: 'Submitted "Data Structures Quiz"',
-                        time: '2 hours ago'
-                    },
-                    {
-                        title: 'Course Completed',
-                        course: 'Python Fundamentals',
-                        description: 'Successfully completed Python Fundamentals course',
-                        time: '1 day ago'
-                    },
-                    {
-                        title: 'Achievement Unlocked',
-                        course: 'Learning',
-                        description: 'Earned "30-Day Streak" achievement',
-                        time: '3 days ago'
-                    },
-                    {
-                        title: 'Course Enrolled',
-                        course: 'Pre-calculus',
-                        description: 'Enrolled in Pre-calculus course',
-                        time: '5 days ago'
-                    }
-                ];
-
-                if (activities.length > 0) {
-                    container.innerHTML = activities.map(activity => `
-                        <div class="activity-item">
-                            <div class="activity-header">
-                                <h4 class="activity-title">${activity.title}</h4>
-                                <span class="activity-time">${activity.time}</span>
+                
+                if (data.success && data.activity && data.activity.length > 0) {
+                    container.innerHTML = data.activity.map(activity => {
+                        const timeAgo = getTimeAgo(new Date(activity.created_at));
+                        return `
+                            <div class="activity-item">
+                                <div class="activity-header">
+                                    <h4 class="activity-title">${activity.title}</h4>
+                                    <span class="activity-time">${timeAgo}</span>
+                                </div>
+                                <p class="activity-description">${activity.description}</p>
                             </div>
-                            <p class="activity-description">${activity.description}</p>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                            <i class="fas fa-history" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No recent activity. Start enrolling in courses and completing assignments!</p>
                         </div>
-                    `).join('');
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading activity:', error);
             }
         }
 
+        // Helper function to format time ago
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
         // Load recommendations
         async function loadRecommendations() {
             try {
+                const response = await fetch('/api/student/recommended-courses?limit=3');
+                const data = await response.json();
                 const container = document.getElementById('recommendedContainer');
-                const recommendations = [
-                    {
-                        id: 1,
-                        title: 'Machine Learning Basics',
-                        instructor: 'Prof. Smith',
-                        students: 1250,
-                        level: 'Intermediate'
-                    },
-                    {
-                        id: 2,
-                        title: 'Web Development with React',
-                        instructor: 'Prof. Johnson',
-                        students: 2100,
-                        level: 'Beginner'
-                    },
-                    {
-                        id: 3,
-                        title: 'Database Design',
-                        instructor: 'Prof. Williams',
-                        students: 890,
-                        level: 'Advanced'
-                    }
-                ];
-
-                if (recommendations.length > 0) {
-                    container.innerHTML = recommendations.map(course => `
+                
+                if (data.success && data.courses && data.courses.length > 0) {
+                    container.innerHTML = data.courses.map(course => `
                         <div style="background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.boxShadow='0 8px 20px rgba(13, 27, 42, 0.1)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
                             <h4 style="font-size: 0.9rem; font-weight: 700; color: #1f2937; margin: 0 0 0.5rem 0;">${course.title}</h4>
-                            <p style="font-size: 0.8rem; color: #6b7280; margin: 0 0 0.8rem 0;">${course.instructor}</p>
+                            <p style="font-size: 0.8rem; color: #6b7280; margin: 0 0 0.8rem 0;">${course.instructor_name}</p>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-size: 0.7rem; background: #f0f9ff; color: #0369a1; padding: 0.3rem 0.6rem; border-radius: 12px; font-weight: 600;">${course.level}</span>
-                                <span style="font-size: 0.7rem; color: #9ca3af;">${course.students} students</span>
+                                <span style="font-size: 0.7rem; color: #9ca3af;">${course.total_students || 0} students</span>
                             </div>
                         </div>
                     `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                            <i class="fas fa-book" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No recommendations available at the moment.</p>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading recommendations:', error);
@@ -1403,6 +1351,7 @@
         window.addEventListener('load', () => {
             loadThemePreference();
             loadProfile();
+            loadStats();
             loadEnrollments();
             loadAssignments();
             loadActivity();

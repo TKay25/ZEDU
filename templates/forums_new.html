@@ -641,30 +641,26 @@
                 const data = await response.json();
                 
                 if (data.success && data.tags && data.tags.length > 0) {
-                    renderPopularTags(data.tags);
+                    // Filter out tags with count of 0 (default/unused tags)
+                    const activeTags = data.tags.filter(t => t.count > 0);
+                    if (activeTags.length > 0) {
+                        renderPopularTags(activeTags);
+                    } else {
+                        showNoTagsMessage();
+                    }
                 } else {
-                    // Fallback to default tags if no tags returned
-                    renderPopularTags([
-                        { tag: 'python', count: 0 },
-                        { tag: 'javascript', count: 0 },
-                        { tag: 'databases', count: 0 },
-                        { tag: 'web-development', count: 0 },
-                        { tag: 'project-help', count: 0 },
-                        { tag: 'study-tips', count: 0 }
-                    ]);
+                    showNoTagsMessage();
                 }
             } catch (error) {
                 console.error('Error loading popular tags:', error);
-                // Fallback to default tags
-                renderPopularTags([
-                    { tag: 'python', count: 0 },
-                    { tag: 'javascript', count: 0 },
-                    { tag: 'databases', count: 0 },
-                    { tag: 'web-development', count: 0 },
-                    { tag: 'project-help', count: 0 },
-                    { tag: 'study-tips', count: 0 }
-                ]);
+                showNoTagsMessage();
             }
+        }
+
+        // Show message when no tags exist
+        function showNoTagsMessage() {
+            const container = document.getElementById('popularTagsContainer');
+            container.innerHTML = '<div class="sidebar-item" style="text-align: center; font-size: 0.85rem; color: var(--gray-600);">No tags yet</div>';
         }
 
         // Render popular tags

@@ -13,7 +13,8 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards, update_last_login,
                        get_all_forums_with_stats, create_notification, get_user_notifications, 
                        get_unread_notification_count, mark_notification_as_read, mark_all_notifications_as_read, 
-                       delete_notification, get_popular_tags)
+                       delete_notification, get_popular_tags, get_student_gpa, get_student_study_hours,
+                       get_student_recommended_courses, get_student_activity)
 import os
 from datetime import timedelta
 import base64
@@ -358,6 +359,55 @@ def enroll_course():
         from db_helper import create_enrollment
         result = create_enrollment(user_id, course_id)
         return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/student/stats', methods=['GET'])
+def get_student_stats():
+    """Get student dashboard statistics (GPA, study hours, etc)"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        gpa = get_student_gpa(user_id)
+        study_hours = get_student_study_hours(user_id, days=7)
+        
+        return jsonify({
+            "success": True,
+            "stats": {
+                "gpa": gpa,
+                "study_hours": study_hours
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/student/recommended-courses', methods=['GET'])
+def get_recommended_courses():
+    """Get recommended courses for student"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        limit = request.args.get('limit', 3, type=int)
+        courses = get_student_recommended_courses(user_id, limit)
+        return jsonify({"success": True, "courses": [dict(c) for c in courses]}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/student/activity', methods=['GET'])
+def get_activity():
+    """Get recent activity for student"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        limit = request.args.get('limit', 10, type=int)
+        activity = get_student_activity(user_id, limit)
+        return jsonify({"success": True, "activity": [dict(a) for a in activity]}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
