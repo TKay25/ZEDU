@@ -3,7 +3,7 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        init_global_forum, get_global_forum, get_course_forum, get_forum_threads, get_thread_info, create_thread,
                        get_thread_posts, create_post, update_user_profile, update_user_avatar,
                        upload_course_material, get_course_materials, create_live_session, start_live_session,
-                       end_live_session, get_course_live_sessions, save_recorded_lesson, get_recorded_lessons,
+                       end_live_session, get_course_live_sessions, get_live_session, save_recorded_lesson, get_recorded_lessons,
                        request_parent_student_link, approve_parent_student_link, reject_parent_student_link,
                        get_pending_links_for_student, get_approved_students_for_parent, unlink_parent_student,
                        get_parent_student_links, unlink_parent_student_by_link, create_admin_application,
@@ -810,6 +810,34 @@ def end_session_api(session_id):
         return jsonify(result), 200 if result['success'] else 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/live-session/<int:session_id>')
+def view_live_session(session_id):
+    """View a live session with Jitsi embedded"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect('/login')
+    
+    session_info = get_live_session(session_id)
+    
+    if not session_info:
+        return "Session not found", 404
+    
+    return render_template('live_session.html', session=session_info)
+
+@app.route('/api/session/<int:session_id>', methods=['GET'])
+def get_session_api(session_id):
+    """Get session details"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    session_info = get_live_session(session_id)
+    
+    if not session_info:
+        return jsonify({"success": False, "message": "Session not found"}), 404
+    
+    return jsonify({"success": True, "session": session_info}), 200
 
 # ============== RECORDED LESSONS ROUTES ==============
 

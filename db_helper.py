@@ -5,6 +5,7 @@ import os
 import random
 import string
 from datetime import datetime
+import uuid
 
 # Database connection string
 DATABASE_URL = "postgresql://zeduweb_user:qdEe6bfJmlIHAknO2TVbum3SSm2kFvFV@dpg-d7cklfa8qa3s73e9podg-a.oregon-postgres.render.com/zeduweb"
@@ -1493,7 +1494,7 @@ def get_course_materials(course_id):
 
 def create_live_session(course_id, instructor_id, title, description, scheduled_at, session_url=None):
     """
-    Create a new live session
+    Create a new live session with auto-generated Jitsi room name
     """
     conn = get_db_connection()
     if not conn:
@@ -1501,10 +1502,16 @@ def create_live_session(course_id, instructor_id, title, description, scheduled_
 
     cursor = conn.cursor()
     try:
+        # Generate unique Jitsi room name if no session_url provided
+        if not session_url:
+            # Create a unique room name: zedu-<timestamp>-<random>
+            room_name = f"zedu-{int(datetime.now().timestamp())}-{uuid.uuid4().hex[:8]}"
+            session_url = f"https://meet.jitsi.org/{room_name}"
+        
         cursor.execute("""
             INSERT INTO live_sessions (course_id, instructor_id, title, description, scheduled_at, session_url, status)
             VALUES (%s, %s, %s, %s, %s, %s, 'scheduled')
-            RETURNING id, title, scheduled_at;
+            RETURNING id, title, scheduled_at, session_url;
         """, (course_id, instructor_id, title, description, scheduled_at, session_url))
         
         result = cursor.fetchone()
@@ -1518,7 +1525,8 @@ def create_live_session(course_id, instructor_id, title, description, scheduled_
                 "session": {
                     "id": result[0],
                     "title": result[1],
-                    "scheduled_at": result[2]
+                    "scheduled_at": result[2],
+                    "session_url": result[3]
                 }
             }
         else:
@@ -1641,6 +1649,36 @@ def get_course_live_sessions(course_id, status=None):
     except Exception as e:
         print(f"Error getting live sessions: {e}")
         return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_live_session(session_id):
+    """
+    Get details of a specific live session
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT ls.id, ls.course_id, ls.instructor_id, ls.title, ls.description, 
+                   ls.scheduled_at, ls.started_at, ls.ended_at, ls.session_url, ls.status, 
+                   ls.is_recorded, ls.created_at, ls.updated_at,
+                   u.full_name as instructor_name, c.title as course_title
+            FROM live_sessions ls
+            LEFT JOIN users u ON ls.instructor_id = u.id
+            LEFT JOIN courses c ON ls.course_id = c.id
+            WHERE ls.id = %s;
+        """, (session_id,))
+        
+        result = cursor.fetchone()
+        return dict(result) if result else None
+    except Exception as e:
+        print(f"Error getting live session: {e}")
+        return None
     finally:
         cursor.close()
         conn.close()

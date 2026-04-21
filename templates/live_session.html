@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ session.title }} - Live Session</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #007bff;
+            --primary-light: #0056b3;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-600: #495057;
+            --gray-800: #343a40;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 0.8rem 1.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            font-size: 0.96rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .search-box {
+            width: 300px;
+            background: var(--gray-100);
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .search-box:focus {
+            outline: none;
+            background: #e9ecef;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .navbar-actions > div:nth-child(2) {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .navbar-actions > div:nth-child(2) a {
+            text-decoration: none;
+            color: var(--gray-600);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-actions > div:nth-child(2) a:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .navbar-actions > div:nth-child(2) a[href*="live"] {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .navbar-actions > div:nth-child(2) a#logoutBtn:hover {
+            color: var(--danger) !important;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .session-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .session-header {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .session-header h1 {
+            margin: 0;
+            color: var(--gray-800);
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .session-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        .meta-item i {
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        .session-status {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .session-status.scheduled {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .session-status.live {
+            background: #c8e6c9;
+            color: #2e7d32;
+            animation: pulse 2s infinite;
+        }
+
+        .session-status.ended {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .jitsi-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        #jitsi-meet-container {
+            width: 100%;
+            height: 600px;
+            min-height: 600px;
+        }
+
+        .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-group-custom {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-custom {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-success-custom {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success-custom:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-danger-custom {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger-custom:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .info-alert {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            color: #1565c0;
+        }
+
+        .info-alert i {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .top-navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0.8rem;
+            }
+
+            .navbar-actions {
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            #jitsi-meet-container {
+                height: 400px;
+                min-height: 400px;
+            }
+
+            .session-meta {
+                gap: 1rem;
+            }
+
+            .btn-group-custom {
+                flex-direction: column;
+            }
+
+            .btn-custom {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-graduation-cap"></i> ZEDU
+        </div>
+        <div class="navbar-actions">
+            <input type="text" class="search-box" placeholder="Search courses..." id="searchBox">
+            
+            <!-- Navigation Links -->
+            <div>
+                <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="/forums"><i class="fas fa-comments"></i> Forums</a>
+                <a href="/noticeboards"><i class="fas fa-bullhorn"></i> Noticeboards</a>
+                <a href="/account"><i class="fas fa-user-circle"></i> Account</a>
+                <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+
+            <!-- Notifications Bell -->
+            <div style="position: relative;">
+                <a href="#" id="notificationsBell" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 1.1rem; padding: 0.5rem; border-radius: 8px; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.3rem;" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationBadge" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">0</span>
+                </a>
+                <div id="notificationsDropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); min-width: 300px; max-width: 400px; z-index: 1000; margin-top: 0.5rem;">
+                    <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+                        <h6 style="margin: 0; font-weight: 700; color: var(--gray-800);">Notifications</h6>
+                    </div>
+                    <div id="notificationsContent" style="max-height: 400px; overflow-y: auto;">
+                        <p style="text-align: center; color: var(--gray-600); font-size: 0.9rem;">Loading notifications...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="avatar" id="userInitials">ZV</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="session-container">
+        <!-- Session Header -->
+        <div class="session-header">
+            <h1><i class="fas fa-broadcast-tower"></i> {{ session.title }}</h1>
+            
+            <div class="session-meta">
+                <div class="meta-item">
+                    <i class="fas fa-book"></i>
+                    <span><strong>Course:</strong> {{ session.course_title }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-user"></i>
+                    <span><strong>Instructor:</strong> {{ session.instructor_name }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <span><strong>Scheduled:</strong> <span id="scheduledTime">{{ session.scheduled_at }}</span></span>
+                </div>
+            </div>
+
+            {% if session.description %}
+            <div style="margin-top: 1rem; color: var(--gray-600); line-height: 1.6;">
+                {{ session.description }}
+            </div>
+            {% endif %}
+
+            <div class="session-status {{ session.status }}">
+                <i class="fas fa-circle"></i>
+                {% if session.status == 'scheduled' %}
+                    Scheduled
+                {% elif session.status == 'live' %}
+                    <span style="animation: pulse 1s infinite;">● LIVE</span>
+                {% elif session.status == 'ended' %}
+                    Ended
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Info Alert -->
+        <div class="info-alert">
+            <i class="fas fa-info-circle"></i>
+            You are now in the live session. The meeting will start at the scheduled time.
+        </div>
+
+        <!-- Jitsi Meet Container -->
+        <div class="jitsi-container">
+            <div id="jitsi-meet-container"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-section">
+            <div class="btn-group-custom">
+                <button class="btn-custom btn-success-custom" id="startSessionBtn">
+                    <i class="fas fa-play"></i> Start Session
+                </button>
+                <button class="btn-custom btn-danger-custom" id="endSessionBtn">
+                    <i class="fas fa-stop"></i> End Session
+                </button>
+                <a href="/tutor-dashboard" class="btn-custom btn-primary-custom" style="text-decoration: none; color: white;">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jitsi Script -->
+    <script src="https://meet.jitsi.org/external_api.js"></script>
+    
+    <script>
+        // Extract room name from session URL
+        const sessionUrl = "{{ session.session_url }}";
+        const roomName = sessionUrl.split('/').pop();
+        const sessionId = {{ session.id }};
+        const sessionStatus = "{{ session.status }}";
+
+        // Initialize Jitsi Meet
+        const domain = "meet.jitsi.org";
+        const options = {
+            roomName: roomName,
+            width: '100%',
+            height: '100%',
+            parentNode: document.querySelector('#jitsi-meet-container'),
+            configOverwrite: {},
+            interfaceConfigOverwrite: {
+                TOOLBAR_BUTTONS: ['microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection', 'hangup', 'profile', 'settings', 'raisehand', 'videoquality', 'stats', 'shortcuts', 'tileview', 'help', 'recording'],
+                SHOW_JITSI_WATERMARK: false,
+                SHOW_WATERMARK_FOR_GUESTS: false,
+                BRAND_WATERMARK_LINK: 'https://zedu.example.com'
+            }
+        };
+
+        let api;
+        const container = document.querySelector('#jitsi-meet-container');
+        
+        if (container) {
+            api = new JitsiMeetExternalAPI(domain, options);
+        }
+
+        // Format datetime
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        document.getElementById('scheduledTime').textContent = formatDateTime("{{ session.scheduled_at }}");
+
+        // Start Session
+        document.getElementById('startSessionBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/api/session/${sessionId}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('Session started!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error starting session:', error);
+                alert('Error starting session');
+            }
+        });
+
+        // End Session
+        document.getElementById('endSessionBtn').addEventListener('click', async () => {
+            const isRecorded = confirm('Did you record this session?\n\nClick OK if you want to save it as a recorded lesson');
+            
+            try {
+                const response = await fetch(`/api/session/${sessionId}/end`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_recorded: isRecorded })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('Session ended successfully!');
+                    window.location.href = '/tutor-dashboard';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error ending session:', error);
+                alert('Error ending session');
+            }
+        });
+
+        // Logout Handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        // Load Notifications
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications?limit=5');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const notifications = data.notifications || [];
+                    const badge = document.getElementById('notificationBadge');
+                    const content = document.getElementById('notificationsContent');
+                    
+                    if (notifications.length > 0) {
+                        badge.style.display = 'flex';
+                        badge.textContent = notifications.length;
+                        content.innerHTML = notifications.map(n => `
+                            <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                <div style="font-weight: 600; color: var(--gray-800); font-size: 0.95rem;">${n.title}</div>
+                                <div style="font-size: 0.85rem; color: var(--gray-600); margin-top: 0.25rem;">${n.message}</div>
+                                <div style="font-size: 0.8rem; color: var(--gray-500); margin-top: 0.5rem;">${new Date(n.created_at).toLocaleDateString()}</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        badge.style.display = 'none';
+                        content.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--gray-600);">No notifications</div>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        // Load Profile
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const user = data.user;
+                    const initials = user.full_name
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2);
+                    
+                    document.getElementById('userInitials').textContent = initials;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Toggle Notifications Dropdown
+        document.getElementById('notificationsBell').addEventListener('click', (e) => {
+            e.preventDefault();
+            const dropdown = document.getElementById('notificationsDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            if (dropdown.style.display === 'block') {
+                loadNotifications();
+            }
+        });
+
+        // Close notifications when clicking outside
+        document.addEventListener('click', (e) => {
+            const bell = document.getElementById('notificationsBell');
+            const dropdown = document.getElementById('notificationsDropdown');
+            
+            if (!bell.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            loadProfile();
+            loadNotifications();
+        });
+    </script>
+</body>
+</html>

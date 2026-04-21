@@ -1025,13 +1025,9 @@
                             <label class="form-label">Scheduled Date & Time</label>
                             <input type="datetime-local" class="form-control" id="sessionDateTime" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Meeting URL (Zoom, Google Meet, etc.)</label>
-                            <input type="url" class="form-control" id="sessionUrl" placeholder="https://zoom.us/j/...">
-                        </div>
-                        <div class="alert alert-primary" style="margin-bottom: 0;">
-                            <i class="fas fa-info-circle"></i>
-                            You'll be able to start the session, record it, and save the recording as a video lesson.
+                        <div class="alert alert-success" style="margin-bottom: 0;">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Built-in video conference:</strong> A Jitsi Meet room will be automatically created for this session. You can start teaching, record the session, and save it as a video lesson.
                         </div>
                     </form>
                 </div>
@@ -1384,8 +1380,7 @@
             const formData = {
                 title: document.getElementById('sessionTitle').value,
                 description: document.getElementById('sessionDescription').value,
-                scheduled_at: scheduledAt,
-                session_url: document.getElementById('sessionUrl').value
+                scheduled_at: scheduledAt
             };
 
             try {
@@ -1397,7 +1392,7 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    alert('Live session scheduled successfully!');
+                    alert('Live session scheduled successfully! A Jitsi room has been created.');
                     document.getElementById('liveSessionForm').reset();
                     bootstrap.Modal.getInstance(document.getElementById('liveSessionModal')).hide();
                 } else {
