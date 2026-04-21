@@ -432,11 +432,9 @@
         </div>
     </div>
 
-    <!-- Jitsi Script -->
-    <script src="https://meet.jitsi.org/external_api.js"></script>
-    
+    <!-- Jitsi Script with proper async loading -->
     <script>
-        // Extract room name from session URL
+        // Declare variables globally first
         const sessionUrl = "{{ session.session_url }}";
         const roomName = sessionUrl.split('/').pop();
         const sessionId = {{ session.id }};
@@ -447,9 +445,39 @@
         console.log('Session URL:', sessionUrl);
 
         let api = null;
+        let jitsiScriptReady = false;
+
+        // Load Jitsi script dynamically with proper handling
+        function loadJitsiScript() {
+            return new Promise((resolve, reject) => {
+                if (window.JitsiMeetExternalAPI) {
+                    console.log('Jitsi API already loaded');
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://meet.jitsi.org/external_api.js';
+                script.async = true;
+                script.defer = true;
+
+                script.onload = () => {
+                    console.log('Jitsi script loaded successfully');
+                    jitsiScriptReady = true;
+                    resolve();
+                };
+
+                script.onerror = () => {
+                    console.error('Failed to load Jitsi script from CDN');
+                    reject(new Error('Failed to load Jitsi Meet API'));
+                };
+
+                document.head.appendChild(script);
+            });
+        }
 
         // Initialize Jitsi Meet when page loads
-        function initializeJitsi() {
+        async function initializeJitsi() {
             const container = document.querySelector('#jitsi-meet-container');
             const loadingDiv = document.querySelector('#jitsi-loading');
             
@@ -458,9 +486,24 @@
                 return;
             }
 
+            try {
+                // Wait for Jitsi script to load
+                console.log('Waiting for Jitsi API to load...');
+                await loadJitsiScript();
+                console.log('Jitsi API ready');
+            } catch (error) {
+                console.error('Error loading Jitsi:', error);
+                if (loadingDiv) {
+                    loadingDiv.innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;"></i><p style="color: var(--danger); margin: 0.5rem 0;">Failed to load video conference</p><p style="color: var(--gray-500); font-size: 0.9rem; margin: 0;">Please check your internet connection and refresh</p></div>';
+                }
+                return;
+            }
+
             if (typeof JitsiMeetExternalAPI === 'undefined') {
-                console.error('JitsiMeetExternalAPI not loaded yet');
-                setTimeout(initializeJitsi, 1000);
+                console.error('JitsiMeetExternalAPI still not available');
+                if (loadingDiv) {
+                    loadingDiv.innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;"></i><p style="color: var(--danger); margin: 0.5rem 0;">Video conference not available</p><p style="color: var(--gray-500); font-size: 0.9rem; margin: 0;">The Jitsi Meet service may be unavailable</p></div>';
+                }
                 return;
             }
 
@@ -477,7 +520,8 @@
                     startAudioMuted: false,
                     startVideoMuted: false,
                     enableLobbyMode: false,
-                    disableAudioLevels: false
+                    disableAudioLevels: false,
+                    useHostPageLocalStorage: false
                 },
                 interfaceConfigOverwrite: {
                     TOOLBAR_BUTTONS: ['microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection', 'hangup', 'profile', 'settings', 'raisehand', 'videoquality', 'stats', 'shortcuts', 'tileview', 'help', 'recording'],
@@ -496,7 +540,9 @@
 
                 // Hide loading spinner once Jitsi is ready
                 if (loadingDiv) {
-                    loadingDiv.style.display = 'none';
+                    setTimeout(() => {
+                        loadingDiv.style.display = 'none';
+                    }, 2000);
                 }
 
                 // Log events
@@ -722,8 +768,11 @@
             setupStartButton();
             setupEndButton();
             
-            // Initialize Jitsi after a short delay to ensure DOM is ready
-            setTimeout(initializeJitsi, 500);
+            // Initialize Jitsi - now async with proper loading
+            console.log('Starting Jitsi initialization...');
+            initializeJitsi().catch(error => {
+                console.error('Fatal error initializing Jitsi:', error);
+            });
         });
 
         // Also initialize on DOMContentLoaded
