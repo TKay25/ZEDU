@@ -618,6 +618,26 @@ def get_forum_threads_api(forum_id):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/api/forum/thread', methods=['POST'])
+def create_forum_thread():
+    """Create a new forum thread"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        data = request.get_json()
+        forum_id = data.get('forum_id')
+        title = data.get('title', '').strip()
+        
+        if not forum_id or not title:
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+        
+        result = create_thread(forum_id, user_id, title)
+        return jsonify(result), 200 if result.get('success') else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/api/forum/<int:forum_id>/thread', methods=['POST'])
 def create_thread_api(forum_id):
     """Create new thread in forum"""
