@@ -13,7 +13,7 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        unpin_noticeboard_post, delete_noticeboard_post, get_student_noticeboards, update_last_login,
                        get_all_forums_with_stats, create_notification, get_user_notifications, 
                        get_unread_notification_count, mark_notification_as_read, mark_all_notifications_as_read, 
-                       delete_notification)
+                       delete_notification, get_popular_tags)
 import os
 from datetime import timedelta
 import base64
@@ -543,6 +543,18 @@ def get_forums_api():
         if forums:
             return jsonify({"success": True, "forums": forums}), 200
         return jsonify({"success": True, "forums": []}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/forums/popular-tags', methods=['GET'])
+def get_popular_tags_api():
+    """Get popular tags from forum discussions"""
+    try:
+        limit = request.args.get('limit', 8, type=int)
+        if limit < 1 or limit > 50:
+            limit = 8
+        tags = get_popular_tags(limit)
+        return jsonify({"success": True, "tags": tags}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

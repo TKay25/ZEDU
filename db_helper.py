@@ -2557,6 +2557,58 @@ def delete_notification(notification_id):
         conn.close()
 
 
+# ============== FORUM TAGS ==============
+
+def get_popular_tags(limit=8):
+    """
+    Extract and count popular tags from forum thread titles
+    Returns top tags by frequency
+    """
+    import re
+    
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor()
+    try:
+        # Get all forum thread titles
+        cursor.execute("""
+            SELECT title FROM forum_threads
+            ORDER BY created_at DESC
+        """)
+        
+        threads = cursor.fetchall()
+        
+        # Extract tags from titles (look for #hashtag pattern)
+        tag_count = {}
+        for thread in threads:
+            title = thread[0] if thread[0] else ""
+            # Find all hashtags in the title
+            tags = re.findall(r'#(\w+)', title)
+            for tag in tags:
+                tag_lower = tag.lower()
+                tag_count[tag_lower] = tag_count.get(tag_lower, 0) + 1
+        
+        # Sort by count and get top tags
+        popular_tags = sorted(tag_count.items(), key=lambda x: x[1], reverse=True)[:limit]
+        
+        # If no tags found in titles, return default popular tags
+        if not popular_tags:
+            default_tags = ['python', 'javascript', 'databases', 'web-development', 'project-help', 'study-tips', 'career', 'networking']
+            return [{'tag': tag, 'count': 0} for tag in default_tags[:limit]]
+        
+        return [{'tag': tag, 'count': count} for tag, count in popular_tags]
+    except Exception as e:
+        print(f"Error getting popular tags: {e}")
+        # Return default tags on error
+        default_tags = ['python', 'javascript', 'databases', 'web-development', 'project-help', 'study-tips', 'career', 'networking']
+        return [{'tag': tag, 'count': 0} for tag in default_tags[:limit]]
+    finally:
+        cursor.close()
+        conn.close()
+
+
 if __name__ == "__main__":
     # Test database connection and create tables
     print("Connecting to database...")

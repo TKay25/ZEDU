@@ -499,14 +499,11 @@
                     </button>
 
                     <div class="sidebar-title">Popular Tags</div>
-                    <div class="sidebar-item">#python</div>
-                    <div class="sidebar-item">#javascript</div>
-                    <div class="sidebar-item">#databases</div>
-                    <div class="sidebar-item">#web-development</div>
-                    <div class="sidebar-item">#project-help</div>
-                    <div class="sidebar-item">#study-tips</div>
-                    <div class="sidebar-item">#career</div>
-                    <div class="sidebar-item">#networking</div>
+                    <div id="popularTagsContainer">
+                        <div class="sidebar-item" style="text-align: center;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading tags...
+                        </div>
+                    </div>
 
                     <div style="margin-top: 1.6rem; padding: 1rem; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border-radius: var(--radius-md); color: white;">
                         <p style="font-weight: 600; margin: 0 0 0.5rem 0;">Community Guidelines</p>
@@ -637,6 +634,57 @@
             }
         }
 
+        // Load popular tags dynamically
+        async function loadPopularTags() {
+            try {
+                const response = await fetch('/api/forums/popular-tags');
+                const data = await response.json();
+                
+                if (data.success && data.tags && data.tags.length > 0) {
+                    renderPopularTags(data.tags);
+                } else {
+                    // Fallback to default tags if no tags returned
+                    renderPopularTags([
+                        { tag: 'python', count: 0 },
+                        { tag: 'javascript', count: 0 },
+                        { tag: 'databases', count: 0 },
+                        { tag: 'web-development', count: 0 },
+                        { tag: 'project-help', count: 0 },
+                        { tag: 'study-tips', count: 0 }
+                    ]);
+                }
+            } catch (error) {
+                console.error('Error loading popular tags:', error);
+                // Fallback to default tags
+                renderPopularTags([
+                    { tag: 'python', count: 0 },
+                    { tag: 'javascript', count: 0 },
+                    { tag: 'databases', count: 0 },
+                    { tag: 'web-development', count: 0 },
+                    { tag: 'project-help', count: 0 },
+                    { tag: 'study-tips', count: 0 }
+                ]);
+            }
+        }
+
+        // Render popular tags
+        function renderPopularTags(tags) {
+            const container = document.getElementById('popularTagsContainer');
+            container.innerHTML = '';
+            
+            tags.forEach(tagObj => {
+                const tagDiv = document.createElement('div');
+                tagDiv.className = 'sidebar-item';
+                tagDiv.innerHTML = `#${tagObj.tag}${tagObj.count > 0 ? ` <span style="font-size: 0.75rem; opacity: 0.7;">(${tagObj.count})</span>` : ''}`;
+                tagDiv.style.cursor = 'pointer';
+                tagDiv.onclick = () => {
+                    // Optional: Add search/filter functionality when tag is clicked
+                    console.log('Tag clicked:', tagObj.tag);
+                };
+                container.appendChild(tagDiv);
+            });
+        }
+
         // Load forums dynamically
         async function loadForums() {
             try {
@@ -701,6 +749,7 @@
             loadProfile();
             initializeThreadModal();
             loadForums();
+            loadPopularTags();
         });
     </script>
 </body>
