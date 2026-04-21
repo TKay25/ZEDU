@@ -223,32 +223,6 @@ def logout():
 
 @app.route('/api/profile', methods=['GET'])
 def get_profile():
-    """Get current user's profile information"""
-    if 'user_id' not in session:
-        return jsonify({"success": False, "message": "Not authenticated"}), 401
-    
-    user = get_user_by_id(session['user_id'])
-    
-    if not user:
-        return jsonify({"success": False, "message": "User not found"}), 404
-    
-    return jsonify({
-        "success": True,
-        "user": {
-            "id": user['id'],
-            "email": user['email'],
-            "full_name": user['full_name'],
-            "user_type": user['user_type'],
-            "education_level": user.get('education_level'),
-            "phone": user.get('phone'),
-            "avatar": user.get('avatar'),
-            "created_at": user.get('created_at'),
-            "last_login": user.get('last_login')
-        }
-    }), 200
-
-@app.route('/api/profile', methods=['GET'])
-def get_profile():
     """Get current user profile"""
     user_id = session.get('user_id')
     if not user_id:

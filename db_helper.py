@@ -408,6 +408,16 @@ def create_tables():
             );
         """)
 
+        # Add missing columns to notifications table if they don't exist (migration support)
+        try:
+            cursor.execute("""
+                ALTER TABLE notifications 
+                ADD COLUMN IF NOT EXISTS read BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS read_at TIMESTAMP
+            """)
+        except Exception as migration_error:
+            print(f"Note: Could not add columns to notifications table (may already exist): {migration_error}")
+
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
