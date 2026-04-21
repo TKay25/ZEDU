@@ -199,12 +199,17 @@
             overflow: hidden;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             margin-bottom: 2rem;
+            position: relative;
+            min-height: 600px;
         }
 
         #jitsi-meet-container {
             width: 100%;
             height: 600px;
             min-height: 600px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .controls-section {
@@ -401,7 +406,13 @@
 
         <!-- Jitsi Meet Container -->
         <div class="jitsi-container">
-            <div id="jitsi-meet-container"></div>
+            <div id="jitsi-meet-container" style="background: #f5f5f5; display: flex; align-items: center; justify-content: center; position: relative;">
+                <div style="text-align: center;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--gray-600); margin: 0.5rem 0;">Loading video conference...</p>
+                    <p style="color: var(--gray-500); font-size: 0.9rem; margin: 0;">Please wait while Jitsi Meet initializes</p>
+                </div>
+            </div>
         </div>
 
         <!-- Controls -->
@@ -430,27 +441,68 @@
         const sessionId = {{ session.id }};
         const sessionStatus = "{{ session.status }}";
 
-        // Initialize Jitsi Meet
-        const domain = "meet.jitsi.org";
-        const options = {
-            roomName: roomName,
-            width: '100%',
-            height: '100%',
-            parentNode: document.querySelector('#jitsi-meet-container'),
-            configOverwrite: {},
-            interfaceConfigOverwrite: {
-                TOOLBAR_BUTTONS: ['microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection', 'hangup', 'profile', 'settings', 'raisehand', 'videoquality', 'stats', 'shortcuts', 'tileview', 'help', 'recording'],
-                SHOW_JITSI_WATERMARK: false,
-                SHOW_WATERMARK_FOR_GUESTS: false,
-                BRAND_WATERMARK_LINK: 'https://zedu.example.com'
-            }
-        };
+        console.log('Session ID:', sessionId);
+        console.log('Room Name:', roomName);
+        console.log('Session URL:', sessionUrl);
 
-        let api;
-        const container = document.querySelector('#jitsi-meet-container');
-        
-        if (container) {
-            api = new JitsiMeetExternalAPI(domain, options);
+        let api = null;
+
+        // Initialize Jitsi Meet when page loads
+        function initializeJitsi() {
+            const container = document.querySelector('#jitsi-meet-container');
+            
+            if (!container) {
+                console.error('Jitsi container not found');
+                return;
+            }
+
+            if (typeof JitsiMeetExternalAPI === 'undefined') {
+                console.error('JitsiMeetExternalAPI not loaded yet');
+                setTimeout(initializeJitsi, 1000);
+                return;
+            }
+
+            console.log('Initializing Jitsi with room:', roomName);
+
+            const domain = "meet.jitsi.org";
+            const options = {
+                roomName: roomName,
+                width: '100%',
+                height: '100%',
+                parentNode: container,
+                configOverwrite: {
+                    startAudioOnly: false,
+                    startAudioMuted: false,
+                    startVideoMuted: false,
+                    enableLobbyMode: false
+                },
+                interfaceConfigOverwrite: {
+                    TOOLBAR_BUTTONS: ['microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection', 'hangup', 'profile', 'settings', 'raisehand', 'videoquality', 'stats', 'shortcuts', 'tileview', 'help', 'recording'],
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false,
+                    BRAND_WATERMARK_LINK: 'https://zedu.example.com',
+                    DEFAULT_WELCOME_PAGE_LOGO_URL: 'https://zedu.example.com/logo.png'
+                }
+            };
+
+            try {
+                api = new JitsiMeetExternalAPI(domain, options);
+                console.log('Jitsi initialized successfully');
+
+                // Log events
+                api.addEventListener('readyToClose', () => {
+                    console.log('Ready to close');
+                    window.location.href = '/tutor-dashboard';
+                });
+
+                api.addEventListener('participantJoined', (data) => {
+                    console.log('Participant joined:', data);
+                });
+
+            } catch (error) {
+                console.error('Error initializing Jitsi:', error);
+                alert('Failed to initialize video conference. Please refresh the page.');
+            }
         }
 
         // Format datetime
@@ -469,49 +521,93 @@
         document.getElementById('scheduledTime').textContent = formatDateTime("{{ session.scheduled_at }}");
 
         // Start Session
-        document.getElementById('startSessionBtn').addEventListener('click', async () => {
-            try {
-                const response = await fetch(`/api/session/${sessionId}/start`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    alert('Session started!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error starting session:', error);
-                alert('Error starting session');
+        function setupStartButton() {
+            const btn = document.getElementById('startSessionBtn');
+            if (!btn) {
+                console.error('Start button not found');
+                return;
             }
-        });
+            
+            btn.addEventListener('click', async () => {
+                console.log('Start button clicked for session:', sessionId);
+                btn.disabled = true;
+                btn.textContent = 'Starting...';
+
+                try {
+                    const response = await fetch(`/api/session/${sessionId}/start`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const data = await response.json();
+                    console.log('Start response:', data);
+
+                    if (data.success) {
+                        alert('✓ Session started! You are now LIVE');
+                        // Update status badge
+                        const statusBadge = document.querySelector('.session-status');
+                        if (statusBadge) {
+                            statusBadge.className = 'session-status live';
+                            statusBadge.innerHTML = '<i class="fas fa-circle"></i> <span>● LIVE</span>';
+                        }
+                        btn.textContent = 'Session Live';
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                        btn.disabled = false;
+                        btn.textContent = 'Start Session';
+                    }
+                } catch (error) {
+                    console.error('Error starting session:', error);
+                    alert('Error: ' + error.message);
+                    btn.disabled = false;
+                    btn.textContent = 'Start Session';
+                }
+            });
+        }
 
         // End Session
-        document.getElementById('endSessionBtn').addEventListener('click', async () => {
-            const isRecorded = confirm('Did you record this session?\n\nClick OK if you want to save it as a recorded lesson');
-            
-            try {
-                const response = await fetch(`/api/session/${sessionId}/end`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ is_recorded: isRecorded })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    alert('Session ended successfully!');
-                    window.location.href = '/tutor-dashboard';
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error ending session:', error);
-                alert('Error ending session');
+        function setupEndButton() {
+            const btn = document.getElementById('endSessionBtn');
+            if (!btn) {
+                console.error('End button not found');
+                return;
             }
-        });
+
+            btn.addEventListener('click', async () => {
+                console.log('End button clicked for session:', sessionId);
+                const isRecorded = confirm('Did you record this session?\n\nClick OK if you want to save it as a recorded lesson');
+                
+                btn.disabled = true;
+                btn.textContent = 'Ending...';
+
+                try {
+                    const response = await fetch(`/api/session/${sessionId}/end`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ is_recorded: isRecorded })
+                    });
+                    
+                    const data = await response.json();
+                    console.log('End response:', data);
+
+                    if (data.success) {
+                        alert('✓ Session ended successfully!');
+                        setTimeout(() => {
+                            window.location.href = '/tutor-dashboard';
+                        }, 1000);
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                        btn.disabled = false;
+                        btn.textContent = 'End Session';
+                    }
+                } catch (error) {
+                    console.error('Error ending session:', error);
+                    alert('Error: ' + error.message);
+                    btn.disabled = false;
+                    btn.textContent = 'End Session';
+                }
+            });
+        }
 
         // Logout Handler
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
@@ -601,8 +697,19 @@
 
         // Initialize on page load
         window.addEventListener('load', () => {
+            console.log('Page loaded, initializing...');
             loadProfile();
             loadNotifications();
+            setupStartButton();
+            setupEndButton();
+            
+            // Initialize Jitsi after a short delay to ensure DOM is ready
+            setTimeout(initializeJitsi, 500);
+        });
+
+        // Also initialize on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded');
         });
     </script>
 </body>
