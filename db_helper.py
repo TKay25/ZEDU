@@ -1504,8 +1504,10 @@ def create_live_session(course_id, instructor_id, title, description, scheduled_
     try:
         # Generate unique Google Meet room name if no session_url provided
         if not session_url:
-            # Create a unique room name: zedu-<timestamp>-<random>
-            room_name = f"zedu-{int(datetime.now().timestamp())}-{uuid.uuid4().hex[:8]}"
+            # Create a valid Google Meet room name: zedu-{random}
+            # Google Meet requires alphanumeric and hyphens only
+            random_part = uuid.uuid4().hex[:12]  # Use hex for alphanumeric only
+            room_name = f"zedu-{random_part}"
             session_url = f"https://meet.google.com/{room_name}"
         
         cursor.execute("""
@@ -1747,6 +1749,157 @@ def get_recorded_lessons(course_id):
         return [dict(row) for row in results]
     except Exception as e:
         print(f"Error getting recorded lessons: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+def mark_session_recorded(session_id, is_recorded=True):
+    """
+    Mark a live session as recorded
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE live_sessions
+            SET is_recorded = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+            RETURNING id, is_recorded;
+        """, (is_recorded, session_id))
+        
+        result = cursor.fetchone()
+        conn.commit()
+        
+        if result:
+            return {
+                "success": True,
+                "message": "Session marked as recorded",
+                "session_id": result[0],
+                "is_recorded": result[1]
+            }
+        else:
+            return {"success": False, "message": "Session not found"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error marking session recorded: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_recorded_lesson_by_id(lesson_id):
+    """
+    Get a specific recorded lesson by ID
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, course_id, instructor_id, session_id, title, description, 
+                   video_url, thumbnail_url, duration_seconds, file_size, views, 
+                   is_published, created_at
+            FROM recorded_lessons
+            WHERE id = %s;
+        """, (lesson_id,))
+        
+        result = cursor.fetchone()
+        return dict(result) if result else None
+    except Exception as e:
+        print(f"Error getting recorded lesson: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def increment_recording_views(lesson_id):
+    """
+    Increment view count for a recorded lesson
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE recorded_lessons
+            SET views = views + 1, updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s;
+        """, (lesson_id,))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error incrementing recording views: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+def delete_recording(lesson_id):
+    """
+    Delete a recorded lesson
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        # Get the recording first to get video_url
+        cursor.execute("SELECT video_url FROM recorded_lessons WHERE id = %s;", (lesson_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            return {"success": False, "message": "Recording not found"}
+        
+        # Delete the recording
+        cursor.execute("DELETE FROM recorded_lessons WHERE id = %s;", (lesson_id,))
+        conn.commit()
+        
+        return {
+            "success": True,
+            "message": "Recording deleted successfully",
+            "video_url": result[0]
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting recording: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_session_recordings(session_id):
+    """
+    Get all recordings for a specific live session
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, title, description, video_url, thumbnail_url, duration_seconds, 
+                   views, created_at
+            FROM recorded_lessons
+            WHERE session_id = %s AND is_published = TRUE
+            ORDER BY created_at DESC;
+        """, (session_id,))
+        
+        results = cursor.fetchall()
+        return [dict(row) for row in results]
+    except Exception as e:
+        print(f"Error getting session recordings: {e}")
         return []
     finally:
         cursor.close()

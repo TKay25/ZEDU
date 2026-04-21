@@ -4,6 +4,7 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        get_thread_posts, create_post, update_user_profile, update_user_avatar,
                        upload_course_material, get_course_materials, create_live_session, start_live_session,
                        end_live_session, get_course_live_sessions, get_live_session, save_recorded_lesson, get_recorded_lessons,
+                       mark_session_recorded, get_recorded_lesson_by_id, increment_recording_views, delete_recording, get_session_recordings,
                        request_parent_student_link, approve_parent_student_link, reject_parent_student_link,
                        get_pending_links_for_student, get_approved_students_for_parent, unlink_parent_student,
                        get_parent_student_links, unlink_parent_student_by_link, create_admin_application,
@@ -880,6 +881,102 @@ def save_lesson_api(course_id):
             file_size=data.get('file_size')
         )
         return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# ============== RECORDING MANAGEMENT ROUTES ==============
+
+@app.route('/api/session/<int:session_id>/upload-recording', methods=['POST'])
+def upload_session_recording(session_id):
+    """Upload a recording for a live session"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    # Verify user is the instructor
+    session_info = get_live_session(session_id)
+    if not session_info:
+        return jsonify({"success": False, "message": "Session not found"}), 404
+    
+    if session_info['instructor_id'] != user_id:
+        return jsonify({"success": False, "message": "Only session instructor can upload recordings"}), 403
+    
+    data = request.get_json()
+    
+    if not all([data.get('title'), data.get('video_url')]):
+        return jsonify({"success": False, "message": "Missing required fields (title, video_url)"}), 400
+    
+    try:
+        result = save_recorded_lesson(
+            course_id=session_info['course_id'],
+            instructor_id=user_id,
+            title=data.get('title'),
+            description=data.get('description'),
+            video_url=data.get('video_url'),
+            session_id=session_id,
+            thumbnail_url=data.get('thumbnail_url'),
+            duration_seconds=data.get('duration_seconds'),
+            file_size=data.get('file_size')
+        )
+        
+        if result['success']:
+            # Mark session as recorded
+            mark_session_recorded(session_id, True)
+        
+        return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/session/<int:session_id>/recordings', methods=['GET'])
+def get_session_recordings_api(session_id):
+    """Get all recordings for a session"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        recordings = get_session_recordings(session_id)
+        return jsonify({"success": True, "recordings": recordings}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/recording/<int:lesson_id>', methods=['GET'])
+def get_recording_details_api(lesson_id):
+    """Get details of a specific recording"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        recording = get_recorded_lesson_by_id(lesson_id)
+        if not recording:
+            return jsonify({"success": False, "message": "Recording not found"}), 404
+        
+        # Increment views
+        increment_recording_views(lesson_id)
+        
+        return jsonify({"success": True, "recording": recording}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/recording/<int:lesson_id>', methods=['DELETE'])
+def delete_recording_api(lesson_id):
+    """Delete a recorded lesson"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    try:
+        recording = get_recorded_lesson_by_id(lesson_id)
+        if not recording:
+            return jsonify({"success": False, "message": "Recording not found"}), 404
+        
+        # Verify user is the instructor
+        if recording['instructor_id'] != user_id:
+            return jsonify({"success": False, "message": "Only instructor can delete recordings"}), 403
+        
+        result = delete_recording(lesson_id)
+        return jsonify(result), 200 if result['success'] else 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

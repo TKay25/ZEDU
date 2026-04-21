@@ -501,6 +501,79 @@
                 </a>
             </div>
         </div>
+
+        <!-- Recordings Section -->
+        <div style="margin-top: 2rem;">
+            <div class="controls-section">
+                <h3 style="color: var(--gray-800); margin-bottom: 1.5rem; font-weight: 700;">
+                    <i class="fas fa-video"></i> Recordings
+                </h3>
+
+                <!-- Upload Recording Form -->
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <h5 style="color: var(--gray-800); margin-bottom: 1rem; font-weight: 600;">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload Recording
+                    </h5>
+                    
+                    <form id="recordingUploadForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div>
+                            <label style="color: var(--gray-800); font-weight: 600; display: block; margin-bottom: 0.5rem;">Recording Title</label>
+                            <input type="text" id="recordingTitle" placeholder="e.g., Lecture - Advanced Topics" 
+                                   style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;" required>
+                        </div>
+
+                        <div>
+                            <label style="color: var(--gray-800); font-weight: 600; display: block; margin-bottom: 0.5rem;">Recording URL</label>
+                            <input type="url" id="recordingUrl" placeholder="https://example.com/recording.mp4" 
+                                   style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;" required>
+                            <small style="color: var(--gray-600); display: block; margin-top: 0.25rem;">
+                                • Local file path: /recordings/videos/recording_123.mp4
+                                • Google Drive: https://drive.google.com/...
+                                • Cloud storage: https://storage.example.com/...
+                            </small>
+                        </div>
+
+                        <div>
+                            <label style="color: var(--gray-800); font-weight: 600; display: block; margin-bottom: 0.5rem;">Description (Optional)</label>
+                            <textarea id="recordingDesc" placeholder="Add details about this recording..." rows="3"
+                                      style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="color: var(--gray-800); font-weight: 600; display: block; margin-bottom: 0.5rem;">Duration (seconds) - Optional</label>
+                                <input type="number" id="recordingDuration" min="0" placeholder="e.g., 3600" 
+                                       style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                            </div>
+
+                            <div>
+                                <label style="color: var(--gray-800); font-weight: 600; display: block; margin-bottom: 0.5rem;">File Size (MB) - Optional</label>
+                                <input type="number" id="recordingSize" min="0" placeholder="e.g., 500" 
+                                       style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-custom btn-success-custom" style="justify-content: center; margin-top: 1rem;">
+                            <i class="fas fa-upload"></i> Upload Recording
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Recordings List -->
+                <div>
+                    <h5 style="color: var(--gray-800); margin-bottom: 1rem; font-weight: 600;">
+                        <i class="fas fa-list"></i> Session Recordings
+                    </h5>
+
+                    <div id="recordingsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--gray-600);">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                            <p>No recordings yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Google Meet Integration -->
@@ -736,12 +809,198 @@
             loadNotifications();
             setupStartButton();
             setupEndButton();
+            loadSessionRecordings();
+            setupRecordingUpload();
         });
 
         // Also initialize on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM loaded');
         });
+
+        // ============ RECORDING MANAGEMENT ============
+
+        // Load and display recordings
+        async function loadSessionRecordings() {
+            try {
+                const response = await fetch(`/api/session/${sessionId}/recordings`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const recordings = data.recordings || [];
+                    const container = document.getElementById('recordingsList');
+
+                    if (recordings.length === 0) {
+                        container.innerHTML = `
+                            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--gray-600);">
+                                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                                <p>No recordings yet</p>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = recordings.map(rec => {
+                            const duration = rec.duration_seconds ? formatDuration(rec.duration_seconds) : 'Unknown';
+                            const fileSize = rec.file_size ? `${rec.file_size} MB` : 'Unknown size';
+                            const createdDate = new Date(rec.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+
+                            return `
+                                <div style="background: white; border: 1px solid var(--gray-200); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+                                    <!-- Thumbnail -->
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 150px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                        ${rec.thumbnail_url ? `<img src="${rec.thumbnail_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<i class="fas fa-video" style="font-size: 3rem; color: rgba(255,255,255,0.7);"></i>'}
+                                        <div style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.7); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                                            ${duration}
+                                        </div>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div style="padding: 1rem;">
+                                        <h6 style="margin: 0 0 0.5rem 0; color: var(--gray-800); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            ${rec.title}
+                                        </h6>
+                                        
+                                        ${rec.description ? `<p style="margin: 0.5rem 0; color: var(--gray-600); font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${rec.description}</p>` : ''}
+
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.8rem; color: var(--gray-500);">
+                                            <div>
+                                                <i class="fas fa-eye"></i> ${rec.views || 0} views
+                                            </div>
+                                            <div>${createdDate}</div>
+                                        </div>
+
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                            <button class="btn-custom btn-primary-custom" style="flex: 1; justify-content: center; padding: 0.6rem;" onclick="watchRecording('${rec.video_url}', ${rec.id})">
+                                                <i class="fas fa-play"></i> Watch
+                                            </button>
+                                            <button class="btn-custom btn-danger-custom" style="flex: 1; justify-content: center; padding: 0.6rem;" onclick="deleteRecording(${rec.id}, this)">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading recordings:', error);
+            }
+        }
+
+        // Format duration
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${secs}s`;
+            } else {
+                return `${secs}s`;
+            }
+        }
+
+        // Watch/Play recording
+        function watchRecording(videoUrl, recordingId) {
+            console.log('Opening recording:', videoUrl);
+            // Increment view count
+            fetch(`/api/recording/${recordingId}`, { method: 'GET' }).catch(err => console.error('Error incrementing views:', err));
+            // Open video in new window or player
+            window.open(videoUrl, '_blank');
+        }
+
+        // Delete recording
+        async function deleteRecording(recordingId, button) {
+            if (!confirm('Are you sure you want to delete this recording? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/recording/${recordingId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Recording deleted successfully');
+                    loadSessionRecordings();
+                } else {
+                    alert('Error deleting recording: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error deleting recording:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Setup recording upload form
+        function setupRecordingUpload() {
+            const form = document.getElementById('recordingUploadForm');
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('recordingTitle').value;
+                const videoUrl = document.getElementById('recordingUrl').value;
+                const description = document.getElementById('recordingDesc').value;
+                const duration = document.getElementById('recordingDuration').value;
+                const fileSize = document.getElementById('recordingSize').value;
+
+                if (!title || !videoUrl) {
+                    alert('Please fill in required fields (Title and URL)');
+                    return;
+                }
+
+                try {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Uploading...';
+
+                    const response = await fetch(`/api/session/${sessionId}/upload-recording`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: title,
+                            video_url: videoUrl,
+                            description: description,
+                            duration_seconds: duration ? parseInt(duration) : null,
+                            file_size: fileSize ? parseInt(fileSize) : null,
+                            thumbnail_url: null
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert('✓ Recording uploaded successfully!');
+                        form.reset();
+                        loadSessionRecordings();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to upload recording'));
+                    }
+
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Recording';
+                } catch (error) {
+                    console.error('Error uploading recording:', error);
+                    alert('Error: ' + error.message);
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Recording';
+                }
+            });
+        }
     </script>
 </body>
 </html>
