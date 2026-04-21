@@ -1395,6 +1395,10 @@
                     alert('Live session scheduled successfully! A Jitsi room has been created.');
                     document.getElementById('liveSessionForm').reset();
                     bootstrap.Modal.getInstance(document.getElementById('liveSessionModal')).hide();
+                    // Redirect to live session page to join the Jitsi meeting
+                    setTimeout(() => {
+                        window.location.href = `/live-session/${data.session_id}`;
+                    }, 500);
                 } else {
                     alert('Error: ' + data.message);
                 }
