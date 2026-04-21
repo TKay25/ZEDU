@@ -410,6 +410,40 @@ def create_tables():
 
         # Add missing columns to notifications table if they don't exist (migration support)
         try:
+            # Add notification_type column if it doesn't exist
+            cursor.execute("""
+                ALTER TABLE notifications 
+                ADD COLUMN IF NOT EXISTS notification_type VARCHAR(50)
+            """)
+            
+            # Set default values for any existing rows
+            cursor.execute("""
+                UPDATE notifications 
+                SET notification_type = 'system' 
+                WHERE notification_type IS NULL
+            """)
+            
+            # Add NOT NULL constraint
+            cursor.execute("""
+                ALTER TABLE notifications 
+                ALTER COLUMN notification_type SET NOT NULL
+            """)
+            
+            # Add CHECK constraint
+            try:
+                cursor.execute("""
+                    ALTER TABLE notifications 
+                    ADD CONSTRAINT notification_type_check 
+                    CHECK (notification_type IN ('assignment', 'forum', 'message', 'achievement', 'system', 'noticeboard', 'grade', 'announcement'))
+                """)
+            except Exception:
+                # Constraint may already exist
+                pass
+                
+        except Exception as e:
+            print(f"Note: Migration for notification_type: {e}")
+        
+        try:
             cursor.execute("""
                 ALTER TABLE notifications 
                 ADD COLUMN IF NOT EXISTS read BOOLEAN DEFAULT FALSE,
