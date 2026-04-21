@@ -302,13 +302,43 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar">
-        <div class="container-lg">
-            <a class="navbar-brand" href="/"><i class="fas fa-graduation-cap"></i> ZEDU</a>
-            <div>
-                <a href="/dashboard" class="btn btn-sm" style="background: var(--primary-blue); color: white; margin-right: 0.5rem;">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+        <div class="container-lg" style="display: flex; justify-content: space-between; align-items: center;">
+            <a class="navbar-brand" href="/" style="margin: 0;"><i class="fas fa-graduation-cap"></i> ZEDU</a>
+            
+            <!-- Navigation Links -->
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="/dashboard" style="text-decoration: none; color: var(--text-gray); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--light-bg-alt)'; this.style.color='var(--primary-blue)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-gray)'">
+                    <i class="fas fa-th-large"></i> Dashboard
                 </a>
-                <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <a href="/forums" style="text-decoration: none; color: var(--primary-blue); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; background: var(--light-bg-alt);">
+                    <i class="fas fa-comments"></i> Forums
+                </a>
+                <a href="/noticeboards" style="text-decoration: none; color: var(--text-gray); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--light-bg-alt)'; this.style.color='var(--primary-blue)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-gray)'">
+                    <i class="fas fa-bullhorn"></i> Noticeboards
+                </a>
+                <a href="/account" style="text-decoration: none; color: var(--text-gray); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--light-bg-alt)'; this.style.color='var(--primary-blue)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-gray)'">
+                    <i class="fas fa-user-circle"></i> Account
+                </a>
+                <a href="/settings" style="text-decoration: none; color: var(--text-gray); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--light-bg-alt)'; this.style.color='var(--primary-blue)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-gray)'">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="#" id="logoutBtn" style="text-decoration: none; color: var(--text-gray); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--light-bg-alt)'; this.style.color='var(--secondary-red)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-gray)'">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+
+            <!-- Notifications Bell -->
+            <div style="position: relative; margin-left: 1rem;">
+                <a href="#" id="notificationsBell" style="text-decoration: none; color: var(--text-gray); font-weight: 600; font-size: 1.1rem; padding: 0.5rem; border-radius: 8px; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.3rem;" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationBadge" style="position: absolute; top: 0; right: 0; background: var(--secondary-red); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; display: none;">0</span>
+                </a>
+                <div id="notificationsDropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 350px; max-height: 400px; overflow-y: auto; z-index: 1000;">
+                    <div style="padding: 1rem; border-bottom: 1px solid var(--border-light); font-weight: 600;">Notifications</div>
+                    <div id="notificationsContent" style="padding: 1rem;">
+                        <p style="text-align: center; color: var(--text-gray); font-size: 0.9rem;">Loading notifications...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -526,11 +556,111 @@
             }, 4000);
         }
 
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications?limit=5');
+                const data = await response.json();
+                
+                if (data.success && data.notifications && data.notifications.length > 0) {
+                    const container = document.getElementById('notificationsContent');
+                    container.innerHTML = data.notifications.map(notif => `
+                        <div style="padding: 0.8rem; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='var(--light-bg-alt)'" onmouseout="this.style.background='transparent'">
+                            <p style="margin: 0 0 0.3rem 0; font-size: 0.85rem; font-weight: 600; color: var(--text-dark);">${notif.title}</p>
+                            <p style="margin: 0 0 0.3rem 0; font-size: 0.8rem; color: var(--text-gray);">${notif.message}</p>
+                            <p style="margin: 0; font-size: 0.7rem; color: var(--text-gray);">${getTimeAgo(new Date(notif.created_at))}</p>
+                        </div>
+                    `).join('');
+                    
+                    // Update badge count
+                    const unreadResponse = await fetch('/api/notifications/unread-count');
+                    const unreadData = await unreadResponse.json();
+                    if (unreadData.count > 0) {
+                        document.getElementById('notificationBadge').textContent = unreadData.count;
+                        document.getElementById('notificationBadge').style.display = 'flex';
+                    }
+                } else {
+                    document.getElementById('notificationsContent').innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--text-gray);">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p>No notifications yet</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notificationsContent').innerHTML = `
+                    <div style="text-align: center; padding: 1rem; color: var(--secondary-red);">
+                        <p>Error loading notifications</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Helper function to format time ago
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
+        // Toggle notifications dropdown
+        if (document.getElementById('notificationsBell')) {
+            document.getElementById('notificationsBell').addEventListener('click', (e) => {
+                e.preventDefault();
+                const dropdown = document.getElementById('notificationsDropdown');
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                if (dropdown.style.display === 'block') {
+                    loadNotifications();
+                }
+            });
+
+            // Close notifications dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const notificationBell = document.getElementById('notificationsBell');
+                const dropdown = document.getElementById('notificationsDropdown');
+                if (!e.target.closest('#notificationsBell') && !e.target.closest('#notificationsDropdown')) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+
         function logout() {
             fetch('/api/logout', { method: 'POST' })
                 .then(() => window.location.href = '/')
                 .catch(err => console.error(err));
         }
+
+        // Logout button handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+        });
+
+        // Initialize on page load
+        setTimeout(async () => {
+            try {
+                const response = await fetch('/api/notifications/unread-count');
+                const data = await response.json();
+                if (data.count > 0) {
+                    document.getElementById('notificationBadge').textContent = data.count;
+                    document.getElementById('notificationBadge').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error loading notification count:', error);
+            }
+        }, 500);
     </script>
 </body>
 </html>

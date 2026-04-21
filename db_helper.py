@@ -64,6 +64,21 @@ def create_tables():
             );
         """)
 
+        # Programmers table (System developers/admins)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS programmers (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                full_name VARCHAR(255) NOT NULL,
+                role VARCHAR(50) DEFAULT 'developer' CHECK (role IN ('developer', 'system_admin', 'super_admin')),
+                status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP
+            );
+        """)
+
         # Courses table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS courses (
@@ -455,6 +470,8 @@ def create_tables():
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_type ON users(user_type);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_programmers_email ON programmers(email);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_programmers_status ON programmers(status);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_courses_instructor ON courses(instructor_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_student ON enrollments(student_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_course ON enrollments(course_id);")
@@ -858,6 +875,155 @@ def create_enrollment(student_id, course_id):
         conn.rollback()
         print(f"Error creating enrollment: {e}")
         return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+# ==================== PROGRAMMER/DEVELOPER FUNCTIONS ====================
+
+def get_programmer_by_email(email):
+    """
+    Get programmer by email (case-insensitive)
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("SELECT * FROM programmers WHERE LOWER(email) = LOWER(%s);", (email,))
+        result = cursor.fetchone()
+        return result
+    except Exception as e:
+        print(f"Error getting programmer: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_programmer_by_id(programmer_id):
+    """
+    Get programmer by ID
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("SELECT id, email, full_name, role, status, created_at, last_login FROM programmers WHERE id = %s;", (programmer_id,))
+        result = cursor.fetchone()
+        return result
+    except Exception as e:
+        print(f"Error getting programmer: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def authenticate_programmer(email, password):
+    """
+    Authenticate programmer by email and password
+    Returns: programmer dict if successful, None if failed
+    """
+    programmer = get_programmer_by_email(email)
+    
+    if not programmer:
+        return None
+    
+    # Check if programmer is active
+    if programmer.get('status') != 'active':
+        return None
+    
+    password_match = verify_password(password, programmer['password_hash'])
+    
+    if password_match:
+        return programmer
+    return None
+
+def update_programmer_last_login(programmer_id):
+    """
+    Update the last_login timestamp for a programmer
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE programmers SET last_login = CURRENT_TIMESTAMP WHERE id = %s;", (programmer_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error updating programmer last login: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+def create_programmer(email, password, full_name, role='developer'):
+    """
+    Create a new programmer account (for system initialization)
+    Returns: dict with success status and programmer_id
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        # Check if email already exists
+        existing = get_programmer_by_email(email)
+        if existing:
+            return {"success": False, "message": "Email already registered"}
+        
+        password_hash = hash_password(password)
+        
+        cursor.execute("""
+            INSERT INTO programmers (email, password_hash, full_name, role, status)
+            VALUES (%s, %s, %s, %s, 'active')
+            RETURNING id
+        """, (email, password_hash, full_name, role))
+        
+        programmer_id = cursor.fetchone()[0]
+        conn.commit()
+        
+        return {
+            "success": True, 
+            "message": "Programmer account created successfully",
+            "programmer_id": programmer_id
+        }
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating programmer: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_all_programmers(limit=100):
+    """
+    Get all active programmers
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT id, email, full_name, role, status, created_at, last_login 
+            FROM programmers 
+            WHERE status = 'active'
+            ORDER BY created_at DESC
+            LIMIT %s
+        """, (limit,))
+        results = cursor.fetchall()
+        return results
+    except Exception as e:
+        print(f"Error getting programmers: {e}")
+        return []
     finally:
         cursor.close()
         conn.close()

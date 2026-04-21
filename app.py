@@ -14,7 +14,8 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        get_all_forums_with_stats, create_notification, get_user_notifications, 
                        get_unread_notification_count, mark_notification_as_read, mark_all_notifications_as_read, 
                        delete_notification, get_popular_tags, get_student_gpa, get_student_study_hours,
-                       get_student_recommended_courses, get_student_activity)
+                       get_student_recommended_courses, get_student_activity, authenticate_programmer,
+                       get_programmer_by_id, update_programmer_last_login, create_programmer, get_all_programmers)
 import os
 from datetime import timedelta
 import base64
@@ -1059,6 +1060,89 @@ def reject_admin_application_endpoint():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+# ========== PROGRAMMER/DEVELOPER ENDPOINTS ==========
+
+@app.route('/api/programmer-login', methods=['POST'])
+def programmer_login():
+    """
+    Handle programmer/developer login
+    Expected JSON: {
+        "email": "developer@example.com",
+        "password": "password123"
+    }
+    """
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+        
+        if not email or not password:
+            return jsonify({
+                "success": False,
+                "message": "Email and password are required"
+            }), 400
+        
+        programmer = authenticate_programmer(email, password)
+        
+        if not programmer:
+            return jsonify({
+                "success": False,
+                "message": "Invalid email or password"
+            }), 401
+        
+        # Update last login
+        update_programmer_last_login(programmer['id'])
+        
+        # Store in session
+        session['programmer_id'] = programmer['id']
+        session['programmer_type'] = 'programmer'
+        session.modified = True
+        
+        return jsonify({
+            "success": True,
+            "message": "Programmer login successful",
+            "redirect_url": "/admin-approvals",
+            "programmer": {
+                "id": programmer['id'],
+                "email": programmer['email'],
+                "full_name": programmer['full_name'],
+                "role": programmer['role']
+            }
+        }), 200
+    
+    except Exception as e:
+        print(f"Programmer login error: {e}")
+        return jsonify({
+            "success": False,
+            "message": "Login failed"
+        }), 500
+
+@app.route('/programmer-approvals')
+def programmer_approvals_page():
+    """Render the programmer approvals dashboard"""
+    programmer_id = session.get('programmer_id')
+    programmer = get_programmer_by_id(programmer_id) if programmer_id else None
+    
+    if not programmer:
+        return redirect('/')
+    
+    return render_template('admin_approvals.html', user_type='programmer')
+
+@app.route('/api/programmer/profile', methods=['GET'])
+def get_programmer_profile():
+    """Get current programmer profile"""
+    programmer_id = session.get('programmer_id')
+    if not programmer_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+    
+    programmer = get_programmer_by_id(programmer_id)
+    if not programmer:
+        return jsonify({"success": False, "message": "Programmer not found"}), 404
+    
+    return jsonify({
+        "success": True,
+        "programmer": programmer
+    }), 200
 
 # ========== NOTICEBOARD ROUTES ==========
 

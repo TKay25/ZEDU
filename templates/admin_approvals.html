@@ -341,10 +341,11 @@
 <body>
     <!-- Top Navbar -->
     <div class="top-navbar">
-        <div class="navbar-brand">
+        <div class="navbar-brand" id="navbarBrand">
             <i class="fas fa-shield-alt"></i> ZEDU Admin Control Panel
         </div>
         <div class="navbar-actions">
+            <span id="userLabel" style="color: var(--gray-600); font-weight: 500; margin-right: 1rem;"></span>
             <a href="#" onclick="logout()" style="text-decoration: none; color: var(--gray-600); font-weight: 600;">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
@@ -356,8 +357,8 @@
         <!-- Page Header -->
         <div class="page-header">
             <div>
-                <h1 class="page-title">Administrator Approvals</h1>
-                <p style="color: var(--gray-600); margin-top: 0.5rem;">Review and manage school/organization administrator signups</p>
+                <h1 class="page-title" id="pageTitle">Administrator Approvals</h1>
+                <p style="color: var(--gray-600); margin-top: 0.5rem;" id="pageSubtitle">Review and manage school/organization administrator signups</p>
             </div>
         </div>
 
@@ -549,6 +550,43 @@
             rejected: []
         };
 
+        let currentUserType = 'admin'; // Will be set by checking the endpoint
+
+        // Check if user is programmer or admin
+        async function checkUserType() {
+            try {
+                // Try to get programmer profile
+                const progResponse = await fetch('/api/programmer/profile');
+                if (progResponse.ok) {
+                    const progData = await progResponse.json();
+                    if (progData.success) {
+                        currentUserType = 'programmer';
+                        updatePageForProgrammer(progData.programmer);
+                        return;
+                    }
+                }
+                
+                // If not programmer, must be admin
+                currentUserType = 'admin';
+                updatePageForAdmin();
+            } catch (error) {
+                console.error('Error checking user type:', error);
+                currentUserType = 'admin';
+                updatePageForAdmin();
+            }
+        }
+
+        function updatePageForProgrammer(programmer) {
+            document.getElementById('navbarBrand').innerHTML = '<i class="fas fa-code"></i> ZEDU Developer Portal';
+            document.getElementById('userLabel').textContent = `👨‍💻 ${programmer.full_name} (Developer)`;
+            document.getElementById('pageTitle').textContent = 'Developer: Admin Applications Review';
+            document.getElementById('pageSubtitle').textContent = 'Review and approve school/organization administrator signups from institutions requesting to use ZEDU';
+        }
+
+        function updatePageForAdmin() {
+            document.getElementById('userLabel').textContent = '🏢 Institution Administrator';
+        }
+
         // Load administrator applications
         async function loadAdministrators() {
             try {
@@ -731,6 +769,7 @@
 
         // Load data on page load
         window.addEventListener('load', () => {
+            checkUserType();
             loadAdministrators();
         });
     </script>
