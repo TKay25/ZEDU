@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
 from db_helper import (create_tables, create_user, authenticate_user, get_user_by_id, get_tutors, get_all_users,
-                       init_global_forum, get_global_forum, get_course_forum, get_forum_threads, create_thread,
+                       init_global_forum, get_global_forum, get_course_forum, get_forum_threads, get_thread_info, create_thread,
                        get_thread_posts, create_post, update_user_profile, update_user_avatar,
                        upload_course_material, get_course_materials, create_live_session, start_live_session,
                        end_live_session, get_course_live_sessions, save_recorded_lesson, get_recorded_lessons,
@@ -661,6 +661,18 @@ def get_thread_posts_api(thread_id):
     try:
         posts = get_thread_posts(thread_id)
         return jsonify({"success": True, "posts": [dict(p) for p in posts]}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/thread/<int:thread_id>', methods=['GET'])
+def get_thread_details_api(thread_id):
+    """Get thread details (title, author, views, etc)"""
+    try:
+        thread = get_thread_info(thread_id)
+        if thread:
+            return jsonify({"success": True, "thread": dict(thread)}), 200
+        else:
+            return jsonify({"success": False, "message": "Thread not found"}), 404
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

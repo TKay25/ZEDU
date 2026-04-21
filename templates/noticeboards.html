@@ -57,23 +57,15 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            flex-shrink: 0;
         }
 
         .navbar-actions {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
             flex: 1;
-            margin: 0 1rem;
-            overflow-x: auto;
-            justify-content: flex-end;
-        }
-
-        .navbar-actions > div:first-of-type {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex-wrap: nowrap;
+            margin: 0 1.5rem;
         }
 
         .search-box {
@@ -81,16 +73,47 @@
             border: none;
             padding: 0.6rem 0.8rem;
             border-radius: 8px;
-            width: 250px;
+            width: 280px;
             transition: all 0.3s ease;
             flex-shrink: 0;
-            margin-right: auto;
         }
 
         .search-box:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.1);
             background: white;
+        }
+
+        .navbar-actions > div:nth-child(2) {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        .navbar-actions > div:nth-child(2) a {
+            text-decoration: none;
+            color: var(--gray-600);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .navbar-actions > div:nth-child(2) a:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .navbar-actions > div:nth-child(2) a[href*="noticeboards"] {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .navbar-actions > div:nth-child(2) a#logoutBtn:hover {
+            color: var(--danger) !important;
         }
 
         .avatar {
@@ -103,6 +126,7 @@
             justify-content: center;
             color: white;
             font-weight: 700;
+            flex-shrink: 0;
         }
 
         .container-fluid {
@@ -518,25 +542,13 @@
             <input type="text" class="search-box" placeholder="Search noticeboards..." id="searchBox">
             
             <!-- Navigation Links -->
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <a href="/dashboard" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
-                    <i class="fas fa-th-large"></i> Dashboard
-                </a>
-                <a href="/forums" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
-                    <i class="fas fa-comments"></i> Forums
-                </a>
-                <a href="/noticeboards" style="text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; background: var(--gray-100);">
-                    <i class="fas fa-bullhorn"></i> Noticeboards
-                </a>
-                <a href="/account" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
-                    <i class="fas fa-user-circle"></i> Account
-                </a>
-                <a href="/settings" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
-                    <i class="fas fa-cog"></i> Settings
-                </a>
-                <a href="#" id="logoutBtn" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--danger)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+            <div>
+                <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="/forums"><i class="fas fa-comments"></i> Forums</a>
+                <a href="/noticeboards"><i class="fas fa-bullhorn"></i> Noticeboards</a>
+                <a href="/account"><i class="fas fa-user-circle"></i> Account</a>
+                <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
 
             <!-- Notifications Bell -->

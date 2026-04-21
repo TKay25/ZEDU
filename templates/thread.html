@@ -469,6 +469,10 @@
         // Get thread ID from URL path
         const pathParts = window.location.pathname.split('/');
         const threadId = pathParts[pathParts.length - 1];
+        
+        console.log('URL path:', window.location.pathname);
+        console.log('Path parts:', pathParts);
+        console.log('Extracted thread ID:', threadId);
 
         document.addEventListener('DOMContentLoaded', function() {
             loadThemePreference();
@@ -476,20 +480,76 @@
                 showMessage('Thread not found', 'error');
                 return;
             }
-            loadThreadPosts();
+            loadThreadData();
         });
 
+        async function loadThreadData() {
+            try {
+                // Fetch thread info
+                const threadResponse = await fetch(`/api/thread/${threadId}`);
+                const threadData = await threadResponse.json();
+                
+                console.log('Thread data response:', threadData);
+                
+                if (threadData.success && threadData.thread) {
+                    console.log('Displaying thread info:', threadData.thread);
+                    displayThreadInfo(threadData.thread);
+                } else {
+                    console.error('Failed to load thread:', threadData.message);
+                }
+                
+                // Fetch posts
+                loadThreadPosts();
+            } catch (error) {
+                console.error('Error loading thread data:', error);
+                showMessage('Error loading thread', 'error');
+            }
+        }
+
+        function displayThreadInfo(thread) {
+            if (!thread) {
+                console.error('Thread object is null or undefined');
+                return;
+            }
+            
+            console.log('=== DEBUG: Thread Info ===');
+            console.log('Full thread object:', JSON.stringify(thread, null, 2));
+            console.log('Title:', thread.title);
+            console.log('Author:', thread.full_name);
+            console.log('Views:', thread.views);
+            console.log('Created:', thread.created_at);
+            
+            const title = thread.title || 'No Title';
+            const author = thread.full_name || 'Unknown Author';
+            const date = thread.created_at ? formatDate(thread.created_at) : 'Just now';
+            const views = (thread.views || 0) + ' views';
+            
+            console.log('Setting:', { title, author, date, views });
+            
+            document.getElementById('threadTitle').textContent = title;
+            document.getElementById('threadAuthor').textContent = author;
+            document.getElementById('threadDate').textContent = date;
+            document.getElementById('threadViews').textContent = views;
+        }
+
         function loadThreadPosts() {
+            console.log('Loading posts for thread:', threadId);
             fetch(`/api/thread/${threadId}/posts`)
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Posts response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Posts data:', data);
                     if (data.success) {
+                        console.log('Posts loaded:', data.posts.length, 'posts');
                         displayPosts(data.posts);
                     } else {
                         showMessage(data.message || 'Failed to load posts', 'error');
                     }
                 })
                 .catch(error => {
+                    console.error('Error loading posts:', error);
                     showMessage('Error: ' + error.message, 'error');
                 });
         }

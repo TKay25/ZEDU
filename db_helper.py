@@ -1290,6 +1290,47 @@ def get_forum_threads(forum_id, limit=20):
         cursor.close()
         conn.close()
 
+def get_thread_info(thread_id):
+    """
+    Get thread details including title, author, views, reply count
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # First get basic thread info
+        cursor.execute("""
+            SELECT ft.id, ft.title, ft.user_id, u.full_name, u.user_type,
+                   ft.views, ft.created_at
+            FROM forum_threads ft
+            JOIN users u ON ft.user_id = u.id
+            WHERE ft.id = %s
+        """, (thread_id,))
+        result = cursor.fetchone()
+        
+        if result:
+            # Now get reply count
+            cursor.execute("""
+                SELECT COUNT(*) as reply_count
+                FROM forum_posts
+                WHERE thread_id = %s
+            """, (thread_id,))
+            reply_data = cursor.fetchone()
+            if reply_data:
+                result['reply_count'] = reply_data['reply_count']
+        
+        return result
+    except Exception as e:
+        print(f"Error getting thread info: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
 def create_thread(forum_id, user_id, title):
     """
     Create a new forum thread
