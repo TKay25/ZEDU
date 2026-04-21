@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum - ZEDU</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0d1b2a;
+            --primary-dark: #050d15;
+            --primary-light: #1a3a52;
+            --secondary: #8B2635;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dark: #0F172A;
+            --light: #F8FAFC;
+            --gray-100: #F1F5F9;
+            --gray-200: #E2E8F0;
+            --gray-600: #475569;
+            --gray-800: #1E293B;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--light);
+            color: var(--gray-800);
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 0.8rem 1.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            font-size: 0.96rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .content-area {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.6rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            gap: 0.75rem;
+        }
+
+        .create-thread-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.6rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(13, 27, 42, 0.2);
+        }
+
+        .create-thread-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 27, 42, 0.3);
+            color: white;
+        }
+
+        .thread-item {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .thread-item:hover {
+            background: var(--gray-100);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .thread-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .thread-content {
+            flex: 1;
+        }
+
+        .thread-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--dark);
+            margin: 0 0 0.5rem 0;
+            transition: color 0.3s ease;
+        }
+
+        .thread-item:hover .thread-title {
+            color: var(--primary);
+        }
+
+        .thread-author {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            margin: 0;
+        }
+
+        .thread-stats {
+            display: flex;
+            gap: 1.2rem;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 2px dashed var(--gray-200);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--gray-200);
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: var(--gray-100);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-graduation-cap"></i> ZEDU
+        </div>
+        <div class="navbar-actions">
+            <!-- Navigation Links -->
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="/dashboard" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+                <a href="/forums" style="text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; background: var(--gray-100);">
+                    <i class="fas fa-comments"></i> Forums
+                </a>
+                <a href="/noticeboards" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-bullhorn"></i> Noticeboards
+                </a>
+                <a href="/account" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-user-circle"></i> Account
+                </a>
+                <a href="/settings" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="#" id="logoutBtn" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='var(--gray-100)'; this.style.color='var(--danger)'" onmouseout="this.style.background='transparent'; this.style.color='var(--gray-600)'">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+
+            <!-- Notifications Bell -->
+            <div style="position: relative;">
+                <a href="#" id="notificationsBell" style="text-decoration: none; color: var(--gray-600); font-weight: 600; font-size: 1.1rem; padding: 0.5rem; border-radius: 8px; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.3rem;" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationBadge" style="position: absolute; top: 0; right: 0; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; display: none;">0</span>
+                </a>
+                <div id="notificationsDropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-md); box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 350px; max-height: 400px; overflow-y: auto; z-index: 1000;">
+                    <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200); font-weight: 600;">Notifications</div>
+                    <div id="notificationsContent" style="padding: 1rem;">
+                        <p style="text-align: center; color: var(--gray-600); font-size: 0.9rem;">Loading notifications...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="avatar" id="userInitials">ZV</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-area">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <a href="/forums" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Forums
+                </a>
+                <h1 class="page-title" id="forumName">Forum Discussions</h1>
+            </div>
+            <button class="create-thread-btn" onclick="openThreadModal()">
+                <i class="fas fa-plus"></i> New Discussion
+            </button>
+        </div>
+
+        <!-- Threads List -->
+        <div id="threadsList">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <p>Loading discussions...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Thread Modal -->
+    <div class="modal fade" id="threadModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-comments" style="font-size: 1.2rem; color: var(--secondary);"></i>
+                        <h5 class="modal-title" style="margin: 0;">Start New Discussion</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="threadForm">
+                        <div class="mb-3">
+                            <label class="form-label">Discussion Title</label>
+                            <input type="text" class="form-control" id="threadTitle" placeholder="e.g., How to solve this problem?" required>
+                        </div>
+                        <button type="submit" class="btn" style="background: var(--secondary); color: white;">Create Discussion</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const forumId = {{ forum_id }};
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications?limit=5');
+                const data = await response.json();
+                
+                if (data.success && data.notifications && data.notifications.length > 0) {
+                    const container = document.getElementById('notificationsContent');
+                    container.innerHTML = data.notifications.map(notif => `
+                        <div style="padding: 0.8rem; border-bottom: 1px solid var(--gray-200); cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <p style="margin: 0 0 0.3rem 0; font-size: 0.85rem; font-weight: 600; color: var(--dark);">${notif.title}</p>
+                            <p style="margin: 0 0 0.3rem 0; font-size: 0.8rem; color: var(--gray-600);">${notif.message}</p>
+                            <p style="margin: 0; font-size: 0.7rem; color: var(--gray-500);">${getTimeAgo(new Date(notif.created_at))}</p>
+                        </div>
+                    `).join('');
+                    
+                    // Update badge count
+                    const unreadResponse = await fetch('/api/notifications/unread-count');
+                    const unreadData = await unreadResponse.json();
+                    if (unreadData.count > 0) {
+                        document.getElementById('notificationBadge').textContent = unreadData.count;
+                        document.getElementById('notificationBadge').style.display = 'flex';
+                    }
+                } else {
+                    document.getElementById('notificationsContent').innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p>No notifications yet</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
+        // Toggle notifications
+        document.getElementById('notificationsBell').addEventListener('click', (e) => {
+            e.preventDefault();
+            const dropdown = document.getElementById('notificationsDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            if (dropdown.style.display === 'block') {
+                loadNotifications();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('notificationsDropdown');
+            if (!e.target.closest('#notificationsBell') && !e.target.closest('#notificationsDropdown')) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+        });
+
+        // Load profile
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('userInitials').textContent = 
+                        data.user.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Load threads for this forum
+        async function loadThreads() {
+            try {
+                const response = await fetch(`/api/forum/${forumId}/threads`);
+                const data = await response.json();
+                
+                if (data.success && data.threads && data.threads.length > 0) {
+                    renderThreads(data.threads);
+                } else {
+                    document.getElementById('threadsList').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-inbox"></i>
+                            </div>
+                            <p>No discussions yet. Be the first to start one!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading threads:', error);
+                document.getElementById('threadsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon" style="color: var(--danger);">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <p>Error loading discussions. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render threads
+        function renderThreads(threads) {
+            const container = document.getElementById('threadsList');
+            container.innerHTML = '';
+            
+            threads.forEach(thread => {
+                const threadEl = document.createElement('div');
+                threadEl.className = 'thread-item';
+                threadEl.onclick = () => window.location.href = `/forum/thread/${thread.id}`;
+                
+                const initials = thread.author_name ? thread.author_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+                const postCount = thread.post_count || 0;
+                const createdAt = new Date(thread.created_at);
+                
+                threadEl.innerHTML = `
+                    <div class="thread-icon">${initials}</div>
+                    <div class="thread-content">
+                        <p class="thread-title">${thread.title}</p>
+                        <p class="thread-author">by ${thread.author_name || 'Unknown'}</p>
+                        <div class="thread-stats">
+                            <span><i class="fas fa-comments"></i> ${postCount} ${postCount === 1 ? 'reply' : 'replies'}</span>
+                            <span><i class="fas fa-calendar"></i> ${createdAt.toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(threadEl);
+            });
+        }
+
+        // Open thread creation modal
+        function openThreadModal() {
+            const modal = new bootstrap.Modal(document.getElementById('threadModal'));
+            modal.show();
+        }
+
+        // Create thread
+        document.getElementById('threadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('threadTitle').value.trim();
+            if (!title) {
+                alert('Please enter a title');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/forum/${forumId}/thread`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('threadTitle').value = '';
+                    bootstrap.Modal.getInstance(document.getElementById('threadModal')).hide();
+                    loadThreads();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to create discussion'));
+                }
+            } catch (error) {
+                console.error('Error creating thread:', error);
+                alert('Error creating discussion');
+            }
+        });
+
+        // Load forum name
+        async function loadForumName() {
+            try {
+                const response = await fetch(`/api/forums`);
+                const data = await response.json();
+                if (data.success && data.forums) {
+                    const forum = data.forums.find(f => f.id === forumId);
+                    if (forum) {
+                        document.getElementById('forumName').textContent = forum.name;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading forum name:', error);
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            loadProfile();
+            loadForumName();
+            loadThreads();
+            loadNotifications();
+        });
+
+        // Initialize badge
+        setTimeout(async () => {
+            try {
+                const response = await fetch('/api/notifications/unread-count');
+                const data = await response.json();
+                if (data.count > 0) {
+                    document.getElementById('notificationBadge').textContent = data.count;
+                    document.getElementById('notificationBadge').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error loading notification count:', error);
+            }
+        }, 500);
+    </script>
+</body>
+</html>

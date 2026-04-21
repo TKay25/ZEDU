@@ -531,6 +531,31 @@
         </div>
     </div>
 
+    <!-- Forum Threads Modal -->
+    <div class="modal fade" id="forumModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="forumModalTitle" style="margin: 0; font-size: 1.1rem; font-weight: 700;">Forum Discussions</h5>
+                        <p id="forumModalDescription" style="margin: 0.3rem 0 0 0; font-size: 0.85rem; color: var(--gray-600);"></p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                    <button class="btn" id="createThreadForumBtn" style="background: var(--secondary); color: white; width: 100%; margin-bottom: 1rem;">
+                        <i class="fas fa-plus"></i> Start New Discussion
+                    </button>
+                    <div id="forumThreadsList">
+                        <div style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading discussions...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- New Discussion Modal -->
     <div class="modal fade" id="threadModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -816,7 +841,7 @@
                 
                 const forumCard = document.createElement('div');
                 forumCard.className = 'forum-card';
-                forumCard.onclick = () => window.location.href = `/forum/${forum.id}`;
+                forumCard.onclick = () => openForumModal(forum);
                 forumCard.innerHTML = `
                     <div class="forum-header">
                         <div>
@@ -832,6 +857,93 @@
                     </div>
                 `;
                 forumsList.appendChild(forumCard);
+            });
+        }
+
+        // Open forum modal
+        async function openForumModal(forum) {
+            document.getElementById('forumModalTitle').textContent = forum.name;
+            document.getElementById('forumModalDescription').textContent = forum.description || 'General discussion';
+            document.getElementById('createThreadForumBtn').onclick = () => openThreadModal(forum.id);
+            
+            // Load threads for this forum
+            const threadsContainer = document.getElementById('forumThreadsList');
+            threadsContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> Loading discussions...</div>';
+            
+            try {
+                const response = await fetch(`/api/forum/${forum.id}/threads`);
+                const data = await response.json();
+                
+                if (data.success && data.threads && data.threads.length > 0) {
+                    renderForumThreads(data.threads);
+                } else {
+                    threadsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No discussions yet. Be the first to start one!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading threads:', error);
+                threadsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--danger);">
+                        <i class="fas fa-exclamation-circle"></i> Error loading discussions
+                    </div>
+                `;
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('forumModal'));
+            modal.show();
+        }
+
+        // Render threads in forum modal
+        function renderForumThreads(threads) {
+            const container = document.getElementById('forumThreadsList');
+            container.innerHTML = '';
+            
+            threads.forEach(thread => {
+                const initials = thread.author_name ? thread.author_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+                const postCount = thread.post_count || 0;
+                
+                const threadEl = document.createElement('div');
+                threadEl.style.cssText = `
+                    background: white;
+                    border-radius: var(--radius-md);
+                    padding: 1rem;
+                    border: 1px solid var(--gray-200);
+                    margin-bottom: 0.8rem;
+                    display: flex;
+                    gap: 1rem;
+                    align-items: flex-start;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                `;
+                threadEl.onmouseover = () => {
+                    threadEl.style.background = 'var(--gray-100)';
+                    threadEl.style.borderColor = 'var(--primary)';
+                };
+                threadEl.onmouseout = () => {
+                    threadEl.style.background = 'white';
+                    threadEl.style.borderColor = 'var(--gray-200)';
+                };
+                threadEl.onclick = () => {
+                    bootstrap.Modal.getInstance(document.getElementById('forumModal')).hide();
+                    window.location.href = `/forum/thread/${thread.id}`;
+                };
+                
+                threadEl.innerHTML = `
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0; font-size: 0.85rem;">${initials}</div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 600; font-size: 0.95rem; color: var(--dark); margin: 0 0 0.3rem 0;">${thread.title}</p>
+                        <p style="font-size: 0.85rem; color: var(--gray-600); margin: 0;">${thread.author_name || 'Unknown'}</p>
+                        <div style="display: flex; gap: 1rem; font-size: 0.8rem; color: var(--gray-600); margin-top: 0.5rem;">
+                            <span><i class="fas fa-comments"></i> ${postCount} ${postCount === 1 ? 'reply' : 'replies'}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(threadEl);
             });
         }
 
