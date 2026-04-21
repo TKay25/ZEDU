@@ -193,23 +193,82 @@
             50% { opacity: 0.7; }
         }
 
-        .jitsi-container {
+        .meeting-container {
             background: white;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             margin-bottom: 2rem;
-            position: relative;
-            min-height: 600px;
-            height: 600px;
+            padding: 2rem;
+            text-align: center;
         }
 
-        #jitsi-meet-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            display: block;
-            background: #000;
+        .meeting-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .meeting-room-id {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .join-button-large {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 1rem 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .join-button-large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .copy-link-button {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 1rem 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .copy-link-button:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .meeting-status-indicator {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #e3f2fd;
+            border-radius: 20px;
+            color: var(--primary);
+            font-weight: 600;
+            margin: 1rem 0;
         }
 
         .controls-section {
@@ -401,19 +460,31 @@
         <!-- Info Alert -->
         <div class="info-alert">
             <i class="fas fa-info-circle"></i>
-            <strong>Pro Tip:</strong> Click "Start Session" below to mark your session as LIVE. Use the video meeting link to teach your students.
+            <strong>Pro Tip:</strong> Click "Start Session" to mark your session as LIVE. Share the meeting link with your students or click "Join Meeting" to start teaching.
         </div>
 
-        <!-- Jitsi Meet Container -->
-        <div class="jitsi-container">
-            <div id="jitsi-loading" style="background: #f5f5f5; display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; border-radius: 12px;">
-                <div style="text-align: center;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
-                    <p style="color: var(--gray-600); margin: 0.5rem 0;">Loading video conference...</p>
-                    <p style="color: var(--gray-500); font-size: 0.9rem; margin: 0;">Please wait while Jitsi Meet initializes</p>
-                </div>
+        <!-- Google Meet Container -->
+        <div class="meeting-container">
+            <div class="meeting-icon">
+                <i class="fas fa-video"></i>
             </div>
-            <div id="jitsi-meet-container"></div>
+            <h2 style="color: var(--gray-800); margin: 1rem 0;">Ready to Start Your Session?</h2>
+            <p style="color: var(--gray-600); font-size: 1rem; margin: 0.5rem 0;">Share this meeting link with your students</p>
+            
+            <div class="meeting-room-id" id="meetingLink">
+                {{ session.session_url }}
+            </div>
+
+            <div style="margin: 1.5rem 0;">
+                <button class="join-button-large" id="joinMeetingBtn" onclick="joinMeeting()">
+                    <i class="fas fa-video"></i> Join Meeting
+                </button>
+                <button class="copy-link-button" onclick="copyMeetingLink()">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+            </div>
+
+            <p style="color: var(--gray-500); font-size: 0.9rem; margin: 1rem 0;">The meeting link will open in a new window</p>
         </div>
 
         <!-- Controls -->
@@ -432,161 +503,38 @@
         </div>
     </div>
 
-    <!-- Jitsi Script with proper async loading -->
+    <!-- Google Meet Integration -->
     <script>
-        // Declare variables globally first
-        const sessionUrl = "{{ session.session_url }}";
-        const roomName = sessionUrl.split('/').pop();
+        // Declare variables globally
+        const meetingUrl = "{{ session.session_url }}";
         const sessionId = {{ session.id }};
         const sessionStatus = "{{ session.status }}";
 
         console.log('Session ID:', sessionId);
-        console.log('Room Name:', roomName);
-        console.log('Session URL:', sessionUrl);
+        console.log('Meeting URL:', meetingUrl);
+        console.log('Session Status:', sessionStatus);
 
-        let api = null;
-        let jitsiScriptReady = false;
-
-        // Fallback interface when CDN fails
-        function showFallbackInterface(loadingDiv) {
-            console.log('Showing fallback interface with direct link');
-            if (loadingDiv) {
-                loadingDiv.innerHTML = `
-                    <div style="text-align: center; padding: 2rem;">
-                        <i class="fas fa-video" style="font-size: 3rem; color: var(--warning); margin-bottom: 1rem;"></i>
-                        <p style="color: var(--gray-800); margin: 1rem 0; font-weight: 600;">Video Conference Unavailable</p>
-                        <p style="color: var(--gray-600); font-size: 0.9rem; margin: 0.5rem 0;">The embedded video player couldn't load. Click the button below to join your meeting.</p>
-                        <a href="${sessionUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 1.5rem; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);">
-                            <i class="fas fa-external-link-alt"></i> Open Meeting in New Window
-                        </a>
-                        <p style="color: var(--gray-500); font-size: 0.8rem; margin-top: 1rem;">A new window will open with your Jitsi meeting room</p>
-                    </div>
-                `;
-            }
+        // Join Google Meet
+        function joinMeeting() {
+            console.log('Opening Google Meet:', meetingUrl);
+            window.open(meetingUrl, '_blank', 'width=1200,height=800');
         }
-        function loadJitsiScript() {
-            return new Promise((resolve, reject) => {
-                if (window.JitsiMeetExternalAPI) {
-                    console.log('Jitsi API already loaded');
-                    resolve();
-                    return;
-                }
 
-                const script = document.createElement('script');
-                script.src = 'https://meet.jitsi.org/external_api.js';
-                script.async = true;
-                script.defer = true;
-
-                script.onload = () => {
-                    console.log('Jitsi script loaded successfully');
-                    jitsiScriptReady = true;
-                    resolve();
-                };
-
-                script.onerror = () => {
-                    console.error('Failed to load Jitsi script from CDN');
-                    reject(new Error('Failed to load Jitsi Meet API from CDN'));
-                };
-
-                // Add timeout
+        // Copy meeting link to clipboard
+        function copyMeetingLink() {
+            const link = document.getElementById('meetingLink').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
                 setTimeout(() => {
-                    if (!jitsiScriptReady) {
-                        reject(new Error('Jitsi script loading timeout'));
-                    }
-                }, 10000);
-
-                document.head.appendChild(script);
+                    btn.innerHTML = originalText;
+                }, 2000);
+                console.log('Meeting link copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy link. Please copy manually from the box above.');
             });
-        }
-
-        // Initialize Jitsi Meet when page loads
-        async function initializeJitsi() {
-            const container = document.querySelector('#jitsi-meet-container');
-            const loadingDiv = document.querySelector('#jitsi-loading');
-            
-            if (!container) {
-                console.error('Jitsi container not found');
-                return;
-            }
-
-            try {
-                // Wait for Jitsi script to load
-                console.log('Waiting for Jitsi API to load...');
-                await loadJitsiScript();
-                console.log('Jitsi API ready');
-            } catch (error) {
-                console.error('Error loading Jitsi:', error);
-                showFallbackInterface(loadingDiv);
-                return;
-            }
-
-            if (typeof JitsiMeetExternalAPI === 'undefined') {
-                console.error('JitsiMeetExternalAPI still not available');
-                showFallbackInterface(loadingDiv);
-                return;
-            }
-
-            console.log('Initializing Jitsi with room:', roomName);
-
-            const domain = "meet.jitsi.org";
-            const options = {
-                roomName: roomName,
-                width: '100%',
-                height: '100%',
-                parentNode: container,
-                configOverwrite: {
-                    startAudioOnly: false,
-                    startAudioMuted: false,
-                    startVideoMuted: false,
-                    enableLobbyMode: false,
-                    disableAudioLevels: false,
-                    useHostPageLocalStorage: false
-                },
-                interfaceConfigOverwrite: {
-                    TOOLBAR_BUTTONS: ['microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection', 'hangup', 'profile', 'settings', 'raisehand', 'videoquality', 'stats', 'shortcuts', 'tileview', 'help', 'recording'],
-                    SHOW_JITSI_WATERMARK: false,
-                    SHOW_WATERMARK_FOR_GUESTS: false,
-                    BRAND_WATERMARK_LINK: 'https://zedu.example.com',
-                    DEFAULT_WELCOME_PAGE_LOGO_URL: 'https://zedu.example.com/logo.png',
-                    DISPLAY_WELCOME_PAGE_CONTENT: false,
-                    SHOW_CHROME_EXTENSION_BANNER: false
-                }
-            };
-
-            try {
-                api = new JitsiMeetExternalAPI(domain, options);
-                console.log('Jitsi initialized successfully');
-
-                // Hide loading spinner once Jitsi is ready
-                if (loadingDiv) {
-                    setTimeout(() => {
-                        loadingDiv.style.display = 'none';
-                    }, 2000);
-                }
-
-                // Log events
-                api.addEventListener('readyToClose', () => {
-                    console.log('Ready to close');
-                    window.location.href = '/tutor-dashboard';
-                });
-
-                api.addEventListener('participantJoined', (data) => {
-                    console.log('Participant joined:', data);
-                });
-
-                api.addEventListener('videoConferenceJoined', (data) => {
-                    console.log('Video conference joined:', data);
-                    if (loadingDiv) {
-                        loadingDiv.style.display = 'none';
-                    }
-                });
-
-            } catch (error) {
-                console.error('Error initializing Jitsi:', error);
-                if (loadingDiv) {
-                    loadingDiv.innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;"></i><p style="color: var(--danger); margin: 0.5rem 0;">Failed to load video conference</p><p style="color: var(--gray-500); font-size: 0.9rem; margin: 0;">Please refresh the page and try again</p></div>';
-                }
-            }
         }
 
         // Format datetime
@@ -659,7 +607,9 @@
 
             btn.addEventListener('click', async () => {
                 console.log('End button clicked for session:', sessionId);
-                const isRecorded = confirm('Did you record this session?\n\nClick OK if you want to save it as a recorded lesson');
+                const confirmEnd = confirm('Are you sure you want to end this session?');
+                
+                if (!confirmEnd) return;
                 
                 btn.disabled = true;
                 btn.textContent = 'Ending...';
@@ -668,7 +618,7 @@
                     const response = await fetch(`/api/session/${sessionId}/end`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ is_recorded: isRecorded })
+                        body: JSON.stringify({ is_recorded: false })
                     });
                     
                     const data = await response.json();
@@ -781,17 +731,11 @@
 
         // Initialize on page load
         window.addEventListener('load', () => {
-            console.log('Page loaded, initializing...');
+            console.log('Page loaded, initializing Google Meet session...');
             loadProfile();
             loadNotifications();
             setupStartButton();
             setupEndButton();
-            
-            // Initialize Jitsi - now async with proper loading
-            console.log('Starting Jitsi initialization...');
-            initializeJitsi().catch(error => {
-                console.error('Fatal error initializing Jitsi:', error);
-            });
         });
 
         // Also initialize on DOMContentLoaded

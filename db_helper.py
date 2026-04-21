@@ -1502,11 +1502,11 @@ def create_live_session(course_id, instructor_id, title, description, scheduled_
 
     cursor = conn.cursor()
     try:
-        # Generate unique Jitsi room name if no session_url provided
+        # Generate unique Google Meet room name if no session_url provided
         if not session_url:
             # Create a unique room name: zedu-<timestamp>-<random>
             room_name = f"zedu-{int(datetime.now().timestamp())}-{uuid.uuid4().hex[:8]}"
-            session_url = f"https://meet.jitsi.org/{room_name}"
+            session_url = f"https://meet.google.com/{room_name}"
         
         cursor.execute("""
             INSERT INTO live_sessions (course_id, instructor_id, title, description, scheduled_at, session_url, status)
