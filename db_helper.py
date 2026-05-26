@@ -880,6 +880,239 @@ def create_enrollment(student_id, course_id):
         cursor.close()
         conn.close()
 
+# ==================== ASSIGNMENTS & GRADES FUNCTIONS ====================
+
+def get_assignment_by_id(assignment_id):
+    """
+    Get assignment by ID
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT a.*, c.title as course_title, u.full_name as student_name, u.email as student_email
+            FROM assignments a
+            JOIN courses c ON a.course_id = c.id
+            JOIN users u ON a.student_id = u.id
+            WHERE a.id = %s;
+        """, (assignment_id,))
+        return cursor.fetchone()
+    except Exception as e:
+        print(f"Error getting assignment: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_course_by_id(course_id):
+    """
+    Get course by ID
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("SELECT * FROM courses WHERE id = %s;", (course_id,))
+        return cursor.fetchone()
+    except Exception as e:
+        print(f"Error getting course by id: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_course_assignments(course_id):
+    """
+    Get all assignments for a course
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT a.*, u.full_name as student_name, u.email as student_email
+            FROM assignments a
+            JOIN users u ON a.student_id = u.id
+            WHERE a.course_id = %s
+            ORDER BY a.due_date ASC, a.created_at DESC;
+        """, (course_id,))
+        return cursor.fetchall()
+    except Exception as e:
+        print(f"Error getting course assignments: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_student_assignments(student_id, course_id=None):
+    """
+    Get assignments for a student, optionally filtered by course
+    """
+    conn = get_db_connection()
+    if not conn:
+        return []
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        query = """
+            SELECT a.*, c.title as course_title, u.full_name as student_name
+            FROM assignments a
+            JOIN courses c ON a.course_id = c.id
+            JOIN users u ON a.student_id = u.id
+            WHERE a.student_id = %s
+        """
+        params = [student_id]
+
+        if course_id is not None:
+            query += " AND a.course_id = %s"
+            params.append(course_id)
+
+        query += " ORDER BY a.due_date ASC, a.created_at DESC;"
+        cursor.execute(query, tuple(params))
+        return cursor.fetchall()
+    except Exception as e:
+        print(f"Error getting student assignments: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def create_assignment(course_id, student_id, title, description, due_date, priority='normal'):
+    """
+    Create a new assignment for a student
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO assignments (course_id, student_id, title, description, due_date, priority)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id;
+        """, (course_id, student_id, title, description, due_date, priority))
+        assignment_id = cursor.fetchone()[0]
+        conn.commit()
+        return {"success": True, "message": "Assignment created successfully", "assignment_id": assignment_id}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating assignment: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def submit_assignment(assignment_id, student_id):
+    """
+    Mark an assignment as submitted by the student
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE assignments
+            SET status = 'submitted', submission_date = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s AND student_id = %s
+            RETURNING id;
+        """, (assignment_id, student_id))
+        result = cursor.fetchone()
+        if not result:
+            return {"success": False, "message": "Assignment not found or not owned by student"}
+
+        conn.commit()
+        return {"success": True, "message": "Assignment submitted successfully", "assignment_id": result[0]}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error submitting assignment: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def grade_assignment(assignment_id, grade, feedback=None):
+    """
+    Grade an assignment and add feedback
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE assignments
+            SET grade = %s, feedback = %s, status = 'graded', updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+            RETURNING id;
+        """, (grade, feedback, assignment_id))
+        result = cursor.fetchone()
+        if not result:
+            return {"success": False, "message": "Assignment not found"}
+
+        conn.commit()
+        return {"success": True, "message": "Assignment graded successfully", "assignment_id": result[0]}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error grading assignment: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_student_grades(student_id):
+    """
+    Get graded assignments for a student and average grade
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"assignments": [], "average_grade": None}
+
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute("""
+            SELECT a.id, a.course_id, c.title as course_title, a.title, a.status,
+                   a.grade, a.feedback, a.due_date, a.submission_date, a.updated_at
+            FROM assignments a
+            JOIN courses c ON a.course_id = c.id
+            WHERE a.student_id = %s
+            ORDER BY a.updated_at DESC;
+        """, (student_id,))
+        assignments = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT AVG(grade) as average_grade
+            FROM assignments
+            WHERE student_id = %s AND grade IS NOT NULL;
+        """, (student_id,))
+        avg_result = cursor.fetchone()
+        average_grade = float(avg_result['average_grade']) if avg_result and avg_result['average_grade'] is not None else None
+
+        return {"assignments": assignments, "average_grade": average_grade}
+    except Exception as e:
+        print(f"Error getting student grades: {e}")
+        return {"assignments": [], "average_grade": None}
+    finally:
+        cursor.close()
+        conn.close()
+
 # ==================== PROGRAMMER/DEVELOPER FUNCTIONS ====================
 
 def get_programmer_by_email(email):
@@ -3080,9 +3313,12 @@ def get_student_study_hours(student_id, days=7):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            SELECT SUM(EXTRACT(EPOCH FROM (ended_at - started_at)) / 3600)
-            FROM live_sessions
-            WHERE instructor_id = %s AND status = 'ended' AND ended_at > NOW() - INTERVAL '%s days'
+            SELECT SUM(EXTRACT(EPOCH FROM (ls.ended_at - ls.started_at)) / 3600)
+            FROM session_participants sp
+            JOIN live_sessions ls ON sp.session_id = ls.id
+            WHERE sp.student_id = %s
+              AND ls.status = 'ended'
+              AND ls.ended_at > NOW() - INTERVAL '%s days'
         """, (student_id, days))
         
         result = cursor.fetchone()
@@ -3110,6 +3346,13 @@ def get_student_recommended_courses(student_id, limit=3):
         cursor.execute("SELECT education_level FROM users WHERE id = %s", (student_id,))
         student = cursor.fetchone()
         education_level = student['education_level'] if student else 'university'
+
+        level_mapping = {
+            'primary': 'beginner',
+            'high_school': 'intermediate',
+            'university': 'advanced'
+        }
+        course_level = level_mapping.get(education_level, 'advanced')
         
         # Get courses not yet enrolled in
         cursor.execute("""
@@ -3120,7 +3363,7 @@ def get_student_recommended_courses(student_id, limit=3):
             AND c.id NOT IN (SELECT course_id FROM enrollments WHERE student_id = %s)
             ORDER BY c.rating DESC, c.total_students DESC
             LIMIT %s
-        """, (education_level, student_id, limit))
+        """, (course_level, student_id, limit))
         
         results = cursor.fetchall()
         return [dict(row) for row in results]

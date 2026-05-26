@@ -15,11 +15,14 @@ from db_helper import (create_tables, create_user, authenticate_user, get_user_b
                        get_all_forums_with_stats, create_notification, get_user_notifications, 
                        get_unread_notification_count, mark_notification_as_read, mark_all_notifications_as_read, 
                        delete_notification, get_popular_tags, get_student_gpa, get_student_study_hours,
-                       get_student_recommended_courses, get_student_activity, authenticate_programmer,
+                       get_student_recommended_courses, get_student_activity, get_assignment_by_id, get_course_assignments,
+                       get_student_assignments, create_assignment, submit_assignment, grade_assignment,
+                       get_student_grades, get_course_by_id, authenticate_programmer,
                        get_programmer_by_id, update_programmer_last_login, create_programmer, get_all_programmers)
 import os
 from datetime import timedelta
 import base64
+import html
 
 app = Flask(__name__)
 
@@ -223,6 +226,130 @@ def logout():
     """Handle user logout"""
     session.clear()
     return jsonify({"success": True, "message": "Logged out successfully"}), 200
+
+@app.route('/api/page-fragment', methods=['GET'])
+def get_page_fragment():
+    """Return small HTML fragments for modal-driven navigation"""
+    user_id = session.get('user_id')
+    programmer_id = session.get('programmer_id')
+    if not user_id and not programmer_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    user = get_user_by_id(user_id) if user_id else None
+    path = request.args.get('path', '/dashboard')
+    title = 'ZEDU'
+    html_content = ''
+
+    def _escape(value):
+        return html.escape(str(value or ''))
+
+    if path == '/dashboard':
+        if user and user.get('user_type') in ['student', 'tutor', 'parent']:
+            title = 'Dashboard'
+            role = user.get('user_type')
+            first_name = _escape(user.get('full_name', 'Learner').split(' ')[0])
+            role_label = 'Student' if role == 'student' else 'Tutor' if role == 'tutor' else 'Parent'
+            html_content = f"""
+                <div style=\"padding:1rem;\">
+                    <h5>Welcome back, {first_name}</h5>
+                    <p class=\"mb-3\">Your {role_label} control center is ready. Use the quick action cards below to explore learning, assignments and community tools without leaving the landing page.</p>
+                    <div class=\"row g-3\">
+                        <div class=\"col-md-6\"><button class=\"btn btn-primary w-100\" onclick=\"loadModalPath('/forums')\">Open Forums</button></div>
+                        <div class=\"col-md-6\"><button class=\"btn btn-outline-primary w-100\" onclick=\"loadModalPath('/account')\">View Account</button></div>
+                        <div class=\"col-md-6\"><button class=\"btn btn-primary w-100\" onclick=\"loadModalPath('/noticeboards')\">Noticeboards</button></div>
+                        <div class=\"col-md-6\"><button class=\"btn btn-outline-primary w-100\" onclick=\"loadModalPath('/settings')\">Settings</button></div>
+                    </div>
+                </div>
+            """
+        elif user and user.get('user_type') == 'administrator':
+            title = 'Administrator Portal'
+            html_content = """
+                <div style=\"padding:1rem;\">
+                    <h5>Administrator Portal</h5>
+                    <p class=\"mb-3\">You are signed in as an administrator. Review approvals and manage the school system from the modal-driven control surface.</p>
+                    <div class=\"row g-3\">
+                        <div class=\"col-md-6\"><button class=\"btn btn-primary w-100\" onclick=\"loadModalPath('/noticeboards')\">Manage Noticeboards</button></div>
+                        <div class=\"col-md-6\"><button class=\"btn btn-outline-primary w-100\" onclick=\"loadModalPath('/settings')\">Settings</button></div>
+                        <div class=\"col-md-12\"><button class=\"btn btn-secondary w-100\" onclick=\"showAppModal('Approval Queue', '<div style=\\\"padding:1rem;\\\"><p>Open the approval queue in the admin dashboard to review pending applications.</p></div>')\">Open Approval Queue</button></div>
+                    </div>
+                </div>
+            """
+        elif programmer_id:
+            title = 'Developer Portal'
+            html_content = """
+                <div style=\"padding:1rem;\">
+                    <h5>Developer workspace</h5>
+                    <p class=\"mb-3\">You are signed in as a developer. Use the system tools to monitor and manage developer workflows within the modal shell.</p>
+                    <div class=\"d-flex gap-2 flex-wrap\">
+                        <button class=\"btn btn-primary\" onclick=\"loadModalPath('/account')\">My Account</button>
+                        <button class=\"btn btn-outline-primary\" onclick=\"loadModalPath('/settings')\">Settings</button>
+                    </div>
+                </div>
+            """
+        else:
+            return jsonify({"success": False, "message": "No dashboard available for current user"}), 403
+    elif path == '/account':
+        title = 'Account Overview'
+        account_user = user
+        email = ''
+        role = ''
+        last_login = 'Not available'
+        if programmer_id and not account_user:
+            account_user = get_programmer_by_id(programmer_id)
+            last_login = 'N/A'
+
+        user_label = _escape(account_user.get('full_name', 'User')) if account_user else 'User'
+        if account_user:
+            email = _escape(account_user.get('email', ''))
+            role = _escape(account_user.get('user_type', account_user.get('role', '')))
+            last_login = _escape(account_user.get('last_login', last_login))
+
+        html_content = f"""
+            <div style=\"padding:1rem;\">
+                <h5>{user_label}</h5>
+                <p class=\"mb-3\">Manage your profile, update your preferences, and keep your account secure.</p>
+                <ul class=\"list-group\">
+                    <li class=\"list-group-item\">Email: {email}</li>
+                    <li class=\"list-group-item\">Role: {role}</li>
+                    <li class=\"list-group-item\">Last login: {last_login}</li>
+                </ul>
+            </div>
+        """
+    elif path == '/settings':
+        title = 'Settings'
+        html_content = """
+            <div style=\"padding:1rem;\">
+                <h5>Settings</h5>
+                <p class=\"mb-3\">Adjust display preferences, notification settings, and account security without leaving the modal.</p>
+                <div class=\"list-group\">
+                    <button class=\"list-group-item list-group-item-action\">Theme & appearance</button>
+                    <button class=\"list-group-item list-group-item-action\">Privacy controls</button>
+                    <button class=\"list-group-item list-group-item-action\">Notification preferences</button>
+                </div>
+            </div>
+        """
+    elif path == '/forums':
+        title = 'Forums'
+        html_content = """
+            <div style=\"padding:1rem;\">
+                <h5>Community Forums</h5>
+                <p class=\"mb-3\">Browse discussions, create new threads, and stay connected with the learning community inside the modal interface.</p>
+                <div class=\"alert alert-secondary\">Forum browsing and thread management are available as AJAX-driven actions inside the platform.</div>
+            </div>
+        """
+    elif path == '/noticeboards':
+        title = 'Noticeboards'
+        html_content = """
+            <div style=\"padding:1rem;\">
+                <h5>Noticeboards</h5>
+                <p class=\"mb-3\">Check announcements, alerts, and community updates here without navigating away from the homepage.</p>
+                <div class=\"alert alert-secondary\">Noticeboard content will appear here as modal-driven updates.</div>
+            </div>
+        """
+    else:
+        return jsonify({"success": False, "message": "Unsupported content fragment"}), 400
+
+    return jsonify({"success": True, "title": title, "html": html_content}), 200
 
 @app.route('/api/profile', methods=['GET'])
 def get_profile():
@@ -504,6 +631,182 @@ def get_my_courses():
         return jsonify({"success": True, "courses": [dict(c) for c in courses]}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/course/<int:course_id>/assignment/create', methods=['POST'])
+def create_assignment_api(course_id):
+    """Create an assignment for a course"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'tutor':
+        return jsonify({"success": False, "message": "Only tutors can create assignments"}), 403
+
+    data = request.get_json()
+    student_id = data.get('student_id')
+    title = data.get('title')
+    due_date = data.get('due_date')
+    description = data.get('description')
+    priority = data.get('priority', 'normal')
+
+    if not student_id or not title or not due_date:
+        return jsonify({"success": False, "message": "student_id, title, and due_date are required"}), 400
+
+    course = get_course_by_id(course_id)
+    if not course or course['instructor_id'] != user_id:
+        return jsonify({"success": False, "message": "Course not found or you are not the course instructor"}), 404
+
+    try:
+        result = create_assignment(course_id, student_id, title, description, due_date, priority)
+        return jsonify(result), 201 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/course/<int:course_id>/assignments', methods=['GET'])
+def get_course_assignments_api(course_id):
+    """Get assignments for a course"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    user = get_user_by_id(user_id)
+    if not user:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    if user['user_type'] == 'tutor':
+        course = get_course_by_id(course_id)
+        if not course or course['instructor_id'] != user_id:
+            return jsonify({"success": False, "message": "Course not found or you are not the instructor"}), 404
+        assignments = get_course_assignments(course_id)
+        return jsonify({"success": True, "assignments": [dict(a) for a in assignments]}), 200
+
+    if user['user_type'] == 'student':
+        assignments = get_student_assignments(user_id, course_id)
+        return jsonify({"success": True, "assignments": [dict(a) for a in assignments]}), 200
+
+    return jsonify({"success": False, "message": "Unauthorized access"}), 403
+
+@app.route('/api/student/assignments', methods=['GET'])
+def get_student_assignments_api():
+    """Get all assignments for the logged-in student"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'student':
+        return jsonify({"success": False, "message": "Only students can access this endpoint"}), 403
+
+    assignments = get_student_assignments(user_id)
+    return jsonify({"success": True, "assignments": [dict(a) for a in assignments]}), 200
+
+@app.route('/api/assignment/<int:assignment_id>/submit', methods=['POST'])
+def submit_assignment_api(assignment_id):
+    """Submit an assignment"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'student':
+        return jsonify({"success": False, "message": "Only students can submit assignments"}), 403
+
+    result = submit_assignment(assignment_id, user_id)
+    return jsonify(result), 200 if result['success'] else 400
+
+@app.route('/api/assignment/<int:assignment_id>/grade', methods=['POST'])
+def grade_assignment_api(assignment_id):
+    """Grade a student's assignment"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    user = get_user_by_id(user_id)
+    if not user or user['user_type'] != 'tutor':
+        return jsonify({"success": False, "message": "Only tutors can grade assignments"}), 403
+
+    data = request.get_json()
+    grade = data.get('grade')
+    feedback = data.get('feedback')
+
+    if grade is None:
+        return jsonify({"success": False, "message": "Grade is required"}), 400
+
+    assignment = get_assignment_by_id(assignment_id)
+    if not assignment:
+        return jsonify({"success": False, "message": "Assignment not found"}), 404
+
+    course = get_course_by_id(assignment['course_id'])
+    if not course or course['instructor_id'] != user_id:
+        return jsonify({"success": False, "message": "You are not authorized to grade this assignment"}), 403
+
+    try:
+        result = grade_assignment(assignment_id, float(grade), feedback)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/student/<int:student_id>/grades', methods=['GET'])
+def get_student_grades_api(student_id):
+    """Get grade summary for a student"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    current_user = get_user_by_id(user_id)
+    if not current_user:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    if current_user['user_type'] == 'student' and user_id == student_id:
+        grades = get_student_grades(student_id)
+        return jsonify({"success": True, "grades": grades}), 200
+
+    if current_user['user_type'] == 'parent':
+        links = get_parent_student_links(user_id)
+        if links.get('success'):
+            approved_ids = [link['student_id'] for link in links.get('data', []) if link['status'] == 'approved']
+            if student_id in approved_ids:
+                grades = get_student_grades(student_id)
+                return jsonify({"success": True, "grades": grades}), 200
+
+    return jsonify({"success": False, "message": "Unauthorized access"}), 403
+
+@app.route('/api/student/<int:course_id>/assignments', methods=['GET'])
+def get_student_course_assignments_api(course_id):
+    """Get student assignments for a specific course"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    current_user = get_user_by_id(user_id)
+    if not current_user or current_user['user_type'] != 'student':
+        return jsonify({"success": False, "message": "Only students can access this endpoint"}), 403
+
+    assignments = get_student_assignments(user_id, course_id)
+    return jsonify({"success": True, "assignments": [dict(a) for a in assignments]}), 200
+
+@app.route('/api/student/<int:student_id>/assignments', methods=['GET'])
+def get_student_assignments_for_parent_api(student_id):
+    """Get assignments for a linked student"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    current_user = get_user_by_id(user_id)
+    if not current_user or current_user['user_type'] != 'parent':
+        return jsonify({"success": False, "message": "Only parents can access this endpoint"}), 403
+
+    links = get_parent_student_links(user_id)
+    if not links.get('success'):
+        return jsonify({"success": False, "message": "Unable to verify parent links"}), 403
+
+    approved_ids = [link['student_id'] for link in links.get('data', []) if link['status'] == 'approved']
+    if student_id not in approved_ids:
+        return jsonify({"success": False, "message": "You are not linked to this student"}), 403
+
+    assignments = get_student_assignments(student_id)
+    return jsonify({"success": True, "assignments": [dict(a) for a in assignments]}), 200
 
 @app.route('/api/course/<int:course_id>', methods=['DELETE'])
 def delete_course_api(course_id):
@@ -1258,6 +1561,7 @@ def programmer_login():
         return jsonify({
             "success": True,
             "message": "Programmer login successful",
+            "user_type": "programmer",
             "redirect_url": "/admin-approvals",
             "programmer": {
                 "id": programmer['id'],
