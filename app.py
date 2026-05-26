@@ -332,18 +332,32 @@ def get_page_fragment():
         title = 'Forums'
         html_content = """
             <div style=\"padding:1rem;\">
-                <h5>Community Forums</h5>
-                <p class=\"mb-3\">Browse discussions, create new threads, and stay connected with the learning community inside the modal interface.</p>
-                <div class=\"alert alert-secondary\">Forum browsing and thread management are available as AJAX-driven actions inside the platform.</div>
+                <div class=\"d-flex align-items-center justify-content-between mb-3\">
+                    <div>
+                        <h5>Community Forums</h5>
+                        <p class=\"mb-2\">Browse active discussions and open new threads inside the modal shell.</p>
+                    </div>
+                    <button class=\"btn btn-primary\" onclick=\"loadForumList()\">Refresh Forums</button>
+                </div>
+                <div id=\"forumListContainer\">
+                    <div class=\"spinner-border text-primary\" role=\"status\"><span class=\"visually-hidden\">Loading...</span></div>
+                </div>
             </div>
         """
     elif path == '/noticeboards':
         title = 'Noticeboards'
         html_content = """
             <div style=\"padding:1rem;\">
-                <h5>Noticeboards</h5>
-                <p class=\"mb-3\">Check announcements, alerts, and community updates here without navigating away from the homepage.</p>
-                <div class=\"alert alert-secondary\">Noticeboard content will appear here as modal-driven updates.</div>
+                <div class=\"d-flex align-items-center justify-content-between mb-3\">
+                    <div>
+                        <h5>Noticeboards</h5>
+                        <p class=\"mb-2\">View announcements, urgent alerts, and latest notices without leaving the homepage.</p>
+                    </div>
+                    <button class=\"btn btn-primary\" onclick=\"loadNoticeboardList()\">Refresh Noticeboards</button>
+                </div>
+                <div id=\"noticeboardListContainer\">
+                    <div class=\"spinner-border text-primary\" role=\"status\"><span class=\"visually-hidden\">Loading...</span></div>
+                </div>
             </div>
         """
     else:

@@ -1623,6 +1623,7 @@
                 const data = await response.json();
                 if (data.success) {
                     showAppModal(data.title, data.html);
+                    initAppModal(path);
                 } else {
                     alert('Unable to load modal content: ' + data.message);
                 }
@@ -1645,6 +1646,202 @@
                 keyboard: true
             });
             appModal.show();
+        }
+
+        function initAppModal(path) {
+            if (path === '/forums') {
+                loadForumList();
+            }
+            if (path === '/noticeboards') {
+                loadNoticeboardList();
+            }
+            if (path === '/dashboard') {
+                document.getElementById('appModalBody').querySelectorAll('button').forEach(button => {
+                    button.classList.add('btn-lg');
+                });
+            }
+        }
+
+        async function loadForumList() {
+            const container = document.getElementById('forumListContainer');
+            if (!container) return;
+            container.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+            try {
+                const response = await fetch('/api/forums');
+                const data = await response.json();
+                if (!data.success) {
+                    container.innerHTML = '<div class="alert alert-danger">Unable to load forums.</div>';
+                    return;
+                }
+                const forums = data.forums || [];
+                if (!forums.length) {
+                    container.innerHTML = '<div class="alert alert-secondary">No forums available yet.</div>';
+                    return;
+                }
+                container.innerHTML = forums.map(forum => `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">${forum.title || 'Untitled Forum'}</h6>
+                                    <p class="card-text text-muted mb-0">${forum.description || 'No description available.'}</p>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadForumThreads(${forum.id})">View Threads</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<div class="alert alert-danger">Error loading forums. Try again.</div>';
+            }
+        }
+
+        async function loadForumThreads(forumId) {
+            const container = document.getElementById('appModalBody');
+            if (!container) return;
+            container.innerHTML = '<div class="p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            try {
+                const response = await fetch(`/api/forum/${forumId}/threads`);
+                const data = await response.json();
+                if (!data.success) {
+                    container.innerHTML = '<div class="alert alert-danger">Unable to load threads.</div>';
+                    return;
+                }
+                const threads = data.threads || [];
+                container.innerHTML = `
+                    <div style="padding:1rem;">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h5>Forum Threads</h5>
+                                <p class="mb-2">Threads in this forum.</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadModalPath('/forums')">Back to Forums</button>
+                        </div>
+                        ${threads.length ? threads.map(thread => `
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <h6 class="mb-1">${thread.title || 'Untitled Thread'}</h6>
+                                    <p class="mb-1 text-muted">${thread.author_name || 'Unknown author'}</p>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="loadThread(${thread.id})">Open Thread</button>
+                                </div>
+                            </div>
+                        `).join('') : '<div class="alert alert-secondary">No threads yet.</div>'}
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading threads. Try again.</div>';
+            }
+        }
+
+        async function loadThread(threadId) {
+            const container = document.getElementById('appModalBody');
+            if (!container) return;
+            container.innerHTML = '<div class="p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            try {
+                const [detailsRes, postsRes] = await Promise.all([
+                    fetch(`/api/thread/${threadId}`),
+                    fetch(`/api/thread/${threadId}/posts`)
+                ]);
+                const detailsData = await detailsRes.json();
+                const postsData = await postsRes.json();
+                if (!detailsData.success || !postsData.success) {
+                    container.innerHTML = '<div class="alert alert-danger">Unable to load thread.</div>';
+                    return;
+                }
+                const thread = detailsData.thread;
+                const posts = postsData.posts || [];
+                container.innerHTML = `
+                    <div style="padding:1rem;">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h5>${thread.title}</h5>
+                                <p class="text-muted mb-0">Started by ${thread.author_name || 'Unknown'}</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadForumThreads(${thread.forum_id})">Back to Threads</button>
+                        </div>
+                        ${posts.length ? posts.map(post => `
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <p>${post.content || ''}</p>
+                                    <small class="text-muted">Posted by ${post.author_name || 'User'}</small>
+                                </div>
+                            </div>
+                        `).join('') : '<div class="alert alert-secondary">No posts yet.</div>'}
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading thread. Try again.</div>';
+            }
+        }
+
+        async function loadNoticeboardList() {
+            const container = document.getElementById('noticeboardListContainer');
+            if (!container) return;
+            container.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+            try {
+                const response = await fetch('/api/noticeboards/student/my-noticeboards');
+                const data = await response.json();
+                if (!data.success) {
+                    container.innerHTML = '<div class="alert alert-danger">Unable to load noticeboards.</div>';
+                    return;
+                }
+                const noticeboards = data.noticeboards || [];
+                container.innerHTML = noticeboards.length ? noticeboards.map(nb => `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">${nb.title || 'Untitled Noticeboard'}</h6>
+                                    <p class="card-text text-muted mb-0">${nb.description || 'No description.'}</p>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadNoticeboard(${nb.id})">Open</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('') : '<div class="alert alert-secondary">No noticeboards available for your account.</div>';
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<div class="alert alert-danger">Error loading noticeboards. Try again.</div>';
+            }
+        }
+
+        async function loadNoticeboard(noticeboardId) {
+            const container = document.getElementById('appModalBody');
+            if (!container) return;
+            container.innerHTML = '<div class="p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            try {
+                const response = await fetch(`/api/noticeboards/${noticeboardId}`);
+                const data = await response.json();
+                if (!data.success) {
+                    container.innerHTML = '<div class="alert alert-danger">Unable to load noticeboard.</div>';
+                    return;
+                }
+                const noticeboard = data.noticeboard;
+                const posts = data.posts || [];
+                container.innerHTML = `
+                    <div style="padding:1rem;">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h5>${noticeboard.title || 'Noticeboard'}</h5>
+                                <p class="mb-2 text-muted">${noticeboard.description || 'Latest updates and announcements.'}</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadModalPath('/noticeboards')">Back</button>
+                        </div>
+                        ${posts.length ? posts.map(post => `
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <h6>${post.title || 'Post'}</h6>
+                                    <p>${post.content || ''}</p>
+                                    <small class="text-muted">Posted by ${post.author_name || 'Author'}</small>
+                                </div>
+                            </div>
+                        `).join('') : '<div class="alert alert-secondary">No posts in this noticeboard yet.</div>'}
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading noticeboard. Try again.</div>';
+            }
         }
 
         // Display welcome banner with user info
