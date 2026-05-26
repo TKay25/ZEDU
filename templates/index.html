@@ -4048,7 +4048,7 @@
                 
                 if (data.success) {
                     console.log('Login successful, redirecting to:', data.redirect_url);
-                    window.location.href = data.redirect_url || '/tutor-dashboard';
+                    window.location.href = data.redirect_url || '/dashboard';
                 } else {
                     console.warn('Login failed:', data.message);
                     alert(data.message || 'Login failed');
@@ -4093,7 +4093,7 @@
                 
                 if (data.success) {
                     console.log('Login successful, redirecting to:', data.redirect_url);
-                    window.location.href = data.redirect_url || '/parent-dashboard';
+                    window.location.href = data.redirect_url || '/dashboard';
                 } else {
                     console.warn('Login failed:', data.message);
                     alert(data.message || 'Login failed');

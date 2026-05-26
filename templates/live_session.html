@@ -496,7 +496,7 @@
                 <button class="btn-custom btn-danger-custom" id="endSessionBtn">
                     <i class="fas fa-stop"></i> End Session
                 </button>
-                <a href="/tutor-dashboard" class="btn-custom btn-primary-custom" style="text-decoration: none; color: white;">
+                <a href="javascript:void(0)" onclick="navigateToModal('/dashboard'); return false;" class="btn-custom btn-primary-custom" style="text-decoration: none; color: white;">
                     <i class="fas fa-arrow-left"></i> Back to Dashboard
                 </a>
             </div>
@@ -700,7 +700,7 @@
                     if (data.success) {
                         alert('✓ Session ended successfully!');
                         setTimeout(() => {
-                            window.location.href = '/tutor-dashboard';
+                            window.location.href = '/dashboard';
                         }, 1000);
                     } else {
                         alert('Error: ' + (data.message || 'Unknown error'));

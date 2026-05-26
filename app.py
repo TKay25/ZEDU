@@ -203,12 +203,8 @@ def login():
         
         # Redirect to appropriate dashboard based on user type
         redirect_url = '/'
-        if user['user_type'] == 'student':
+        if user['user_type'] in ['student', 'tutor', 'parent']:
             redirect_url = '/dashboard'
-        elif user['user_type'] == 'tutor':
-            redirect_url = '/tutor-dashboard'
-        elif user['user_type'] == 'parent':
-            redirect_url = '/parent-dashboard'
         
         return jsonify({
             "success": True,
@@ -577,27 +573,19 @@ def dashboard():
 
 @app.route('/tutor-dashboard')
 def tutor_dashboard():
-    """Tutor dashboard"""
+    """Legacy tutor dashboard alias"""
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/')
-    
-    user = get_user_by_id(user_id)
-    if user and user['user_type'] == 'tutor':
-        return render_template('tutor_dashboard_new.html', user=dict(user))
-    return redirect('/')
+    return redirect('/dashboard')
 
 @app.route('/parent-dashboard')
 def parent_dashboard():
-    """Parent dashboard"""
+    """Legacy parent dashboard alias"""
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/')
-    
-    user = get_user_by_id(user_id)
-    if user and user['user_type'] == 'parent':
-        return render_template('parent_dashboard_new.html', user=dict(user))
-    return redirect('/')
+    return redirect('/dashboard')
 
 @app.route('/api/create-course', methods=['POST'])
 def create_course_api():
