@@ -1,0 +1,20 @@
+body .modal-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(10, 18, 32, 0.55) !important;
+    backdrop-filter: blur(4px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(4px) saturate(140%) !important;
+    transition: opacity 0.20s ease !important;
+    z-index: 1040 !important;
+}
+
+body .modal-backdrop.show {
+    opacity: 1 !important;
+}
+
+body .modal-backdrop.fade {
+    opacity: 0 !important;
+}
