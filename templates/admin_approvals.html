@@ -345,7 +345,7 @@
             <i class="fas fa-shield-alt"></i> ZEDU Admin Control Panel
         </div>
         <div class="navbar-actions">
-            <a href="/noticeboards" style="text-decoration: none; color: var(--gray-600); font-weight: 600; margin-right: 1.5rem; font-size: 0.9rem;">
+            <a href="javascript:void(0)" onclick="navigateToModal('/noticeboards'); return false;" style="text-decoration: none; color: var(--gray-600); font-weight: 600; margin-right: 1.5rem; font-size: 0.9rem;">
                 <i class="fas fa-bullhorn"></i> Noticeboards
             </a>
             <!-- Notifications Bell -->
@@ -882,5 +882,6 @@
             loadAdministrators();
         });
     </script>
+    <script src="/static/modal-nav.js"></script>
 </body>
 </html>

@@ -544,8 +544,8 @@
             <!-- Navigation Links -->
             <div>
                 <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="/forums"><i class="fas fa-comments"></i> Forums</a>
-                <a href="/noticeboards"><i class="fas fa-bullhorn"></i> Noticeboards</a>
+                <a href="javascript:void(0)" onclick="navigateToModal('/forums'); return false;"><i class="fas fa-comments"></i> Forums</a>
+                <a href="javascript:void(0)" onclick="navigateToModal('/noticeboards'); return false;"><i class="fas fa-bullhorn"></i> Noticeboards</a>
                 <a href="/account"><i class="fas fa-user-circle"></i> Account</a>
                 <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
                 <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -1090,5 +1090,6 @@
             }
         }, 500);
     </script>
+    <script src="/static/modal-nav.js"></script>
 </body>
 </html>

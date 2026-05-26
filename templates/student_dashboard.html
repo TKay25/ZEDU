@@ -858,10 +858,10 @@
                         <a class="nav-link" href="#achievements">Achievements</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/forums"><i class="fas fa-comments"></i> Forums</a>
+                        <a class="nav-link" href="javascript:void(0)" onclick="navigateToModal('/forums'); return false;"><i class="fas fa-comments"></i> Forums</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/noticeboards"><i class="fas fa-bullhorn"></i> Noticeboards</a>
+                        <a class="nav-link" href="javascript:void(0)" onclick="navigateToModal('/noticeboards'); return false;"><i class="fas fa-bullhorn"></i> Noticeboards</a>
                     </li>
                 </ul>
             </div>
@@ -1850,5 +1850,6 @@
             }
         });
     </script>
+    <script src="/static/modal-nav.js"></script>
 </body>
 </html>
