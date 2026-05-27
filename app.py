@@ -593,6 +593,26 @@ def enroll_course():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+
+@app.route('/api/unenroll', methods=['POST'])
+def unenroll_course():
+    """Unenroll student from a course"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "Not authenticated"}), 401
+
+    data = request.get_json() or {}
+    course_id = data.get('course_id')
+    if not course_id:
+        return jsonify({"success": False, "message": "Course ID required"}), 400
+
+    try:
+        from db_helper import delete_enrollment
+        result = delete_enrollment(user_id, course_id)
+        return jsonify(result), 200 if result.get('success') else 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/api/student/stats', methods=['GET'])
 def get_student_stats():
     """Get student dashboard statistics (GPA, study hours, etc)"""

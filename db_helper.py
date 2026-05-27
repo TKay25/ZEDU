@@ -6,6 +6,7 @@ import random
 import string
 from datetime import datetime
 import uuid
+import traceback
 
 # Database connection string
 DATABASE_URL = "postgresql://zeduweb_user:qdEe6bfJmlIHAknO2TVbum3SSm2kFvFV@dpg-d7cklfa8qa3s73e9podg-a.oregon-postgres.render.com/zeduweb"
@@ -41,6 +42,11 @@ def create_tables():
     if not conn:
         print("Failed to connect to database")
         return False
+    # Use autocommit for DDL to avoid a single aborted transaction blocking subsequent statements
+    try:
+        conn.autocommit = True
+    except Exception:
+        pass
 
     cursor = conn.cursor()
     try:
@@ -508,13 +514,22 @@ def create_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(notification_type);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at);")
 
-        conn.commit()
+        # If we reached here without unhandled exceptions, consider it successful
+        try:
+            conn.commit()
+        except Exception:
+            # commit may not be necessary when autocommit=True
+            pass
         print("✓ Database tables created successfully!")
         return True
 
     except Exception as e:
         print(f"Error creating tables: {e}")
-        conn.rollback()
+        traceback.print_exc()
+        try:
+            conn.rollback()
+        except Exception:
+            pass
         return False
     finally:
         cursor.close()
@@ -875,6 +890,40 @@ def create_enrollment(student_id, course_id):
     except Exception as e:
         conn.rollback()
         print(f"Error creating enrollment: {e}")
+        return {"success": False, "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
+def delete_enrollment(student_id, course_id):
+    """
+    Delete a course enrollment for a student
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "message": "Database connection failed"}
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            DELETE FROM enrollments
+            WHERE student_id = %s AND course_id = %s
+            RETURNING id;
+        """, (student_id, course_id))
+        row = cursor.fetchone()
+        if row:
+            # Optionally decrement total_students in courses
+            try:
+                cursor.execute("UPDATE courses SET total_students = GREATEST(0, COALESCE(total_students,0) - 1) WHERE id = %s;", (course_id,))
+            except Exception:
+                pass
+            conn.commit()
+            return {"success": True, "message": "Unenrolled successfully"}
+        else:
+            return {"success": False, "message": "Enrollment not found"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting enrollment: {e}")
         return {"success": False, "message": str(e)}
     finally:
         cursor.close()

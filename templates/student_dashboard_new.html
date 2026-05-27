@@ -1530,13 +1530,49 @@
                                 </div>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-top:auto;">
-                                ${enrolled ? `<button class="course-explorer-cta" disabled>Enrolled</button>` : `<button class="course-explorer-cta" onclick="enrollInCourse(${course.id}, this)">Enroll</button>`}
+                                ${enrolled ? `<button class="course-explorer-cta unenroll" onclick="unenrollInCourse(${course.id}, this)">Unenroll</button>` : `<button class="course-explorer-cta enroll" onclick="enrollInCourse(${course.id}, this)">Enroll</button>`}
                                 <span style="font-size:0.8rem; color:var(--gray-500);">${course.price && course.price > 0 ? '$' + course.price.toFixed(2) : 'Free'}</span>
                             </div>
                         </div>
                     `;
                 }).join('');
             });
+        }
+
+        async function unenrollInCourse(courseId, btnEl) {
+            if (!courseId) return;
+            try {
+                btnEl.disabled = true;
+                const prevText = btnEl.textContent;
+                btnEl.textContent = 'Unenrolling...';
+
+                const res = await fetch('/api/unenroll', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ course_id: courseId })
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    courseExplorerState.enrolledCourseIds.delete(courseId);
+                    // update enrolled count in dashboard
+                    const el = document.getElementById('enrolledCount');
+                    if (el) {
+                        const cur = parseInt(el.textContent || '0', 10) || 0;
+                        el.textContent = Math.max(0, cur - 1);
+                    }
+                    // re-render tabs to show Enroll button
+                    renderCourseExplorerTabs();
+                } else {
+                    btnEl.disabled = false;
+                    btnEl.textContent = prevText || 'Unenroll';
+                    alert((data && data.message) ? data.message : 'Could not unenroll from course');
+                }
+            } catch (error) {
+                console.error('Unenroll error:', error);
+                btnEl.disabled = false;
+                btnEl.textContent = 'Unenroll';
+                alert('Unenrollment failed. Please try again.');
+            }
         }
 
         async function enrollInCourse(courseId, btnEl) {
@@ -1693,7 +1729,8 @@
         }
 
         function exploreCourses() {
-            window.location.href = '/#courses';
+            // Open the in-page course explorer modal instead of redirecting
+            openCourseExplorerModal();
         }
 
         function renderCourses(enrollments) {
