@@ -654,6 +654,28 @@ def dashboard():
     
     return redirect('/')
 
+
+@app.route('/course/<int:course_id>')
+def course_detail_page(course_id):
+    """Render a course detail page where students can view details and enroll."""
+    user_id = session.get('user_id')
+    try:
+        course = get_course_by_id(course_id)
+    except Exception as e:
+        print(f"Error fetching course {course_id}: {e}")
+        course = None
+
+    if not course:
+        return "Course not found", 404
+
+    # course may be a mapping or object; ensure serializable dict for template
+    try:
+        course_obj = dict(course)
+    except Exception:
+        course_obj = course
+
+    return render_template('course_detail.html', course=course_obj, user_id=user_id)
+
 @app.route('/tutor-dashboard')
 def tutor_dashboard():
     """Legacy tutor dashboard alias"""

@@ -1522,7 +1522,7 @@
                         <div class="course-explorer-card">
                             <div>
                                 <div class="course-explorer-level">${formatText(course.level)}</div>
-                                <h3 class="course-explorer-card-title">${course.title}</h3>
+                                <h3 class="course-explorer-card-title"><a href="/course/${course.id}" style="color:inherit; text-decoration:none;">${course.title}</a></h3>
                                 <div class="course-explorer-meta">
                                     <span>${course.category || 'General'}</span>
                                     <span><strong>Instructor:</strong> ${course.instructor_name || 'Staff'}</span>
