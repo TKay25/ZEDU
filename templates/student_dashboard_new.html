@@ -447,6 +447,203 @@
             text-decoration: none;
         }
 
+        .course-explorer-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.72);
+            z-index: 250;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .course-explorer-card-modal {
+            background: white;
+            width: min(1100px, 100%);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 32px 80px rgba(15, 23, 42, 0.25);
+        }
+
+        .course-explorer-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.5rem 1.5rem 0.5rem;
+        }
+
+        .course-explorer-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .course-explorer-subtitle {
+            margin: 0.4rem 0 0;
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        .course-explorer-close {
+            border: none;
+            background: transparent;
+            color: var(--gray-700);
+            font-size: 1.8rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0.25rem 0.7rem;
+        }
+
+        .course-explorer-controls,
+        .course-explorer-tab-search {
+            padding: 0 1.5rem 1rem;
+        }
+
+        .course-explorer-controls input,
+        .course-explorer-tab-search input {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid var(--gray-300);
+            padding: 0.95rem 1rem;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .course-explorer-tabs {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            padding: 0 1.5rem 1rem;
+        }
+
+        .course-explorer-tab {
+            border: none;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 0.9rem 1.2rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .course-explorer-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .course-explorer-loading {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: var(--gray-700);
+        }
+
+        .course-explorer-content {
+            padding: 0 1.5rem 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .course-explorer-pane {
+            display: none;
+        }
+
+        .course-explorer-pane.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .course-explorer-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid var(--gray-200);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .course-explorer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        }
+
+        .course-explorer-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            color: var(--gray-600);
+            font-size: 0.85rem;
+        }
+
+        .course-explorer-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .course-explorer-footer {
+            padding: 1rem 1.5rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            background: #f8fafc;
+        }
+
+        .course-explorer-level {
+            display: inline-block;
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .course-explorer-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .course-explorer-cta:hover {
+            background: #12263f;
+        }
+
+        .empty-tab-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+            border-radius: 16px;
+            background: #f8fafc;
+        }
+
         /* Dropdown Menu */
         .dropdown-menu {
             border: 1px solid var(--gray-200);
@@ -1026,7 +1223,7 @@
             <!-- Enrolled Courses Section -->
             <div class="section-header">
                 <h2 class="section-title">My Courses</h2>
-                <a href="/#courses" class="view-all-btn">View All →</a>
+                <a href="javascript:void(0)" class="view-all-btn" onclick="openCourseExplorerModal()">View All →</a>
             </div>
 
             <div class="courses-grid" id="coursesContainer">
@@ -1036,7 +1233,42 @@
                     </div>
                     <div class="empty-state-title">No Courses Yet</div>
                     <p>You haven't enrolled in any courses. Start exploring courses to begin your learning journey!</p>
-                    <button class="empty-state-btn" onclick="exploreCourses()">Explore Courses</button>
+                    <button class="empty-state-btn" onclick="openCourseExplorerModal()">Explore Courses</button>
+                </div>
+            </div>
+
+            <div id="courseExplorerModal" class="course-explorer-modal" onclick="if (event.target === this) closeCourseExplorerModal()">
+                <div class="course-explorer-card-modal">
+                    <div class="course-explorer-header">
+                        <div>
+                            <h2 class="course-explorer-title">Explore Courses</h2>
+                            <p class="course-explorer-subtitle">Browse instructor-created courses by academic level, and search globally or inside each tab.</p>
+                        </div>
+                        <button class="course-explorer-close" onclick="closeCourseExplorerModal()" aria-label="Close">×</button>
+                    </div>
+                    <div class="course-explorer-controls">
+                        <input id="courseExplorerGlobalSearch" type="search" placeholder="Search all courses by title, instructor, category or keyword..." oninput="updateCourseExplorerGlobalSearch()">
+                    </div>
+                    <div class="course-explorer-tabs">
+                        <button class="course-explorer-tab active" data-level="primary" onclick="switchCourseExplorerTab(event)">Primary</button>
+                        <button class="course-explorer-tab" data-level="high_school" onclick="switchCourseExplorerTab(event)">High School</button>
+                        <button class="course-explorer-tab" data-level="university" onclick="switchCourseExplorerTab(event)">University</button>
+                    </div>
+                    <div class="course-explorer-tab-search">
+                        <input id="courseExplorerTabSearch" type="search" placeholder="Filter current tab..." oninput="updateCourseExplorerTabSearch()">
+                    </div>
+                    <div id="courseExplorerLoading" class="course-explorer-loading">
+                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                        <span>Loading courses...</span>
+                    </div>
+                    <div class="course-explorer-content">
+                        <div class="course-explorer-pane active" id="explorerTab-primary"></div>
+                        <div class="course-explorer-pane" id="explorerTab-high_school"></div>
+                        <div class="course-explorer-pane" id="explorerTab-university"></div>
+                    </div>
+                    <div class="course-explorer-footer">
+                        <button class="empty-state-btn" onclick="closeCourseExplorerModal()">Close</button>
+                    </div>
                 </div>
             </div>
 
@@ -1154,6 +1386,142 @@
                 .split(' ')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                 .join(' ');
+        }
+
+        const courseExplorerState = {
+            activeLevel: 'primary',
+            coursesByLevel: {
+                primary: [],
+                high_school: [],
+                university: []
+            },
+            globalSearch: '',
+            tabSearch: {
+                primary: '',
+                high_school: '',
+                university: ''
+            },
+            loaded: false
+        };
+
+        function openCourseExplorerModal() {
+            document.getElementById('courseExplorerModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            const globalInput = document.getElementById('courseExplorerGlobalSearch');
+            const tabInput = document.getElementById('courseExplorerTabSearch');
+            if (globalInput) globalInput.value = courseExplorerState.globalSearch;
+            if (tabInput) tabInput.value = courseExplorerState.tabSearch[courseExplorerState.activeLevel];
+            if (!courseExplorerState.loaded) {
+                loadCourseExplorerData();
+            } else {
+                renderCourseExplorerTabs();
+            }
+        }
+
+        function closeCourseExplorerModal() {
+            document.getElementById('courseExplorerModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        async function loadCourseExplorerData() {
+            const loadingEl = document.getElementById('courseExplorerLoading');
+            loadingEl.style.display = 'flex';
+            try {
+                const levels = Object.keys(courseExplorerState.coursesByLevel);
+                const fetchPromises = levels.map(level => fetch(`/api/courses?level=${encodeURIComponent(level)}`).then(res => res.json()));
+                const results = await Promise.all(fetchPromises);
+
+                levels.forEach((level, index) => {
+                    if (results[index].success && Array.isArray(results[index].courses)) {
+                        courseExplorerState.coursesByLevel[level] = results[index].courses.map(course => ({ ...course, level }));
+                    } else {
+                        courseExplorerState.coursesByLevel[level] = [];
+                    }
+                });
+
+                courseExplorerState.loaded = true;
+                renderCourseExplorerTabs();
+            } catch (error) {
+                console.error('Error loading course explorer data:', error);
+                document.getElementById('courseExplorerLoading').style.display = 'none';
+                const activePane = document.getElementById(`explorerTab-${courseExplorerState.activeLevel}`);
+                if (activePane) {
+                    activePane.innerHTML = `<div class="empty-tab-state"><p>Unable to load courses. Please try again later.</p></div>`;
+                }
+            } finally {
+                document.getElementById('courseExplorerLoading').style.display = 'none';
+            }
+        }
+
+        function switchCourseExplorerTab(event) {
+            const selected = event.currentTarget;
+            const level = selected.dataset.level;
+            if (!level) return;
+            courseExplorerState.activeLevel = level;
+            document.querySelectorAll('.course-explorer-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.level === level));
+            document.querySelectorAll('.course-explorer-pane').forEach(pane => pane.classList.toggle('active', pane.id === `explorerTab-${level}`));
+            const tabInput = document.getElementById('courseExplorerTabSearch');
+            if (tabInput) {
+                tabInput.value = courseExplorerState.tabSearch[level] || '';
+            }
+            renderCourseExplorerTabs();
+        }
+
+        function updateCourseExplorerGlobalSearch() {
+            const value = document.getElementById('courseExplorerGlobalSearch').value.trim().toLowerCase();
+            courseExplorerState.globalSearch = value;
+            renderCourseExplorerTabs();
+        }
+
+        function updateCourseExplorerTabSearch() {
+            const level = courseExplorerState.activeLevel;
+            const value = document.getElementById('courseExplorerTabSearch').value.trim().toLowerCase();
+            courseExplorerState.tabSearch[level] = value;
+            renderCourseExplorerTabs();
+        }
+
+        function renderCourseExplorerTabs() {
+            const globalTerm = courseExplorerState.globalSearch;
+            Object.keys(courseExplorerState.coursesByLevel).forEach(level => {
+                const pane = document.getElementById(`explorerTab-${level}`);
+                const courses = courseExplorerState.coursesByLevel[level] || [];
+                const tabTerm = courseExplorerState.tabSearch[level] || '';
+
+                const filteredCourses = courses.filter(course => {
+                    const normalized = `${course.title} ${course.description || ''} ${course.instructor_name || ''} ${course.category || ''}`.toLowerCase();
+                    const matchesGlobal = !globalTerm || normalized.includes(globalTerm);
+                    const matchesTab = !tabTerm || normalized.includes(tabTerm);
+                    return matchesGlobal && matchesTab;
+                });
+
+                if (filteredCourses.length === 0) {
+                    pane.innerHTML = `
+                        <div class="empty-tab-state">
+                            <i class="fas fa-search"></i>
+                            <p>No courses match your search. Try another keyword or switch tabs.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                pane.innerHTML = filteredCourses.map(course => `
+                    <div class="course-explorer-card">
+                        <div>
+                            <div class="course-explorer-level">${formatText(course.level)}</div>
+                            <h3 class="course-explorer-card-title">${course.title}</h3>
+                            <div class="course-explorer-meta">
+                                <span>${course.category || 'General'}</span>
+                                <span><strong>Instructor:</strong> ${course.instructor_name || 'Staff'}</span>
+                                <span>${course.duration_hours || 0} hours · ${Math.round(course.rating || 0)}★ · ${course.total_students || 0} students</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-top:auto;">
+                            <button class="course-explorer-cta" onclick="window.location.href='/dashboard'">Continue</button>
+                            <span style="font-size:0.8rem; color:var(--gray-500);">${course.price && course.price > 0 ? '$' + course.price.toFixed(2) : 'Free'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            });
         }
 
         // Load notifications
