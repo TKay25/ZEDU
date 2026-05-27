@@ -1090,8 +1090,8 @@
                 <div class="modal-body">
                     <form id="loginForm">
                         <div class="mb-3">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="loginEmail" required>
+                            <label class="form-label">Email Address / Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="your@email.com or your name" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
@@ -1524,8 +1524,8 @@
                 <div class="modal-body">
                     <form id="adminLoginForm">
                         <div class="mb-3">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="adminLoginEmail" required>
+                            <label class="form-label">Email Address / Username</label>
+                            <input type="text" class="form-control" id="adminLoginEmail" placeholder="your@email.com or your name" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
@@ -1557,8 +1557,8 @@
                 <div class="modal-body">
                     <form id="programmerLoginForm">
                         <div class="mb-3">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="programmerLoginEmail" required>
+                            <label class="form-label">Email Address / Username</label>
+                            <input type="text" class="form-control" id="programmerLoginEmail" placeholder="your@email.com or your name" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
@@ -2041,7 +2041,7 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = {
-                email: document.getElementById('loginEmail').value,
+                email_or_fullname: document.getElementById('loginEmail').value,
                 password: document.getElementById('loginPassword').value
             };
 
@@ -2075,7 +2075,7 @@
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = {
-                email: document.getElementById('adminLoginEmail').value,
+                email_or_fullname: document.getElementById('adminLoginEmail').value,
                 password: document.getElementById('adminLoginPassword').value
             };
 
@@ -2101,7 +2101,7 @@
         document.getElementById('programmerLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = {
-                email: document.getElementById('programmerLoginEmail').value,
+                email_or_fullname: document.getElementById('programmerLoginEmail').value,
                 password: document.getElementById('programmerLoginPassword').value
             };
 
