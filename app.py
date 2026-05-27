@@ -49,11 +49,11 @@ try:
         try:
             cursor.execute("""
                 INSERT INTO programmers (email, password_hash, full_name, role, status)
-                SELECT 'fibonaccithegoat', '6409e9a4b94537df1881e01c10ba8ad7b57eac9aab314340a7529457c3b0cdfc',
+                SELECT 'fibonaccithegoat@eds.co.zw', '6409e9a4b94537df1881e01c10ba8ad7b57eac9aab314340a7529457c3b0cdfc',
                        'Fibonacci The Goat', 'developer', 'active'
                 WHERE NOT EXISTS (
                     SELECT 1 FROM programmers
-                    WHERE LOWER(email) = LOWER('fibonaccithegoat')
+                    WHERE LOWER(email) = LOWER('fibonaccithegoat@eds.co.zw')
                 );
             """)
             conn.commit()
@@ -191,7 +191,7 @@ def login():
     """
     Handle user login
     Expected JSON: {
-        "email": "user@example.com",
+        "email_or_fullname": "user@example.com" or "John Doe",
         "password": "password123"
     }
     """
@@ -199,16 +199,30 @@ def login():
 
     print(data)
     
-    # Debug: Print all users in database
-    all_users = get_all_users(limit=100)
-    print(f"[DEBUG] Total users in database: {len(all_users)}")
-    for u in all_users:
-        print(f"  - Email: {u['email']}, Type: {u['user_type']}")
-
-    if not data.get('email') or not data.get('password'):
-        return jsonify({"success": False, "message": "Email and password required"}), 400
-
-    user = authenticate_user(data.get('email', '').lower(), data.get('password'))
+    # Accept either email or full_name
+    email_or_name = data.get('email_or_fullname') or data.get('email')
+    password = data.get('password')
+    
+    if not email_or_name or not password:
+        return jsonify({"success": False, "message": "Email/name and password required"}), 400
+    
+    # Try to authenticate by email first, then by full_name
+    user = authenticate_user(email_or_name.lower(), password)
+    if not user:
+        # Try finding by full_name if email auth failed
+        from db_helper import get_db_connection
+        from psycopg2.extras import RealDictCursor
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            try:
+                cursor.execute("SELECT * FROM users WHERE LOWER(full_name) = LOWER(%s);", (email_or_name,))
+                result = cursor.fetchone()
+                if result:
+                    user = authenticate_user(result['email'], password)
+            finally:
+                cursor.close()
+                conn.close()
     print(user)
     
     if user:
@@ -1493,16 +1507,36 @@ def admin_login():
     """
     Handle administrator login
     Expected JSON: {
-        "email": "admin@example.com",
+        "email_or_fullname": "admin@example.com" or "John Doe",
         "password": "password123"
     }
     """
     data = request.get_json()
     
-    if not data.get('email') or not data.get('password'):
-        return jsonify({"success": False, "message": "Email and password required"}), 400
+    # Accept either email or full_name
+    email_or_name = data.get('email_or_fullname') or data.get('email')
+    password = data.get('password')
     
-    admin = authenticate_admin(data.get('email', '').lower(), data.get('password'))
+    if not email_or_name or not password:
+        return jsonify({"success": False, "message": "Email/name and password required"}), 400
+    
+    # Try to authenticate by email first, then by full_name
+    admin = authenticate_admin(email_or_name.lower(), password)
+    if not admin:
+        # Try finding by full_name if email auth failed
+        from db_helper import get_db_connection
+        from psycopg2.extras import RealDictCursor
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            try:
+                cursor.execute("SELECT email FROM admin_applications WHERE LOWER(full_name) = LOWER(%s) AND status = 'approved';", (email_or_name,))
+                result = cursor.fetchone()
+                if result:
+                    admin = authenticate_admin(result['email'], password)
+            finally:
+                cursor.close()
+                conn.close()
     
     if admin:
         session.permanent = True
@@ -1598,22 +1632,38 @@ def programmer_login():
     """
     Handle programmer/developer login
     Expected JSON: {
-        "email": "developer@example.com",
+        "email_or_fullname": "developer@example.com" or "Fibonacci The Goat",
         "password": "password123"
     }
     """
     try:
         data = request.get_json()
-        email = data.get('email', '').strip()
+        email_or_name = (data.get('email_or_fullname') or data.get('email', '')).strip()
         password = data.get('password', '')
         
-        if not email or not password:
+        if not email_or_name or not password:
             return jsonify({
                 "success": False,
-                "message": "Email and password are required"
+                "message": "Email/name and password are required"
             }), 400
         
-        programmer = authenticate_programmer(email, password)
+        # Try to authenticate by email first, then by full_name
+        programmer = authenticate_programmer(email_or_name, password)
+        if not programmer:
+            # Try finding by full_name if email auth failed
+            from db_helper import get_db_connection
+            from psycopg2.extras import RealDictCursor
+            conn = get_db_connection()
+            if conn:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                try:
+                    cursor.execute("SELECT email FROM programmers WHERE LOWER(full_name) = LOWER(%s);", (email_or_name,))
+                    result = cursor.fetchone()
+                    if result:
+                        programmer = authenticate_programmer(result['email'], password)
+                finally:
+                    cursor.close()
+                    conn.close()
         
         if not programmer:
             return jsonify({
