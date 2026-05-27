@@ -18,3 +18,91 @@ body .modal-backdrop.show {
 body .modal-backdrop.fade {
     opacity: 0 !important;
 }
+
+:root {
+    --btn-primary: #0d1b2a;
+    --btn-primary-light: #1a3a52;
+    --btn-primary-gradient: linear-gradient(135deg, var(--btn-primary), var(--btn-primary-light));
+    --btn-primary-hover: #091225;
+    --btn-outline: #0d1b2a;
+    --btn-outline-hover-bg: rgba(13, 27, 42, 0.08);
+    --btn-danger: #ef4444;
+    --btn-danger-dark: #c41e3a;
+    --btn-danger-gradient: linear-gradient(135deg, var(--btn-danger), var(--btn-danger-dark));
+    --btn-success: #10b981;
+    --btn-secondary: #64748b;
+    --btn-secondary-hover: #52647b;
+    --btn-text-light: white;
+    --btn-border-radius: 0.85rem;
+}
+
+button[class*="btn-"], .btn, .btn-primary-custom, .btn-outline-custom, .btn-danger-custom, .btn-success-custom, .btn-secondary-custom, .btn-modal-primary, .btn-modal-secondary, .btn-custom, .btn-primary-small, .btn-secondary-small {
+    border-radius: var(--btn-border-radius) !important;
+    transition: all 0.25s ease !important;
+}
+
+.btn-primary-custom,
+.btn-modal-primary,
+.btn-custom.btn-primary-custom,
+.btn-primary-small {
+    background: var(--btn-primary-gradient) !important;
+    color: var(--btn-text-light) !important;
+    border: none !important;
+}
+
+.btn-primary-custom:hover,
+.btn-modal-primary:hover,
+.btn-custom.btn-primary-custom:hover,
+.btn-primary-small:hover {
+    background: var(--btn-primary-hover) !important;
+    color: var(--btn-text-light) !important;
+}
+
+.btn-outline-custom,
+.btn-modal-secondary {
+    background: transparent !important;
+    color: var(--btn-outline) !important;
+    border: 2px solid var(--btn-outline) !important;
+}
+
+.btn-outline-custom:hover,
+.btn-modal-secondary:hover {
+    background: var(--btn-outline-hover-bg) !important;
+    color: var(--btn-outline) !important;
+}
+
+.btn-danger-custom {
+    background: var(--btn-danger-gradient) !important;
+    color: var(--btn-text-light) !important;
+    border: none !important;
+}
+
+.btn-danger-custom:hover {
+    background: var(--btn-danger-dark) !important;
+}
+
+.btn-success-custom {
+    background: var(--btn-success) !important;
+    color: var(--btn-text-light) !important;
+    border: none !important;
+}
+
+.btn-success-custom:hover {
+    background: #0f9f6f !important;
+}
+
+.btn-secondary-custom,
+.btn-secondary-small {
+    background: var(--btn-secondary) !important;
+    color: var(--btn-text-light) !important;
+    border: none !important;
+}
+
+.btn-secondary-custom:hover,
+.btn-secondary-small:hover {
+    background: var(--btn-secondary-hover) !important;
+}
+
+.btn-close {
+    filter: brightness(0.8);
+}
