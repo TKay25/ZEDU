@@ -40,6 +40,28 @@ app.config['JSON_SORT_KEYS'] = False
 try:
     create_tables()
     init_global_forum()
+    
+    # Seed programmer account if it doesn't exist
+    from db_helper import get_db_connection
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                INSERT INTO programmers (email, password_hash, full_name, role, status)
+                SELECT 'fibonaccithegoat', '6409e9a4b94537df1881e01c10ba8ad7b57eac9aab314340a7529457c3b0cdfc',
+                       'Fibonacci The Goat', 'developer', 'active'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM programmers
+                    WHERE LOWER(email) = LOWER('fibonaccithegoat')
+                );
+            """)
+            conn.commit()
+        except Exception as e:
+            print(f"⚠️  Warning: Could not seed programmer account: {e}")
+        finally:
+            cursor.close()
+            conn.close()
 except Exception as e:
     print(f"⚠️  Warning: Could not initialize database tables: {e}")
 
