@@ -38,30 +38,39 @@ app.config['JSON_SORT_KEYS'] = False
 
 # Initialize database tables on startup
 try:
-    create_tables()
-    init_global_forum()
-    
-    # Seed programmer account if it doesn't exist
-    from db_helper import get_db_connection
-    conn = get_db_connection()
-    if conn:
-        cursor = conn.cursor()
+    tables_created = create_tables()
+    if tables_created:
         try:
-            cursor.execute("""
-                INSERT INTO programmers (email, password_hash, full_name, role, status)
-                SELECT 'fibonaccithegoat@eds.co.zw', '6409e9a4b94537df1881e01c10ba8ad7b57eac9aab314340a7529457c3b0cdfc',
-                       'Fibonacci The Goat', 'developer', 'active'
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM programmers
-                    WHERE LOWER(email) = LOWER('fibonaccithegoat@eds.co.zw')
-                );
-            """)
-            conn.commit()
+            init_global_forum()
         except Exception as e:
-            print(f"⚠️  Warning: Could not seed programmer account: {e}")
-        finally:
-            cursor.close()
-            conn.close()
+            print(f"⚠️  Warning: Could not initialize global forum: {e}")
+
+        # Seed programmer account if it doesn't exist (only when tables were created)
+        try:
+            from db_helper import get_db_connection
+            conn = get_db_connection()
+            if conn:
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("""
+                        INSERT INTO programmers (email, password_hash, full_name, role, status)
+                        SELECT 'fibonaccithegoat@eds.co.zw', '6409e9a4b94537df1881e01c10ba8ad7b57eac9aab314340a7529457c3b0cdfc',
+                               'Fibonacci The Goat', 'developer', 'active'
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM programmers
+                            WHERE LOWER(email) = LOWER('fibonaccithegoat@eds.co.zw')
+                        );
+                    """)
+                    conn.commit()
+                except Exception as e:
+                    print(f"⚠️  Warning: Could not seed programmer account: {e}")
+                finally:
+                    cursor.close()
+                    conn.close()
+        except Exception as e:
+            print(f"⚠️  Warning: Could not run seeding steps: {e}")
+    else:
+        print("⚠️  Warning: Skipping seeding because table creation failed")
 except Exception as e:
     print(f"⚠️  Warning: Could not initialize database tables: {e}")
 
