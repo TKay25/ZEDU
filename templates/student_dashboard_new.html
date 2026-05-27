@@ -436,34 +436,48 @@
             font-weight: 600;
             margin-top: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
         }
 
         .empty-state-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(94, 59, 238, 0.3);
+            box-shadow: 0 14px 30px rgba(13, 27, 42, 0.18);
+            background: var(--primary-hover, #091225);
             color: white;
             text-decoration: none;
         }
 
         /* Dropdown Menu */
         .dropdown-menu {
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            border-radius: 1rem;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
             padding: 0.5rem 0;
+            background: white;
+            min-width: 220px;
         }
 
         .dropdown-item {
-            padding: 0.75rem 1.5rem;
+            display: block;
+            width: calc(100% - 1rem);
+            margin: 0.25rem 0.5rem;
+            padding: 0.85rem 1rem;
+            border-radius: 0.85rem;
             font-size: 0.95rem;
             color: var(--gray-800);
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            background: transparent;
         }
 
-        .dropdown-item:hover {
+        .dropdown-item:hover,
+        .dropdown-item:focus {
             background: var(--gray-100);
             color: var(--primary);
+        }
+
+        .dropdown-item.logout {
+            color: var(--danger);
         }
 
         .dropdown-divider {
@@ -942,8 +956,14 @@
                 </div>
             </div>
 
-            <div class="user-profile dropdown">
+            <div class="user-profile dropdown" style="position: relative; cursor: pointer;">
                 <div class="avatar" id="userInitials">ZV</div>
+                <div class="dropdown-menu" style="display: none; position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border: 1px solid var(--gray-200); border-radius: 0.85rem; box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14); width: 220px; z-index: 1000;">
+                    <a href="/dashboard" style="display: block; padding: 0.9rem 1rem; color: var(--gray-800); text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(15,23,42,0.08);">Dashboard</a>
+                    <a href="javascript:void(0)" onclick="navigateToModal('/account'); return false;" style="display: block; padding: 0.9rem 1rem; color: var(--gray-800); text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(15,23,42,0.08);">Account</a>
+                    <a href="javascript:void(0)" onclick="navigateToModal('/settings'); return false;" style="display: block; padding: 0.9rem 1rem; color: var(--gray-800); text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(15,23,42,0.08);">Settings</a>
+                    <a href="#" id="logoutLink" class="dropdown-item logout" style="padding: 0.9rem 1rem;">Logout</a>
+                </div>
             </div>
         </div>
     </div>
@@ -1453,11 +1473,17 @@
         });
 
         // User profile dropdown
-        document.querySelector('.user-profile').addEventListener('click', (e) => {
-            e.preventDefault();
-            const menu = e.currentTarget.querySelector('.dropdown-menu');
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        });
+        const userProfileEl = document.querySelector('.user-profile');
+        if (userProfileEl) {
+            userProfileEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                const menu = e.currentTarget.querySelector('.dropdown-menu');
+                if (!menu) {
+                    return;
+                }
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            });
+        }
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.user-profile')) {
@@ -1466,6 +1492,19 @@
                 });
             }
         });
+
+        const logoutLink = document.getElementById('logoutLink');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await fetch('/api/logout', { method: 'POST' });
+                    window.location.href = '/';
+                } catch (error) {
+                    console.error('Logout failed:', error);
+                }
+            });
+        }
     </script>
     <script src="/static/modal-nav.js"></script>
 </body>

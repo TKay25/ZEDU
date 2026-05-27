@@ -2052,8 +2052,9 @@
                     body: JSON.stringify(formData)
                 });
                 const data = await response.json();
+                console.log('Login response:', data);
                 if (data.success) {
-                    // Redirect to dashboard as full page (not modal)
+                    console.log('Redirecting to:', data.redirect_url || '/dashboard');
                     window.location.href = data.redirect_url || '/dashboard';
                 } else {
                     alert('Error: ' + data.message);
