@@ -258,6 +258,11 @@
             text-decoration: none;
         }
 
+        /* Hide auth buttons when authenticated */
+        #navAuthButtons.hidden {
+            display: none !important;
+        }
+
         /* About Section */
         .about-section {
             padding: 80px 0;
@@ -816,7 +821,7 @@
                         <a class="nav-link" href="#about">About</a>
                     </li>
                 </ul>
-                <div class="d-flex gap-2 ms-3">
+                <div class="d-flex gap-2 ms-3" id="navAuthButtons">
                     <button class="btn btn-outline-custom" data-bs-toggle="modal" data-bs-target="#loginModal">
                         <i class="fas fa-sign-in-alt"></i> Login
                     </button>
@@ -852,7 +857,7 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
-                    <button onclick="loadModalPath('/dashboard')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                    <button onclick="window.location.href='/dashboard'" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
                         <i class="fas fa-th-large"></i> Open Dashboard
                     </button>
                     <button onclick="logoutUser()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
@@ -1590,28 +1595,19 @@
         // Load user profile if logged in
         async function loadUserProfile() {
             try {
-                let response = await fetch('/api/profile');
-                let data = await response.json();
-
-                if (!data.success) {
-                    response = await fetch('/api/programmer/profile');
-                    data = await response.json();
-                    if (data.success && data.programmer) {
-                        const programmer = data.programmer;
-                        displayWelcomeBanner({
-                            full_name: programmer.full_name,
-                            email: programmer.email,
-                            user_type: 'programmer',
-                            education_level: 'developer'
-                        });
-                        return;
-                    }
+                // Check auth state first
+                const authResponse = await fetch('/api/auth-state');
+                const authData = await authResponse.json();
+                
+                if (!authData.authenticated) {
+                    // Not authenticated - hide welcome banner and show login controls
+                    document.getElementById('welcomeBanner').style.display = 'none';
+                    return;
                 }
-
-                if (data.success && data.user) {
-                    const user = data.user;
-                    displayWelcomeBanner(user);
-                }
+                
+                // Authenticated - show welcome banner and hide login controls
+                const user = authData.user;
+                displayWelcomeBanner(user);
             } catch (error) {
                 console.error('Error loading user profile:', error);
             }
@@ -1890,6 +1886,12 @@
             // Show banner
             banner.style.display = 'block';
             
+            // Hide auth buttons in navbar
+            const navAuthButtons = document.getElementById('navAuthButtons');
+            if (navAuthButtons) {
+                navAuthButtons.classList.add('hidden');
+            }
+            
             // Hide all modals
             const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
             const signupModal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
@@ -2051,8 +2053,8 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    loadUserProfile();
-                    loadModalPath('/dashboard');
+                    // Redirect to dashboard as full page (not modal)
+                    window.location.href = data.redirect_url || '/dashboard';
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -2084,8 +2086,8 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    loadUserProfile();
-                    loadModalPath('/dashboard');
+                    // Redirect to admin approvals as full page (not modal)
+                    window.location.href = data.redirect_url || '/admin-approvals';
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -2110,8 +2112,8 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    loadUserProfile();
-                    showAppModal('Developer Workspace', '<div style="padding:1rem;"><h5>Developer access granted</h5><p class="mb-3">You are now signed in to the developer portal. Manage your workflows using modal-driven tools.</p><button class="btn btn-outline-primary" onclick="loadModalPath(\'/settings\')">Open Settings</button></div>');
+                    // Redirect to programmer approvals as full page (not modal)
+                    window.location.href = data.redirect_url || '/programmer-approvals';
                 } else {
                     alert('Error: ' + data.message);
                 }

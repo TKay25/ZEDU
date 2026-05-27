@@ -223,6 +223,53 @@ def logout():
     session.clear()
     return jsonify({"success": True, "message": "Logged out successfully"}), 200
 
+@app.route('/api/auth-state', methods=['GET'])
+def get_auth_state():
+    """Check if user is authenticated and return current auth state"""
+    user_id = session.get('user_id')
+    programmer_id = session.get('programmer_id')
+    
+    if not user_id and not programmer_id:
+        return jsonify({
+            "authenticated": False,
+            "user_type": None,
+            "user": None
+        }), 200
+    
+    if user_id:
+        user = get_user_by_id(user_id)
+        if user:
+            return jsonify({
+                "authenticated": True,
+                "user_type": user.get('user_type'),
+                "user": {
+                    "id": user.get('id'),
+                    "email": user.get('email'),
+                    "full_name": user.get('full_name'),
+                    "user_type": user.get('user_type')
+                }
+            }), 200
+    
+    if programmer_id:
+        programmer = get_programmer_by_id(programmer_id)
+        if programmer:
+            return jsonify({
+                "authenticated": True,
+                "user_type": "programmer",
+                "user": {
+                    "id": programmer.get('id'),
+                    "email": programmer.get('email'),
+                    "full_name": programmer.get('full_name'),
+                    "user_type": "programmer"
+                }
+            }), 200
+    
+    return jsonify({
+        "authenticated": False,
+        "user_type": None,
+        "user": None
+    }), 200
+
 @app.route('/api/page-fragment', methods=['GET'])
 def get_page_fragment():
     """Return small HTML fragments for modal-driven navigation"""
