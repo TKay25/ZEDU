@@ -1683,7 +1683,7 @@ def programmer_login():
             "success": True,
             "message": "Programmer login successful",
             "user_type": "programmer",
-            "redirect_url": "/admin-approvals",
+            "redirect_url": "/programmer-approvals",
             "programmer": {
                 "id": programmer['id'],
                 "email": programmer['email'],

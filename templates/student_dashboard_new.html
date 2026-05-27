@@ -1026,7 +1026,7 @@
             <!-- Enrolled Courses Section -->
             <div class="section-header">
                 <h2 class="section-title">My Courses</h2>
-                <a href="#" class="view-all-btn">View All →</a>
+                <a href="/#courses" class="view-all-btn">View All →</a>
             </div>
 
             <div class="courses-grid" id="coursesContainer">
@@ -1036,7 +1036,7 @@
                     </div>
                     <div class="empty-state-title">No Courses Yet</div>
                     <p>You haven't enrolled in any courses. Start exploring courses to begin your learning journey!</p>
-                    <button class="empty-state-btn" onclick="alert('Explore Courses')">Explore Courses</button>
+                    <button class="empty-state-btn" onclick="exploreCourses()">Explore Courses</button>
                 </div>
             </div>
 
@@ -1261,7 +1261,7 @@
                                 </div>
                                 <div class="empty-state-title">No Courses Yet</div>
                                 <p>You haven't enrolled in any courses. Start exploring courses to begin your learning journey!</p>
-                                <button class="empty-state-btn">Explore Courses</button>
+                                <button class="empty-state-btn" onclick="exploreCourses()">Explore Courses</button>
                             </div>
                         `;
                     } else {
@@ -1271,6 +1271,10 @@
             } catch (error) {
                 console.error('Error loading enrollments:', error);
             }
+        }
+
+        function exploreCourses() {
+            window.location.href = '/#courses';
         }
 
         function renderCourses(enrollments) {
