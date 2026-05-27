@@ -1395,6 +1395,7 @@
                 high_school: [],
                 university: []
             },
+            enrolledCourseIds: new Set(),
             globalSearch: '',
             tabSearch: {
                 primary: '',
@@ -1430,6 +1431,18 @@
                 const levels = Object.keys(courseExplorerState.coursesByLevel);
                 const fetchPromises = levels.map(level => fetch(`/api/courses?level=${encodeURIComponent(level)}`).then(res => res.json()));
                 const results = await Promise.all(fetchPromises);
+
+                // Also fetch current enrollments for this student so we can mark enrolled courses
+                try {
+                    const enrollRes = await fetch('/api/enrollments');
+                    const enrollData = await enrollRes.json();
+                    if (enrollData && enrollData.success && Array.isArray(enrollData.enrollments)) {
+                        courseExplorerState.enrolledCourseIds = new Set(enrollData.enrollments.map(e => e.course_id));
+                    }
+                } catch (err) {
+                    // Non-fatal: keep enrolledCourseIds as-is
+                    console.warn('Could not fetch enrollments for explorer modal:', err);
+                }
 
                 levels.forEach((level, index) => {
                     if (results[index].success && Array.isArray(results[index].courses)) {
@@ -1503,25 +1516,63 @@
                     `;
                     return;
                 }
-
-                pane.innerHTML = filteredCourses.map(course => `
-                    <div class="course-explorer-card">
-                        <div>
-                            <div class="course-explorer-level">${formatText(course.level)}</div>
-                            <h3 class="course-explorer-card-title">${course.title}</h3>
-                            <div class="course-explorer-meta">
-                                <span>${course.category || 'General'}</span>
-                                <span><strong>Instructor:</strong> ${course.instructor_name || 'Staff'}</span>
-                                <span>${course.duration_hours || 0} hours · ${Math.round(course.rating || 0)}★ · ${course.total_students || 0} students</span>
+                pane.innerHTML = filteredCourses.map(course => {
+                    const enrolled = courseExplorerState.enrolledCourseIds.has(course.id);
+                    return `
+                        <div class="course-explorer-card">
+                            <div>
+                                <div class="course-explorer-level">${formatText(course.level)}</div>
+                                <h3 class="course-explorer-card-title">${course.title}</h3>
+                                <div class="course-explorer-meta">
+                                    <span>${course.category || 'General'}</span>
+                                    <span><strong>Instructor:</strong> ${course.instructor_name || 'Staff'}</span>
+                                    <span>${course.duration_hours || 0} hours · ${Math.round(course.rating || 0)}★ · ${course.total_students || 0} students</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-top:auto;">
+                                ${enrolled ? `<button class="course-explorer-cta" disabled>Enrolled</button>` : `<button class="course-explorer-cta" onclick="enrollInCourse(${course.id}, this)">Enroll</button>`}
+                                <span style="font-size:0.8rem; color:var(--gray-500);">${course.price && course.price > 0 ? '$' + course.price.toFixed(2) : 'Free'}</span>
                             </div>
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-top:auto;">
-                            <button class="course-explorer-cta" onclick="window.location.href='/dashboard'">Continue</button>
-                            <span style="font-size:0.8rem; color:var(--gray-500);">${course.price && course.price > 0 ? '$' + course.price.toFixed(2) : 'Free'}</span>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             });
+        }
+
+        async function enrollInCourse(courseId, btnEl) {
+            if (!courseId) return;
+            try {
+                btnEl.disabled = true;
+                const prevText = btnEl.textContent;
+                btnEl.textContent = 'Enrolling...';
+
+                const res = await fetch('/api/enroll', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ course_id: courseId })
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    courseExplorerState.enrolledCourseIds.add(courseId);
+                    btnEl.textContent = 'Enrolled';
+                    btnEl.disabled = true;
+                    // update enrolled count in dashboard
+                    const el = document.getElementById('enrolledCount');
+                    if (el) {
+                        const cur = parseInt(el.textContent || '0', 10) || 0;
+                        el.textContent = cur + 1;
+                    }
+                } else {
+                    btnEl.disabled = false;
+                    btnEl.textContent = prevText || 'Enroll';
+                    alert((data && data.message) ? data.message : 'Could not enroll in course');
+                }
+            } catch (error) {
+                console.error('Enroll error:', error);
+                btnEl.disabled = false;
+                btnEl.textContent = 'Enroll';
+                alert('Enrollment failed. Please try again.');
+            }
         }
 
         // Load notifications
